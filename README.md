@@ -1,1 +1,1 @@
-# CS-371-518-Software-Engineering-Projects
+# CS518-SWE-Projects
