@@ -1,8 +1,7 @@
 import pygame
 import tile_class
 import button_class
-import settings
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, MARGIN_WIDTH, MARGIN_HEIGHT, TILE_SIZE, ROWS, COLS, LEVEL, SCROLL, SCROLL_SPEED
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, MARGIN_WIDTH, MARGIN_HEIGHT, TILE_SIZE, ROWS, COLS, LEVEL, SCROLL, SCROLL_SPEED, WHITE, BLACK, HIGHLIGHT_COLOR
 import game_map
 
 image_dict = {}
@@ -35,20 +34,20 @@ for tile, image in image_dict.items():
 current_tile_type = button_list[0].tile_type
 
 tile_map = []
-tile_map = game_map.load_map(f"level_{settings.LEVEL}", tile_map)
+tile_map = game_map.load_map(f"level_{LEVEL}", tile_map)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
 
 running = True
 
 while running:   
-    screen.fill(settings.BLACK)
+    screen.fill(BLACK)
     game_map.draw_map(tile_map, image_dict, screen, SCROLL)
     game_map.draw_grid(SCREEN_WIDTH - MARGIN_WIDTH, SCREEN_HEIGHT - MARGIN_HEIGHT, TILE_SIZE, screen, SCROLL)
 
     # draw margins and buttons
-    pygame.draw.rect(screen, settings.WHITE, (SCREEN_WIDTH - MARGIN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.draw.rect(screen, settings.WHITE, (0, SCREEN_HEIGHT - MARGIN_HEIGHT, SCREEN_WIDTH, MARGIN_HEIGHT))
+    pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH - MARGIN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.draw.rect(screen, WHITE, (0, SCREEN_HEIGHT - MARGIN_HEIGHT, SCREEN_WIDTH, MARGIN_HEIGHT))
 
     # Draw buttons then chose button
     for button_count, i in enumerate(button_list):
@@ -58,7 +57,7 @@ while running:
             current_tile_type = i.tile_type
     
     # highlight selected tile
-    pygame.draw.rect(screen, settings.HIGHLIGHT_COLOR, button_list[current_tile].rect, 3)
+    pygame.draw.rect(screen, HIGHLIGHT_COLOR, button_list[current_tile].rect, 3)
 
     game_map.draw_text(f"Level: {LEVEL}", (50, SCREEN_HEIGHT - MARGIN_HEIGHT + 50), screen)
 
