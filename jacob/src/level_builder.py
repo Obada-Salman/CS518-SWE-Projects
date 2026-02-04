@@ -2,6 +2,7 @@ import pygame
 import tile_class
 import button_class
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, MARGIN_WIDTH, MARGIN_HEIGHT, TILE_SIZE, ROWS, COLS, LEVEL, SCROLL, SCROLL_SPEED, WHITE, BLACK, HIGHLIGHT_COLOR
+from sound import background_music, click_sound
 import game_map
 
 image_dict = {}
@@ -39,6 +40,7 @@ tile_map = game_map.load_map(f"level_{LEVEL}", tile_map)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
 
 running = True
+background_music.play()
 
 while running:   
     screen.fill(BLACK)
@@ -81,12 +83,14 @@ while running:
             try:
                 if tile_map[y][x] != current_tile_type:
                     tile_map[y][x] = current_tile_type
+                    click_sound.play()
             except IndexError:
                 pass
     
         # Right click remove tile
         elif pygame.mouse.get_pressed()[2] == 1:
             tile_map[y][x] = None
+            click_sound.play()
 
     keys = pygame.key.get_pressed()
 
