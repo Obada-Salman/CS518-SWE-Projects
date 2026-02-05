@@ -5,6 +5,9 @@ from settings import SCREEN_WIDTH, SCREEN_HEIGHT, MARGIN_WIDTH, MARGIN_HEIGHT, T
 from sound import background_music, click_sound
 import game_map
 
+player_placed = False
+goal_placed = False
+
 image_dict = {}
 for tile, attributes in tile_class.tile_types.items():
     image = attributes["image"]
@@ -23,6 +26,7 @@ button_row = 0
 button_col = 0
 current_tile = 0
 current_tile_type = ""
+
 for tile, image in image_dict.items():
 
     tile_button = button_class.Tile_Button((SCREEN_WIDTH - MARGIN_WIDTH + (50 * button_col) + 50, 75 * button_row + 50), tile, image['image'])
@@ -45,6 +49,9 @@ background_music.play()
 while running:   
     screen.fill(BLACK)
     game_map.draw_map(tile_map, image_dict, screen, SCROLL)
+    player_placed = game_map.check_tile(tile_map, "player")
+    goal_placed = game_map.check_tile(tile_map, "goal")
+
     game_map.draw_grid(SCREEN_WIDTH - MARGIN_WIDTH, SCREEN_HEIGHT - MARGIN_HEIGHT, TILE_SIZE, screen, SCROLL)
 
     # draw margins and buttons
@@ -66,7 +73,10 @@ while running:
     screen.blit(save_button.image, save_button.rect)
     game_map.draw_text(f"SAVE", (save_button.rect), screen)
     if save_button.action():
-        game_map.save_map(f"level_{LEVEL}", tile_map)
+        if player_placed == False or goal_placed == False:
+            game_map.draw_text(f"Player/Goal NOT Placed", ((SCREEN_WIDTH // 2) - 50, SCREEN_HEIGHT - (MARGIN_HEIGHT // 2) - 50), screen)
+        else:
+            game_map.save_map(f"level_{LEVEL}", tile_map)
 
     pos = pygame.mouse.get_pos()
     pygame.draw.circle(screen, (0, 0, 0), (pos[0], pos[1]), 10)
@@ -82,13 +92,20 @@ while running:
         if pygame.mouse.get_pressed()[0] == 1:
             try:
                 if tile_map[y][x] != current_tile_type:
-                    tile_map[y][x] = current_tile_type
-                    click_sound.play()
+                    if current_tile_type == "player":
+                        if player_placed == False:
+                            player_placed = True
+                            tile_map[y][x] = current_tile_type
+                            click_sound.play()
+                    else:
+                        tile_map[y][x] = current_tile_type
+                        click_sound.play()
+
             except IndexError:
                 pass
     
         # Right click remove tile
-        elif pygame.mouse.get_pressed()[2] == 1:
+        elif pygame.mouse.get_pressed()[2] == 1 and tile_map[y][x] != None:
             tile_map[y][x] = None
             click_sound.play()
 

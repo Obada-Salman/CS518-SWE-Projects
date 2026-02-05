@@ -4,7 +4,9 @@ tile_types = {
     "dirt": {"image": (165, 42, 42), "property": True},
     "grass": {"image": (0, 128, 0), "property": True},
     "water": {"image": (0, 0, 255), "property": True},
-    "lava": {"image": (255, 0, 0), "property": False}
+    "damage": {"image": (255, 0, 0), "property": False},
+    "player": {"image": (128, 0, 128), "property": True},
+    "goal": {"image": (128, 128, 128), "property": True}
 }
 
 # tile_nums = len(tile_types) REMOVE Unless i find out what this was being used for

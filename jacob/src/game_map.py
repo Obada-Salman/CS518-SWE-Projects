@@ -41,3 +41,11 @@ def load_map(filename, tile_map):
         print(f"Error: {e}")
 
     return tile_map
+
+def check_tile(tile_map, tile_type):
+    for y, row in enumerate(tile_map):
+        for x, tile in enumerate(row):
+            if tile == tile_type:
+                return True
+
+    return False
