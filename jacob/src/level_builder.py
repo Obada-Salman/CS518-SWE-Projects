@@ -9,13 +9,29 @@ player_placed = False
 goal_placed = False
 
 image_dict = {}
+
+
+# TODO This should be suign the Tile Class, fix this
 for tile, attributes in tile_class.tile_types.items():
-    image = attributes["image"]
-    # TODO For when image path is used
-    # image = pygame.image.load(attributes["image"])
-    surface = pygame.Surface((TILE_SIZE, TILE_SIZE))
-    surface.fill(image)
-    image_dict[tile] = {"image": image, "surface": surface}
+    # image = attributes["image"]
+    
+    # surface = pygame.Surface((TILE_SIZE, TILE_SIZE))
+    # # # TODO For when image path is used
+    # if isinstance(image, tuple):
+    #     surface.fill(image)
+    # elif isinstance(image, str):
+    #     surface = pygame.image.load(image)
+    #     surface = pygame.transform.scale(surface, (int(50 * 1), int(50 * 1)))
+    #     print(attributes["image"])
+    
+    
+    # image_dict[tile] = {"image": image, "surface": surface}
+
+    new_tile = tile_class.Tile(None, (50, 50), tile)
+    # image_dict[tile] = {"image": attributes["image"], "surface": new_tile.image}
+    image_dict[tile] = {"image": attributes["image"], "surface": new_tile}
+
+    # image_dict -> tile_dict = {tile: new_tile} -> tile_name coorisponds to tile_class of that tile
 
 
 # Setup buttons

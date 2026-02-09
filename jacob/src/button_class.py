@@ -7,9 +7,13 @@ class Tile_Button():
         self.tile_type = tile_type
         self.position = position
         
-        # self.image = pygame.transform.scale(image, (int(length * scale), int(height * scale)))
-        self.image = pygame.Surface((length, height))
-        self.image.fill(image)
+        if isinstance(image, tuple):
+            self.image = pygame.Surface((length, height))
+            self.image.fill(image)
+        elif isinstance(image, str):
+            self.image = pygame.image.load(image)
+            self.image = pygame.transform.scale(self.image, (int(length * scale), int(height * scale)))
+
         self.rect = self.image.get_rect(topleft = self.position) # Generates tiles at postion x, y from top lef
         
         self.clicked = False
@@ -34,8 +38,15 @@ class Button():
         self.position = position
         
         # self.image = pygame.transform.scale(image, (int(length * scale), int(height * scale)))
-        self.image = pygame.Surface((length, height))
-        self.image.fill(image)
+        # self.image = pygame.Surface((length, height))
+        # self.image.fill(image)
+        
+        if isinstance(image, tuple):
+            self.image = pygame.Surface((length, height))
+            self.image.fill(image)
+        elif isinstance(image, str):
+            self.image = pygame.image.load(image)
+        
         self.rect = self.image.get_rect(topleft = self.position) # Generates tiles at postion x, y from top lef
         
         self.clicked = False

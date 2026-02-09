@@ -15,7 +15,8 @@ def draw_map(tile_map, image_dict, screen, SCROLL):
     for y, row in enumerate(tile_map):
         for x, tile in enumerate(row):
             if tile is not None:
-                screen.blit(image_dict[tile]["surface"], (x * TILE_SIZE - SCROLL, y * TILE_SIZE))
+                # screen.blit(image_dict[tile]["surface"], (x * TILE_SIZE - SCROLL, y * TILE_SIZE))
+                screen.blit(image_dict[tile]["surface"].image, (x * TILE_SIZE - SCROLL, y * TILE_SIZE))
 
 def draw_text(text, postions, screen):
     text_image = FONT.render(text, True, (BLACK))
