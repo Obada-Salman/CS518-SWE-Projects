@@ -21,7 +21,6 @@ class Button:
         else:
             bg = self.bg_color
             text_color = self.text_color
-        pygame.draw.rect(surface, bg, self.rect)
         
         pygame.draw.rect(surface, bg, self.rect, border_radius=12)
         pygame.draw.rect(surface, BLACK, self.rect, 2, border_radius=12) 
