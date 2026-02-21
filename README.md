@@ -1,1 +1,47 @@
 # CS518-SWE-Projects
+
+## Leaderboard scaffold (online + persistent)
+
+This project now includes a minimal online leaderboard backend using Flask + SQLite.
+
+### Files added
+- `src/leaderboard_server.py` - Web server + API routes
+- `src/leaderboard_db.py` - SQLite persistence layer
+- `src/leaderboard_client.py` - Helper function for game-side score uploads
+- `src/templates/leaderboard.html` - Simple leaderboard webpage
+- `requirements.txt` - Python dependency list
+
+### Install
+```bash
+pip install -r requirements.txt
+```
+
+### Run leaderboard server
+```bash
+python src/leaderboard_server.py
+```
+
+Then open:
+- `http://127.0.0.1:5000/` (web leaderboard)
+- `http://127.0.0.1:5000/api/health`
+
+SQLite database is created automatically at `data/leaderboard.db`.
+
+### API (for game integration)
+
+Submit a score:
+```bash
+curl -X POST http://127.0.0.1:5000/api/scores \
+	-H "Content-Type: application/json" \
+	-d '{
+		"username": "player1",
+		"score": 1200,
+		"completion_time_ms": 85321,
+		"level_name": "story_1"
+	}'
+```
+
+Fetch top scores:
+```bash
+curl "http://127.0.0.1:5000/api/scores?limit=25"
+```
