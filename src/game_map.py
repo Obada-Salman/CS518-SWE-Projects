@@ -20,13 +20,13 @@ def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, scaled_TILE_SIZE, SCROLL):
     for col in range(COLS + 1):
         pygame.draw.line(screen, WHITE, (col * scaled_TILE_SIZE - SCROLL, 0), (col * scaled_TILE_SIZE - SCROLL, SCREEN_HEIGHT))
 
-def save_map(filename, tile_map):
-    with open(f"levels/{filename}.pkl", "wb") as f:
+def save_map(filename, tile_map, level_type="community"):
+    with open(f"levels/{level_type}/{filename}.pkl", "wb") as f:
     # with open(f"{filename}", "wb") as f:
         pickle.dump(tile_map, f)
 
-def load_map(filename):
-    with open(f"levels/{filename}.pkl") as f:
+def load_map(filename, level_type="story"):
+    with open(f"levels/{level_type}/{filename}.pkl", "rb") as f:
     # with open(f"{filename}", "rb") as f:
         tile_map = pickle.load(f)
     
