@@ -2,7 +2,7 @@ import pygame
 from settings import *
 import sys
 from state_manager import StateManager
-from Menu import MainMenuState
+from Menu import MainMenuState, StoryState
 
 
 
@@ -15,7 +15,7 @@ def main():
     state_manager = StateManager()
     
     state_manager.add_state('menu',MainMenuState('menu', state_manager))
-    # state_manager.add_state('story',StoryState(state_manager))
+    state_manager.add_state('story',StoryState(state_manager))
     # state_manager.add_state('custom',CustomLevelState(state_manager))
     # state_manager.add_state('settings',SettingsState(state_manager))
     # state_manager.add_state('level_bld',LevelBuilderState(state_manager))
@@ -33,9 +33,6 @@ def main():
         clock.tick(FPS)
     pygame.quit()
     sys.exit()
-        
-        
-
-
+    
 if __name__ == "__main__":
     main()
