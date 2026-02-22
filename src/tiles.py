@@ -3,8 +3,8 @@ import pygame
 tile_lookup = {
     'grass': {"image": (0, 255, 0), "collision": True},
     'water': {"image": "assets/images/water_sprite.png", "collision": True},
-    'sunlight': {"image": "assets/images/sunlight_sprite.png", "collision": True},
-    'resources': {"image": "assets/images/resources_sprite.png", "collision": True},
+    'sunlight': {"image": "assets/images/sun_sprite.png", "collision": True},
+    'nutrient': {"image": "assets/images/nutrient_sprite.png", "collision": True},
     'enemy': {"image": (255, 0, 0), "collision": False},
     'goal': {"image": (128, 128, 128), "collision": True},
     'player': {"image": (128, 0, 128), "collision": True}
@@ -31,6 +31,8 @@ class Tile(pygame.sprite.Sprite):
         elif isinstance(self.image, tuple):
             self.image = pygame.Surface(self.size)
             self.image.fill(self.tile_info["image"])
+
+        self.rect = self.image.get_rect(topleft=self.position)
     
     def __getstate__(self):
         state = self.__dict__.copy()
@@ -53,3 +55,24 @@ class Tile(pygame.sprite.Sprite):
 
     def get_type(self):
         return self.type
+
+class TileButton(Tile):
+    def __init__(self, postion, size, type):
+        super().__init__(postion, size, type)
+
+        self.clicked = False
+
+    def action(self):
+        action = False
+        
+        pos = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                action = True
+                self.clicked = True
+        
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+        
+        return action
