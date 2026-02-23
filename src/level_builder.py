@@ -1,6 +1,6 @@
 import pygame
 import game_map
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, MARGIN_WIDTH, MARGIN_HEIGHT, SCROLL, SCROLL_SPEED, BLACK, WHITE, ROWS, HIGHLIGHT_COLOR
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, MARGIN_WIDTH, MARGIN_HEIGHT, SCROLL, SCROLL_SPEED, BLACK, WHITE, ROWS, COLS, HIGHLIGHT_COLOR
 import tiles
 scaled_tile_size = TILE_SIZE = (SCREEN_HEIGHT - MARGIN_HEIGHT) // ROWS
 
@@ -8,6 +8,7 @@ player_placed = False
 goal_placed = False
 current_tile_type = ""
 current_button = 0
+LEVEL = 0
 
 button_list = []
 button_col = 0
@@ -27,7 +28,7 @@ for tile in tiles.tile_lookup:
 
 current_tile = button_list[current_button].type
 
-tile_map = [[ tiles.Tile((x, y), (TILE_SIZE, TILE_SIZE), 'grass') if y == 19 else None for x in range(100)] for y in range(20)]
+tile_map = game_map.load_map("deafult_map12312312321")
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
 running = True
 
@@ -40,12 +41,10 @@ while running:
     pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH - MARGIN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.draw.rect(screen, WHITE, (0, SCREEN_HEIGHT - MARGIN_HEIGHT, SCREEN_WIDTH, MARGIN_HEIGHT))
 
-    # TODO: add buttons
     for button_count, button in enumerate(button_list):
         screen.blit(button.image, button.rect)
         if button.action():
             current_button = button_count
-            # current_tile_type = button.type
             current_tile = button.type
         
     # highlight tile button
@@ -77,8 +76,27 @@ while running:
         except IndexError:
             pass
 
+    keys = pygame.key.get_pressed()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+        # Scroll
+        if keys[pygame.K_d] and SCROLL < (COLS * TILE_SIZE) - SCREEN_WIDTH:
+            SCROLL += 5 * SCROLL_SPEED
+        if keys[pygame.K_a] and SCROLL > 0:
+            SCROLL -= 5 * SCROLL_SPEED
+        
+        # Cycle through levels
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT and LEVEL < 99:
+                LEVEL += 1
+                tile_map = game_map.load_map(f"level_{LEVEL}", tile_map)
+
+            if event.key == pygame.K_LEFT and LEVEL > 1:
+                LEVEL -= 1
+                tile_map = game_map.load_map(f"level_{LEVEL}", tile_map)
+
 
     pygame.display.update()
