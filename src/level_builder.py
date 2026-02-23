@@ -24,8 +24,10 @@ for tile in tiles.tile_lookup:
     if button_col == 2:
         button_col = 0
         button_row += 1
-    
-tile_map = game_map.load_map("tiles2", "community")
+
+current_tile = button_list[current_button].type
+
+tile_map = [[ tiles.Tile((x, y), (TILE_SIZE, TILE_SIZE), 'grass') if y == 19 else None for x in range(100)] for y in range(20)]
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
 running = True
 
@@ -43,10 +45,35 @@ while running:
         screen.blit(button.image, button.rect)
         if button.action():
             current_button = button_count
-            current_tile_type = button.type
+            # current_tile_type = button.type
+            current_tile = button.type
         
     # highlight tile button
     pygame.draw.rect(screen, HIGHLIGHT_COLOR, button_list[current_button].rect, 3)
+
+    pos= pygame.mouse.get_pos()
+    x, y = (pos[0] + SCROLL) // TILE_SIZE, (pos[1] + SCROLL) // TILE_SIZE
+
+    #check to make sure within the map bounds
+    if pos[0] < SCREEN_WIDTH - MARGIN_WIDTH and pos[1] < SCREEN_HEIGHT - MARGIN_HEIGHT:
+        try:
+            tile = getattr(tile_map[y][x], 'type', None)
+
+            if pygame.mouse.get_pressed()[0] == 1:                
+                if tile != current_tile:
+                    if player_placed == True and current_tile == "player":
+                        continue
+
+                    elif player_placed == False and current_tile == "player":
+                        player_placed = True
+                    
+                    tile_map[y][x] = tiles.Tile((x, y), (TILE_SIZE, TILE_SIZE), current_tile)
+
+            elif pygame.mouse.get_pressed()[2] == 1 and tile != None:
+                tile_map[y][x] = None
+
+        except IndexError:
+            pass
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
