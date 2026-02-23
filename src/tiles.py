@@ -27,7 +27,7 @@ class Tile(pygame.sprite.Sprite):
 
         if isinstance(self.image, str):
             self.image = pygame.image.load(self.tile_info["image"])
-            self.image = pygame.transform.scale(self.image, (int(50 * 1), int(50 * 1)))
+            self.image = pygame.transform.scale(self.image, (int(self.size[0] * 1), int(self.size[1] * 1)))
         elif isinstance(self.image, tuple):
             self.image = pygame.Surface(self.size)
             self.image.fill(self.tile_info["image"])
@@ -45,7 +45,7 @@ class Tile(pygame.sprite.Sprite):
 
         if isinstance(self.image, str):
             self.image = pygame.image.load(self.tile_info["image"])
-            self.image = pygame.transform.scale(self.image, (int(50 * 1), int(50 * 1)))
+            self.image = pygame.transform.scale(self.image, (int(self.size[0] * 1), int(self.size[1] * 1)))
         elif isinstance(self.image, tuple):
             self.image = pygame.Surface(self.size)
             self.image.fill(self.tile_info["image"])
