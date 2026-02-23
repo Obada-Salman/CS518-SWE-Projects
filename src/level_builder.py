@@ -9,6 +9,7 @@ goal_placed = False
 current_tile_type = ""
 current_button = 0
 LEVEL = 0
+level_type = "Custom"
 
 button_list = []
 button_col = 0
@@ -92,11 +93,10 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT and LEVEL < 99:
                 LEVEL += 1
-                tile_map = game_map.load_map(f"level_{LEVEL}", tile_map)
 
             if event.key == pygame.K_LEFT and LEVEL > 1:
                 LEVEL -= 1
-                tile_map = game_map.load_map(f"level_{LEVEL}", tile_map)
 
+            tile_map = game_map.load_map(f"levels/{level_type}/{LEVEL}", level_type)
 
     pygame.display.update()
