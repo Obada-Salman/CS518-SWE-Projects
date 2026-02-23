@@ -59,16 +59,18 @@ while running:
         try:
             tile = getattr(tile_map[y][x], 'type', None)
 
+            # left click place
             if pygame.mouse.get_pressed()[0] == 1:                
-                if tile != current_tile:
                     if player_placed == True and current_tile == "player":
-                        continue
-
-                    elif player_placed == False and current_tile == "player":
-                        player_placed = True
+                        pass
                     
-                    tile_map[y][x] = tiles.Tile((x, y), (TILE_SIZE, TILE_SIZE), current_tile)
+                    elif tile != current_tile:
+                        if current_tile == "player":
+                            player_placed = True
+                    
+                        tile_map[y][x] = tiles.Tile((x, y), (TILE_SIZE, TILE_SIZE), current_tile)
 
+            # right click remove
             elif pygame.mouse.get_pressed()[2] == 1 and tile != None:
                 tile_map[y][x] = None
 
