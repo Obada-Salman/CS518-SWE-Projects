@@ -22,12 +22,15 @@ def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, scaled_TILE_SIZE, SCROLL):
 
 def save_map(filename, tile_map, level_type="community"):
     with open(f"levels/{level_type}/{filename}.pkl", "wb") as f:
-    # with open(f"{filename}", "wb") as f:
         pickle.dump(tile_map, f)
 
 def load_map(filename, level_type="story"):
-    with open(f"levels/{level_type}/{filename}.pkl", "rb") as f:
-    # with open(f"{filename}", "rb") as f:
-        tile_map = pickle.load(f)
+    try:
+        with open(f"levels/{level_type}/{filename}.pkl", "rb") as f:
+            tile_map = pickle.load(f)
+    except FileNotFoundError:
+        with open(f"levels/default/deafult_map.pkl", "rb") as f:
+            tile_map = pickle.load(f)
+
     
     return tile_map
