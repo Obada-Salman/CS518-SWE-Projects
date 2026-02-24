@@ -2,7 +2,8 @@ import pygame
 from settings import *
 import sys
 from state_manager import StateManager
-from Menu import MainMenuState, StoryState
+from Menu import MainMenuState
+from StoryState import StoryState
 
 
 
@@ -10,7 +11,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Onions May Cry")
-    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),pygame.RESIZABLE)
     clock = pygame.time.Clock()
     state_manager = StateManager()
     
