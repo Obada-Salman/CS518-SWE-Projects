@@ -18,8 +18,8 @@ class StateManager:
                 # if hasattr(self.current_state, 'leave'):
                 #     self.current_state.leave()
             self.current_state = self.states[name]
-            # if hasattr(self.current_state, 'enter'):
-            #     self.current_state.enter()
+            if hasattr(self.current_state, 'enter'):
+                self.current_state.enter()
         return
 
     def update(self, events):
