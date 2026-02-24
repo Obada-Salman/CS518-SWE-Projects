@@ -1,15 +1,19 @@
 import pygame
 import game_map
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, MARGIN_WIDTH, MARGIN_HEIGHT, SCROLL, SCROLL_SPEED, BLACK, WHITE, ROWS, COLS, HIGHLIGHT_COLOR
+#from settings import SCREEN_WIDTH, SCREEN_HEIGHT, MARGIN_WIDTH, MARGIN_HEIGHT, SCROLL, SCROLL_SPEED, BLACK, WHITE, ROWS, COLS, HIGHLIGHT_COLOR
+from settings import *
 import tiles
+from button import Button
 scaled_tile_size = TILE_SIZE = (SCREEN_HEIGHT - MARGIN_HEIGHT) // ROWS
 
 player_placed = False
 goal_placed = False
 current_tile_type = ""
 current_button = 0
-LEVEL = 0
+LEVEL = 1
 level_type = "Custom"
+
+save_button = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT - (MARGIN_HEIGHT // 2), 100, 50, "Save", btn_font, BLACK, BLACK, WHITE, WHITE, False)
 
 button_list = []
 button_col = 0
@@ -53,6 +57,11 @@ while running:
 
     pos= pygame.mouse.get_pos()
     x, y = (pos[0] + SCROLL) // TILE_SIZE, (pos[1] + SCROLL) // TILE_SIZE
+
+    # TODO: draw text and save button
+    save_button.draw(screen)
+    text_surface = btn_font.render(f"Level: {LEVEL}", True, BLACK)
+    screen.blit(text_surface, (50, (SCREEN_HEIGHT - MARGIN_HEIGHT + 50)))
 
     #check to make sure within the map bounds
     if pos[0] < SCREEN_WIDTH - MARGIN_WIDTH and pos[1] < SCREEN_HEIGHT - MARGIN_HEIGHT:
@@ -98,5 +107,8 @@ while running:
                 LEVEL -= 1
 
             tile_map = game_map.load_map(f"levels/{level_type}/{LEVEL}", level_type)
+    
+        if save_button.is_clicked(event):
+            game_map.save_map(LEVEL, tile_map, "community")
 
     pygame.display.update()

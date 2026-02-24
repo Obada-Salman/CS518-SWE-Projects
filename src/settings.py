@@ -21,3 +21,7 @@ BLACK = (0, 0, 0)
 GREEN = (20, 200, 20)
 RED = (200, 20, 20)
 HIGHLIGHT_COLOR = BLACK
+
+
+font_size = 50
+btn_font = pygame.font.SysFont(None, font_size)
