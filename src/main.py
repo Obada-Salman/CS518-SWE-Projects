@@ -4,21 +4,21 @@ import sys
 from state_manager import StateManager
 from Menu import MainMenuState
 from StoryState import StoryState
+from SettingsState import SettingsState
 
 
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((BASE_WIDTH, BASE_HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Onions May Cry")
-    pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),pygame.RESIZABLE)
     clock = pygame.time.Clock()
     state_manager = StateManager()
     
     state_manager.add_state('menu',MainMenuState('menu', state_manager))
-    state_manager.add_state('story',StoryState(state_manager))
+    #state_manager.add_state('story',StoryState(state_manager))
     # state_manager.add_state('custom',CustomLevelState(state_manager))
-    # state_manager.add_state('settings',SettingsState(state_manager))
+    state_manager.add_state('settings',SettingsState(state_manager))
     # state_manager.add_state('level_bld',LevelBuilderState(state_manager))
     
     state_manager.transition('menu')

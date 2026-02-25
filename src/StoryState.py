@@ -6,22 +6,30 @@ from Player import Player
 class StoryState:
     def __init__(self, state_machine):
         self.state_machine = state_machine
-        self.player = Player(100, SCREEN_HEIGHT)
+        self.setup_ui()
+        self.player = Player(100, self.screen_height)
+        
+    def setup_ui(self):    
+        surface = pygame.display.get_surface()
+        if surface:
+            self.screen_width, self.screen_height = surface.get_size()
+        else:
+            self.screen_width, self.screen_height = BASE_WIDTH, BASE_HEIGHT
 
     def update(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.state_machine.transition('menu')
             elif event.type == pygame.VIDEORESIZE:
-                self.__init__(self.state_machine)
+                self.setup_ui()
 
         self.player.update()
 
     def draw(self, surface):
         surface.fill(GREEN)
         text = pygame.font.Font(None, 74).render("Level 1", True, BLACK)
-        surface.blit(text, (SCREEN_WIDTH//2 - text.get_width()//2, 50))
+        surface.blit(text, (self.screen_width//2 - text.get_width()//2, 50))
         self.player.draw(surface)
         
     def enter(self):
-        self.__init__(self.state_machine)
+        self.setup_ui()
