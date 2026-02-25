@@ -7,7 +7,7 @@ class StoryState:
     def __init__(self, state_machine):
         self.state_machine = state_machine
         self.setup_ui()
-        self.player = Player(100, self.screen_height)
+        self.player = Player(100, self.screen_height - 100, float(747) // 6, float(1024) // 6)
         
     def setup_ui(self):    
         surface = pygame.display.get_surface()

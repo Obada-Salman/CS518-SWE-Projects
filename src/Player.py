@@ -7,6 +7,8 @@ class Player:
         self.y = float(y)
         self.width = width #float(747) // 6
         self.height = height #float(1024) // 6
+        self.screen_width = BASE_WIDTH 
+        self.screen_height = BASE_HEIGHT
         self.speed = 5
 
         self.vx = 0.0
@@ -31,7 +33,7 @@ class Player:
         self.vy += self.gravity
         self.y += self.vy
 
-        floor = SCREEN_HEIGHT - self.height
+        floor = self.screen_height - self.height
         if self.y >= floor:
             self.y = floor
             self.vy = 0.0
@@ -39,8 +41,8 @@ class Player:
 
         if self.x < 0:
             self.x = 0
-        if self.x + self.width > SCREEN_WIDTH:
-            self.x = SCREEN_WIDTH - self.width
+        if self.x + self.width > self.screen_width:
+            self.x = self.screen_width - self.width
 
     def update(self):
         self.handle_input()

@@ -16,7 +16,7 @@ def main():
     state_manager = StateManager()
     
     state_manager.add_state('menu',MainMenuState('menu', state_manager))
-    #state_manager.add_state('story',StoryState(state_manager))
+    state_manager.add_state('story',StoryState(state_manager))
     # state_manager.add_state('custom',CustomLevelState(state_manager))
     state_manager.add_state('settings',SettingsState(state_manager))
     # state_manager.add_state('level_bld',LevelBuilderState(state_manager))
