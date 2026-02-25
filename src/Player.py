@@ -2,11 +2,11 @@ import pygame
 from settings import *
 
 class Player:
-    def __init__(self, x, y):
+    def __init__(self, x, y, width, height):
         self.x = float(x)
         self.y = float(y)
-        self.width = float(747) // 6
-        self.height = float(1024) // 6
+        self.width = width #float(747) // 6
+        self.height = height #float(1024) // 6
         self.speed = 5
 
         self.vx = 0.0

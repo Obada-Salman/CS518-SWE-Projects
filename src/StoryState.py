@@ -6,7 +6,7 @@ from Player import Player
 class StoryState:
     def __init__(self, state_machine):
         self.state_machine = state_machine
-        self.player = Player(100, SCREEN_HEIGHT)
+        self.player = Player(100, SCREEN_HEIGHT, float(747) // 6, float(1024) // 6)
 
     def update(self, events):
         for event in events:

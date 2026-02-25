@@ -1,6 +1,8 @@
 import pygame
 import pickle
-from settings import ROWS, COLS, WHITE
+from settings import ROWS, COLS, WHITE, TILE_SIZE
+from Player import Player
+
 
 def draw_map(screen, tile_map, TILE_SIZE, SCROLL):
     for row in tile_map:
@@ -11,7 +13,13 @@ def draw_map(screen, tile_map, TILE_SIZE, SCROLL):
                 x = tile.position[0] * TILE_SIZE - SCROLL
                 y = tile.position[1] * TILE_SIZE
 
-                screen.blit(image, (x, y))
+                if tile.type != "player":
+                    screen.blit(image, (x, y))
+
+                elif tile.type == "player":
+                    player = Player(x, y, TILE_SIZE, TILE_SIZE)
+                    player.draw(screen)
+
 
 def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, scaled_TILE_SIZE, SCROLL):
     for row in range(ROWS + 1):
