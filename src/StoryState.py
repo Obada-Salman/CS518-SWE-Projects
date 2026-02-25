@@ -15,6 +15,7 @@ class StoryState:
             self.screen_width, self.screen_height = surface.get_size()
         else:
             self.screen_width, self.screen_height = BASE_WIDTH, BASE_HEIGHT
+        self.player = Player(100, self.screen_height - 100, float(747) // 6, float(1024) // 6)
 
     def update(self, events):
         for event in events:

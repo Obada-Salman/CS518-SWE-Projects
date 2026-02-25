@@ -11,7 +11,7 @@ goal_placed = False
 current_tile_type = ""
 current_button = 0
 LEVEL = 1
-level_type = "Custom"
+level_type = "community"
 
 save_button = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT - (MARGIN_HEIGHT // 2), 100, 50, "Save", btn_font, BLACK, BLACK, WHITE, WHITE, False)
 
@@ -33,7 +33,7 @@ for tile in tiles.tile_lookup:
 
 current_tile = button_list[current_button].type
 
-tile_map = game_map.load_map("deafult_map12312312321")
+tile_map = game_map.load_map("deafult_map")
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
 running = True
 
@@ -106,7 +106,7 @@ while running:
             if event.key == pygame.K_LEFT and LEVEL > 1:
                 LEVEL -= 1
 
-            tile_map = game_map.load_map(f"levels/{level_type}/{LEVEL}", level_type)
+            tile_map = game_map.load_map(LEVEL, level_type)
     
         if save_button.is_clicked(event):
             game_map.save_map(LEVEL, tile_map, "community")
