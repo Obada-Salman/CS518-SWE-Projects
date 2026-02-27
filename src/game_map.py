@@ -1,6 +1,6 @@
 import pygame
 import pickle
-from settings import ROWS, COLS, WHITE, TILE_SIZE
+from settings import ROWS, COLS, WHITE#, TILE_SIZE
 from Player import Player
 
 
