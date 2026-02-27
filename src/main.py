@@ -5,6 +5,7 @@ from state_manager import StateManager
 from Menu import MainMenuState
 from StoryState import StoryState
 from SettingsState import SettingsState
+from LevelSelect import LevelSelectState
 
 
 
@@ -19,6 +20,7 @@ def main():
     state_manager.add_state('story',StoryState(state_manager))
     # state_manager.add_state('custom',CustomLevelState(state_manager))
     state_manager.add_state('settings',SettingsState(state_manager))
+    state_manager.add_state('level_select',LevelSelectState('level_select', state_manager))
     # state_manager.add_state('level_bld',LevelBuilderState(state_manager))
     
     state_manager.transition('menu')

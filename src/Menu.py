@@ -40,7 +40,7 @@ class MainMenuState:
     def update(self, events):
         for event in events:
             if self.story.is_clicked(event):
-                self.state_machine.transition('story')
+                self.state_machine.transition('level_select')
             elif self.custom.is_clicked(event):
                 self.state_machine.transition('custom')
             elif self.setting.is_clicked(event):
