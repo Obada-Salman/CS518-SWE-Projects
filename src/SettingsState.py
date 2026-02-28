@@ -53,6 +53,8 @@ class SettingsState:
                 
     def change_resolution(self, width, height):
         pygame.display.set_mode((width, height), pygame.RESIZABLE)
+        self.screen_width = width
+        self.screen_height = height
         self.setup_ui()
         
     def draw(self, surface):

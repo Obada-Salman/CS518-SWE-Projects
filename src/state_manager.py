@@ -10,7 +10,7 @@ class StateManager:
     def add_state(self, name, state):
         self.states[name] = state
     
-    def transition(self,name):
+    def transition(self ,name):
         if(name in self.states):
         # If in the future we want to add additional things when entering and leaving states, we can add them here.
         # Can only be done if they have leave and enter functions.
