@@ -1,32 +1,32 @@
 import pygame
 import pickle
-from settings import ROWS, COLS, WHITE#, TILE_SIZE
+from settings import ROWS, COLS, WHITE#, tile_size
 from Player import Player
 
 
-def draw_map(screen, tile_map, TILE_SIZE, SCROLL):
+def draw_map(screen, tile_map, tile_size, SCROLL):
     for row in tile_map:
         for tile in row:
             
             if tile != None:
                 image = tile.image
-                x = tile.position[0] * TILE_SIZE - SCROLL
-                y = tile.position[1] * TILE_SIZE
+                x = tile.position[0] * tile_size - SCROLL
+                y = tile.position[1] * tile_size
 
                 if tile.type != "player":
                     screen.blit(image, (x, y))
 
                 elif tile.type == "player":
-                    player = Player(x, y, TILE_SIZE, TILE_SIZE)
+                    player = Player(x, y, tile_size, tile_size)
                     player.draw(screen)
 
 
-def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, scaled_TILE_SIZE, SCROLL):
+def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, tile_size, SCROLL):
     for row in range(ROWS + 1):
-        pygame.draw.line(screen, WHITE, (0, row * scaled_TILE_SIZE), (SCREEN_WIDTH, row * scaled_TILE_SIZE))
+        pygame.draw.line(screen, WHITE, (0, row * tile_size), (SCREEN_WIDTH, row * tile_size))
     
     for col in range(COLS + 1):
-        pygame.draw.line(screen, WHITE, (col * scaled_TILE_SIZE - SCROLL, 0), (col * scaled_TILE_SIZE - SCROLL, SCREEN_HEIGHT))
+        pygame.draw.line(screen, WHITE, (col * tile_size - SCROLL, 0), (col * tile_size - SCROLL, SCREEN_HEIGHT))
 
 def save_map(filename, tile_map, level_type="community"):
         with open(f"levels/{level_type}/{filename}.pkl", "wb") as f:
