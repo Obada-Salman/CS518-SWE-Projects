@@ -46,7 +46,7 @@ class MainMenuState:
             elif self.setting.is_clicked(event):
                 self.state_machine.transition('settings')
             elif self.level_bld.is_clicked(event):
-                self.state_machine.transition('level_bld')
+                self.state_machine.transition('level_builder')
             elif self.quit.is_clicked(event):
                 self.state_machine.quit()
             elif event.type == pygame.VIDEORESIZE:

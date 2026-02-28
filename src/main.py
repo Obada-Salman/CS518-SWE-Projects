@@ -6,6 +6,7 @@ from Menu import MainMenuState
 from StoryState import StoryState
 from SettingsState import SettingsState
 from LevelSelect import LevelSelectState
+from LevelbuilderState import LevelBuilderState
 
 
 
@@ -16,12 +17,12 @@ def main():
     clock = pygame.time.Clock()
     state_manager = StateManager()
     
-    state_manager.add_state('menu',MainMenuState('menu', state_manager))
-    state_manager.add_state('story',StoryState(state_manager))
-    # state_manager.add_state('custom',CustomLevelState(state_manager))
-    state_manager.add_state('settings',SettingsState(state_manager))
+    state_manager.add_state('menu', MainMenuState('menu', state_manager))
+    state_manager.add_state('story', StoryState(state_manager))
+    # state_manager.add_state('custom', CustomLevelState(state_manager))
     state_manager.add_state('level_select',LevelSelectState('level_select', state_manager))
-    # state_manager.add_state('level_bld',LevelBuilderState(state_manager))
+    state_manager.add_state('settings', SettingsState(state_manager))
+    state_manager.add_state('level_builder', LevelBuilderState(state_manager))
     
     state_manager.transition('menu')
     
