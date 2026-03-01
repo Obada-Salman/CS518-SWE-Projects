@@ -22,7 +22,7 @@ def main():
     # state_manager.add_state('custom', CustomLevelState(state_manager))
     state_manager.add_state('level_select',LevelSelectState('level_select', state_manager))
     state_manager.add_state('settings', SettingsState(state_manager))
-    state_manager.add_state('level_builder', LevelBuilderState(state_manager))
+    # state_manager.add_state('level_builder', LevelBuilderState(state_manager))
     
     state_manager.transition('menu')
     
