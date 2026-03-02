@@ -43,3 +43,12 @@ def load_map(filename, level_type="story"):
             tile_map = pickle.load(f)
 
     return tile_map
+
+def check_tile(tile_map, tile_type):
+    for row in tile_map:
+        for tile in row:
+            if tile != None:
+                if tile.type == tile_type:
+                    return True
+
+    return False

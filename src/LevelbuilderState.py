@@ -19,6 +19,9 @@ class LevelBuilderState:
         self.btn_font = pygame.font.SysFont(None, 50)
         self.scroll = SCROLL
         self.scroll_speed = SCROLL_SPEED
+        self.message_text = ""
+        self.message_timer = 0
+        self.message_color = BLACK
         
         self.tile_map = game_map.load_map("deafult_map")
 
@@ -63,6 +66,9 @@ class LevelBuilderState:
         self.current_tile = self.button_list[self.current_button].type
 
     def update(self, events):
+        self.player_placed = game_map.check_tile(self.tile_map, "player")
+        self.goal_placed = game_map.check_tile(self.tile_map, "goal")
+
         keys = pygame.key.get_pressed()
 
         # scroll
@@ -88,7 +94,16 @@ class LevelBuilderState:
                 self.state_machine.transition('menu')
         
             if self.save_button.is_clicked(event):
-                game_map.save_map(self.LEVEL, self.tile_map, "community")
+                if self.player_placed == False or self.goal_placed == False:
+                    self.message_text = "Missing Player and/or Goal"
+                    self.message_color = (200, 0, 0)
+                else:
+                    game_map.save_map(self.LEVEL, self.tile_map, "community")
+                    self.message_text = f"Level {self.LEVEL} Saved"
+                    self.message_color = (0, 150, 0)
+
+                self.message_timer = pygame.time.get_ticks() + 2000
+                    
 
             if self.back_button.is_clicked(event):
                 self.state_machine.transition('menu')
@@ -146,6 +161,12 @@ class LevelBuilderState:
         self.back_button.draw(surface)
         text_surface = self.btn_font.render(f"Level: {self.LEVEL}", True, BLACK)
         surface.blit(text_surface, (50, (self.screen_height - self.margin_height + 50)))
+
+        if pygame.time.get_ticks() < self.message_timer:
+            msg_surf = self.btn_font.render(self.message_text, True, self.message_color)
+            # Position it near the save button or top of screen
+            msg_rect = msg_surf.get_rect(center=(self.screen_width // 2, self.screen_height - self.margin_height - 30))
+            surface.blit(msg_surf, msg_rect)
     
     def enter(self):
         self.setup_ui()
