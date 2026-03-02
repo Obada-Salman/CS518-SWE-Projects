@@ -1,0 +1,12 @@
+Drop your game audio files in this folder with these names:
+
+- menu_theme.ogg
+- story_level_1.ogg
+- story_level_2.ogg
+- story_level_3.ogg
+- story_level_4.ogg
+- story_level_5.ogg
+
+Notes:
+- Missing files are handled safely and will not crash the game.
+- .ogg is recommended for looping background music.

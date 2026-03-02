@@ -41,21 +41,26 @@ class LevelSelectState:
     def update(self, events):
         for event in events:
             if self.btn_1.is_clicked(event):
-                self.state_machine.transition('story')
+                self._start_level(1)
             elif self.btn_2.is_clicked(event):
-                self.state_machine.transition('level_2')
+                self._start_level(2)
             elif self.btn_3.is_clicked(event):
-                self.state_machine.transition('level_3')
+                self._start_level(3)
             elif self.btn_4.is_clicked(event):
-                self.state_machine.transition('level_4')
+                self._start_level(4)
             elif self.btn_5.is_clicked(event):
-                self.state_machine.transition('level_5')
+                self._start_level(5)
             elif self.btn_back.is_clicked(event):
                 self.state_machine.transition('menu')
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.state_machine.transition('menu')
             elif event.type == pygame.VIDEORESIZE:
                 self.setup_ui()
+
+    def _start_level(self, level_number):
+        if hasattr(self.state_machine, 'set_story_level'):
+            self.state_machine.set_story_level(level_number)
+        self.state_machine.transition('story')
     
     def draw(self, surface):
         surface.fill(WHITE)
