@@ -22,8 +22,9 @@ class LevelBuilderState:
         self.message_text = ""
         self.message_timer = 0
         self.message_color = BLACK
+
         
-        self.tile_map = game_map.load_map("deafult_map")
+        self.tile_map = game_map.load_map("deafult_map", "default")
 
         self.setup_ui()
 
@@ -41,6 +42,11 @@ class LevelBuilderState:
         self.back_button = Button(
             (self.screen_width // 2) + 250, self.screen_height - (self.margin_height // 2),
             100, 50, "Exit", self.btn_font, BLACK, BLACK, WHITE, WHITE, False
+        )
+        
+        self.level_type_button = Button(
+            (self.screen_width // 2) - 150, self.screen_height - (self.margin_height // 2),
+            100, 50, self.level_type, self.btn_font, BLACK, BLACK, WHITE, WHITE, False
         )
 
         self.current_tile_type = ""
@@ -103,6 +109,22 @@ class LevelBuilderState:
                     self.message_color = (0, 150, 0)
 
                 self.message_timer = pygame.time.get_ticks() + 2000
+
+            
+            if self.level_type_button.is_clicked(event):
+                if self.level_type == "community":
+                    self.level_type = "story"
+                    self.level_type_button.text = "Story"
+                else:
+                    self.level_type = "community"
+                    self.level_type_button.text = "Community"
+
+                self.level_type_button = Button(
+                    (self.screen_width // 2) - 150, self.screen_height - (self.margin_height // 2),
+                    100, 50, self.level_type, self.btn_font, BLACK, BLACK, WHITE, WHITE, False
+                )
+            
+                self.tile_map = game_map.load_map(self.LEVEL, self.level_type)
                     
 
             if self.back_button.is_clicked(event):
@@ -139,6 +161,7 @@ class LevelBuilderState:
             except IndexError:
                 pass
 
+
     def draw(self, surface):
         surface.fill(BLACK)
 
@@ -159,6 +182,7 @@ class LevelBuilderState:
         # save, and exit button, and text
         self.save_button.draw(surface)
         self.back_button.draw(surface)
+        self.level_type_button.draw(surface)
         text_surface = self.btn_font.render(f"Level: {self.LEVEL}", True, BLACK)
         surface.blit(text_surface, (50, (self.screen_height - self.margin_height + 50)))
 

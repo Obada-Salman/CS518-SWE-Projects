@@ -2,6 +2,7 @@ import pygame
 import pickle
 from settings import ROWS, COLS, WHITE
 from Player import Player
+import os
 
 def draw_map(screen, tile_map, tile_size, SCROLL):
     for row in tile_map:
@@ -31,15 +32,19 @@ def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, tile_size, SCROLL):
         pygame.draw.line(screen, WHITE, (col * tile_size - SCROLL, 0), (col * tile_size - SCROLL, SCREEN_HEIGHT))
 
 def save_map(filename, tile_map, level_type="community"):
-        with open(f"levels/{level_type}/{filename}.pkl", "wb") as f:
+        file_path = os.path.join("levels", level_type, f"{filename}.pkl")
+
+        with open(file_path, "wb") as f:
             pickle.dump(tile_map, f)
 
 def load_map(filename, level_type="story"):
+    file_path = os.path.join("levels", level_type, f"{filename}.pkl")
+
     try:
-        with open(f"levels/{level_type}/{filename}.pkl", "rb") as f:
+        with open(file_path, "rb") as f:
             tile_map = pickle.load(f)
     except FileNotFoundError:
-        with open(f"levels/default/deafult_map.pkl", "rb") as f:
+        with open(file_path, "rb") as f:
             tile_map = pickle.load(f)
 
     return tile_map
