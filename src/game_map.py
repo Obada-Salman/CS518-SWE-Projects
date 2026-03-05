@@ -39,12 +39,13 @@ def save_map(filename, tile_map, level_type="community"):
 
 def load_map(filename, level_type="story"):
     file_path = os.path.join("levels", level_type, f"{filename}.pkl")
+    default_path = os.path.join("levels", "default", f"deafult_map.pkl")
 
     try:
         with open(file_path, "rb") as f:
             tile_map = pickle.load(f)
     except FileNotFoundError:
-        with open(file_path, "rb") as f:
+        with open(default_path, "rb") as f:
             tile_map = pickle.load(f)
 
     return tile_map

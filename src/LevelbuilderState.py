@@ -16,7 +16,7 @@ class LevelBuilderState:
         self.level_type = "community"
         self.margin_height = 100
         self.margin_width = 200
-        self.btn_font = pygame.font.SysFont(None, 50)
+        self.btn_font = pygame.font.SysFont(None, 25)
         self.scroll = SCROLL
         self.scroll_speed = SCROLL_SPEED
         self.message_text = ""
@@ -24,7 +24,7 @@ class LevelBuilderState:
         self.message_color = BLACK
 
         
-        self.tile_map = game_map.load_map("deafult_map", "default")
+        self.tile_map = game_map.load_map(self.LEVEL, self.level_type)
 
         self.setup_ui()
 
@@ -33,20 +33,28 @@ class LevelBuilderState:
         self.screen_width = setting_state.screen_width
         self.screen_height = setting_state.screen_height
         self.tile_size = (self.screen_height - self.margin_height) // ROWS
+        self.BASE_WIDTH = BASE_WIDTH
+        self.BASE_HEIGHT = BASE_HEIGHT
+        
+        scale_x = self.screen_width / self.BASE_WIDTH
+        scale_y = self.screen_height / self.BASE_HEIGHT
+        scale = min(scale_x, scale_y)
+        btn_width = int(100 * scale)
+        btn_height = int(30 * scale)
 
         self.save_button = Button(
             self.screen_width // 2, self.screen_height - (self.margin_height // 2),
-            100, 50, "Save", self.btn_font, BLACK, BLACK, WHITE, WHITE, False
+            btn_width, btn_height, "Save", self.btn_font, BLACK, BLACK, WHITE, WHITE, False
         )
 
         self.back_button = Button(
-            (self.screen_width // 2) + 250, self.screen_height - (self.margin_height // 2),
-            100, 50, "Exit", self.btn_font, BLACK, BLACK, WHITE, WHITE, False
+            (self.screen_width // 2) + 200, self.screen_height - (self.margin_height // 2),
+            btn_width, btn_height, "Exit", self.btn_font, BLACK, BLACK, WHITE, WHITE, False
         )
         
         self.level_type_button = Button(
-            (self.screen_width // 2) - 150, self.screen_height - (self.margin_height // 2),
-            100, 50, self.level_type, self.btn_font, BLACK, BLACK, WHITE, WHITE, False
+            (self.screen_width // 2) - 200, self.screen_height - (self.margin_height // 2),
+            btn_width, btn_height, self.level_type, self.btn_font, BLACK, BLACK, WHITE, WHITE, False
         )
 
         self.current_tile_type = ""

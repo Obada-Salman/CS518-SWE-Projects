@@ -5,9 +5,9 @@ tile_lookup = {
     'water': {"image": "assets/images/water_sprite.png", "collision": True},
     'sunlight': {"image": "assets/images/sun_sprite.png", "collision": True},
     'nutrient': {"image": "assets/images/nutrient_sprite.png", "collision": True},
-    'enemy': {"image": (255, 0, 0), "collision": False},
+    'carrot': {"image": "assets/images/Carrot_75x110.png", "collision": False},
     'goal': {"image": (128, 128, 128), "collision": True},
-    'player': {"image": (128, 0, 128), "collision": True}
+    'player': {"image": "assets/images/Onion_34x34.png", "collision": True}
 }
 
 class Tile(pygame.sprite.Sprite):
