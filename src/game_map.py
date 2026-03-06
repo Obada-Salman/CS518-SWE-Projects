@@ -2,6 +2,7 @@ import pygame
 import pickle
 from settings import ROWS, COLS, WHITE
 from Player import Player
+from Enemy import Enemy
 import os
 
 def draw_map(screen, tile_map, tile_size, SCROLL):
@@ -16,14 +17,18 @@ def draw_map(screen, tile_map, tile_size, SCROLL):
                 if isinstance(image, pygame.Surface):
                     image = pygame.transform.scale(image, (tile_size, tile_size))
 
-                if tile.type != "player":
+                if tile.type != "player" and tile.type != "carrot":
 
                     screen.blit(image, (x, y))
 
                 elif tile.type == "player":
                     player = Player(x, y, tile_size, tile_size)
                     player.draw(screen)
-
+                
+                elif tile.type == "carrot":
+                    player = Enemy(x, y, tile_size, tile_size)
+                    player.draw(screen)
+                
 def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, tile_size, SCROLL):
     for row in range(ROWS + 1):
         pygame.draw.line(screen, WHITE, (0, row * tile_size), (SCREEN_WIDTH, row * tile_size))

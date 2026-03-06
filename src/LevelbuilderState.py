@@ -23,7 +23,6 @@ class LevelBuilderState:
         self.message_timer = 0
         self.message_color = BLACK
 
-        
         self.tile_map = game_map.load_map(self.LEVEL, self.level_type)
 
         self.setup_ui()
@@ -118,7 +117,6 @@ class LevelBuilderState:
 
                 self.message_timer = pygame.time.get_ticks() + 2000
 
-            
             if self.level_type_button.is_clicked(event):
                 if self.level_type == "community":
                     self.level_type = "story"
@@ -168,7 +166,6 @@ class LevelBuilderState:
 
             except IndexError:
                 pass
-
 
     def draw(self, surface):
         surface.fill(BLACK)
