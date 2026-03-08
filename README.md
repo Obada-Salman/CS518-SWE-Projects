@@ -45,3 +45,15 @@ Fetch top scores:
 ```bash
 curl "http://127.0.0.1:5000/api/scores?limit=25"
 ```
+
+### Tests
+
+Run sprite-focused tests:
+```bash
+python -m unittest tests/test_sprites.py
+```
+
+Run all unittest tests:
+```bash
+python -m unittest discover -s tests
+```
