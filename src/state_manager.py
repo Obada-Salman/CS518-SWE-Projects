@@ -1,5 +1,6 @@
 
 from sound_manager import SoundManager
+from score_tracker import ScoreTracker
 
 
 class StateManager:
@@ -11,6 +12,7 @@ class StateManager:
         self.window_width = 800
         self.window_height = 600
         self.sound_manager = SoundManager()
+        self.score_tracker = ScoreTracker()
         self.state_music = {
             'menu': 'menu_theme.ogg',
             'level_select': 'menu_theme.ogg',

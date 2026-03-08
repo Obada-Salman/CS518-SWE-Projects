@@ -3,11 +3,13 @@ from settings import *
 from button import Button
 from Player import Player
 from Enemy import Enemy
+from score_tracker import ScoreTracker
 
 class StoryState:
     def __init__(self, state_machine):
         self.state_machine = state_machine
         self.current_level = 1
+        self.score_tracker = getattr(self.state_machine, 'score_tracker', ScoreTracker())
         self.level_music = {
             1: 'story_level_1.ogg',
             2: 'story_level_2.ogg',
@@ -35,21 +37,32 @@ class StoryState:
 
         self.player.update()
         self.enemy.update()
+        self.score_tracker.tick()
 
     def draw(self, surface):
         surface.fill(GREEN)
         text = pygame.font.Font(None, 74).render(f"Level {self.current_level}", True, BLACK)
         surface.blit(text, (self.screen_width//2 - text.get_width()//2, 50))
+
+        score_value = self.score_tracker.snapshot().level_score
+        score_text = pygame.font.Font(None, 40).render(f"Score: {score_value}", True, BLACK)
+        surface.blit(score_text, (20, 20))
+
         self.player.draw(surface)
         self.enemy.draw(surface)
         
     def enter(self):
         self.setup_ui()
+        self.score_tracker.start_level(f"story_{self.current_level}")
         self._play_level_music()
 
     def set_level(self, level_number):
         self.current_level = level_number
+        self.score_tracker.start_level(f"story_{self.current_level}")
         self._play_level_music()
+
+    def leave(self):
+        self.score_tracker.submit_current_level()
 
     def _play_level_music(self):
         track = self.level_music.get(self.current_level)
