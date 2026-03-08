@@ -27,7 +27,7 @@ repository = LeaderboardRepository(_resolve_db_path())
 
 def _validate_payload(payload: dict[str, Any]) -> tuple[bool, str | None]:
     username = payload.get("username")
-    if not isinstance(username, str) or not username.strip():
+    if not isinstance(username, str) or not username.strip() or username == "":
         return False, "username must be a non-empty string"
     if len(username.strip()) > 32:
         return False, "username must be 32 characters or fewer"
@@ -41,7 +41,7 @@ def _validate_payload(payload: dict[str, Any]) -> tuple[bool, str | None]:
         return False, "completion_time_ms must be a non-negative integer"
 
     level_name = payload.get("level_name")
-    if level_name is not None and not isinstance(level_name, str):
+    if not isinstance(level_name, str) or not level_name.strip() or level_name == "":
         return False, "level_name must be a string when provided"
 
     return True, None

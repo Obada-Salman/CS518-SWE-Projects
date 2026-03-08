@@ -53,6 +53,11 @@ Run sprite-focused tests:
 python -m unittest tests/test_sprites.py
 ```
 
+Run leader-board tests:
+```bash
+python -m unittest tests/test_sprites.py
+```
+
 Run all unittest tests:
 ```bash
 python -m unittest discover -s tests
