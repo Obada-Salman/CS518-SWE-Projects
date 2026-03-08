@@ -2,12 +2,12 @@ import pygame
 
 tile_lookup = {
     'grass': {"image": (0, 255, 0), "collision": True},
-    'water': {"image": "assets/images/water_sprite.png", "collision": True},
-    'sunlight': {"image": "assets/images/sun_sprite.png", "collision": True},
-    'nutrient': {"image": "assets/images/nutrient_sprite.png", "collision": True},
-    'carrot': {"image": "assets/images/carrot_static.png", "collision": False},
+    'water': {"image": "assets/images/Misc/water_sprite.png", "collision": True},
+    'sunlight': {"image": "assets/images/Misc/sun_sprite.png", "collision": True},
+    'nutrient': {"image": "assets/images/Misc/nutrient_sprite.png", "collision": True},
+    'carrot': {"image": "assets/images/Characters/carrot_static.png", "collision": False},
     'goal': {"image": (128, 128, 128), "collision": True},
-    'player': {"image": "assets/images/onion_static.png", "collision": True}
+    'player': {"image": "assets/images/Characters/onion_static.png", "collision": True}
 }
 
 class Tile(pygame.sprite.Sprite):

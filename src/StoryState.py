@@ -18,8 +18,8 @@ class StoryState:
             5: 'story_level_5.ogg',
         }
         self.setup_ui()
-        self.player = Player(100, self.screen_height - 100, 34 * 3, 34 * 3)
-        self.enemy = Enemy(400, self.screen_height - 110, 75, 110)
+        self.player = Player(100, self.screen_height, 34 * 3, 34 * 3)
+        self.enemy = Enemy(400, self.screen_height, 75, 110)
         
     def setup_ui(self):    
         surface = pygame.display.get_surface()
@@ -35,18 +35,32 @@ class StoryState:
             elif event.type == pygame.VIDEORESIZE:
                 self.setup_ui()
 
+        if self.check_collision(self.player.rect, self.enemy.rect):
+            if self.player.can_damage():
+                self.enemy.take_damage(1)
+            self.player.take_damage(1)
+
+        for tear in self.player.tears:
+            if self.check_collision(tear['rect'], self.enemy.rect):
+                self.enemy.take_damage(1)
+                self.player.tears.remove(tear)
+
+        if not self.player.is_alive():
+            self.__init__(self.state_machine)
+            self.state_machine.transition('menu')
+
         self.player.update()
         self.enemy.update()
         self.score_tracker.tick()
 
     def draw(self, surface):
-        surface.fill(GREEN)
-        text = pygame.font.Font(None, 74).render(f"Level {self.current_level}", True, BLACK)
-        surface.blit(text, (self.screen_width//2 - text.get_width()//2, 50))
+        surface.blit(pygame.image.load('assets/images/Levels/Level1_800x600.png'), (0, 0))
+        text = pygame.font.Font(None, 74).render(f"Level {self.current_level}", True, WHITE)
+        surface.blit(text, (self.screen_width//2 - text.get_width()//2, 30))
 
         score_value = self.score_tracker.snapshot().level_score
         score_text = pygame.font.Font(None, 40).render(f"Score: {score_value}", True, BLACK)
-        surface.blit(score_text, (20, 20))
+        surface.blit(score_text, (650, 20))
 
         self.player.draw(surface)
         self.enemy.draw(surface)
@@ -71,3 +85,6 @@ class StoryState:
 
         if hasattr(self.state_machine, 'sound_manager'):
             self.state_machine.sound_manager.play_music_file(track)
+
+    def check_collision(self, rect1, rect2):
+        return rect1.colliderect(rect2)

@@ -130,7 +130,7 @@ class PlayerSpriteAndPhysicsTests(unittest.TestCase):
         mock_sprite_handler.return_value = Mock()
 
         player = Player(10, 10, 34, 34)
-        player.player_rect = pygame.Rect(10, 10, 34, 34)
+        player.rect = pygame.Rect(10, 10, 34, 34)
 
         mock_keys.side_effect = [FakeKeys({pygame.K_x}), FakeKeys({pygame.K_x})]
 

@@ -11,8 +11,9 @@ class Enemy:
         self.height = height
         self.type = type
         self.speed = speed
+        self.health = 8
         self.screen_width = BASE_WIDTH
-        self.screen_height = BASE_HEIGHT
+        self.screen_height = BASE_HEIGHT - 86
 
         self.vx = -self.speed
         self.vy = 0.0
@@ -23,9 +24,9 @@ class Enemy:
         self.state = 1 # Idle = 0, Walk = 1, Jump/Fall = 2
 
         # For now, just use the carrot sprite sheet. We can add more modularity later once we have more enemy types.
-        self.sprites = SpriteHandler("assets/images/Carrot_75x110.png", type=self.type)
+        self.sprites = SpriteHandler("assets/images/Characters/Carrot_75x110.png", type=self.type)
 
-        self.enemy_rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def apply_physics(self):
         self.x += self.vx
@@ -53,8 +54,13 @@ class Enemy:
 
     def update(self):
         self.apply_physics()
-        self.enemy_rect.topleft = (self.x, self.y)
+        self.rect.topleft = (self.x, self.y)
         self.sprites.update(direction=self.direction, state=self.state)
+        if self.health <= 0:
+            self.x, self.y = -1000, -1000
+
+    def take_damage(self, amount):
+        self.health -= amount
 
     def draw(self, surface):
         self.sprites.draw(surface, int(self.x), int(self.y))
