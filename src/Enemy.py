@@ -33,24 +33,28 @@ class Enemy:
         self.vy += self.gravity
         self.y += self.vy
 
-        floor = self.screen_height - self.height
-        if self.y >= floor:
-            self.y = floor
-            self.vy = 0.0
-            self.on_ground = True
-        else:
-            self.on_ground = False
+        # floor = self.screen_height - self.height
+        # if self.y >= floor:
+        #     self.y = floor
+        #     self.vy = 0.0
+        #     self.on_ground = True
+        # else:
+        #     self.on_ground = False
 
         # simple movement for now: just bounce back and forth between edges
-        if self.x < 0:
-            self.x = 0
-            self.vx = abs(self.vx)
-        if self.x + self.width > self.screen_width:
-            self.x = self.screen_width - self.width
-            self.vx = -abs(self.vx)
+        # if self.x < 0:
+        #     self.x = 0
+        #     self.vx = abs(self.vx)
+        # if self.x + self.width > self.screen_width:
+        #     self.x = self.screen_width - self.width
+        #     self.vx = -abs(self.vx)
 
+        # self.direction = 1 if self.vx > 0 else 0
+        # self.state = 1 if self.vx != 0 else 0
+    
+    def on_wall_hit(self):
+        self.vx *= -1
         self.direction = 1 if self.vx > 0 else 0
-        self.state = 1 if self.vx != 0 else 0
 
     def update(self):
         self.apply_physics()

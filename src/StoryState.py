@@ -4,6 +4,7 @@ from button import Button
 from Player import Player
 from Enemy import Enemy
 from score_tracker import ScoreTracker
+import game_map
 
 class StoryState:
     def __init__(self, state_machine):
@@ -17,9 +18,8 @@ class StoryState:
             4: 'story_level_4.ogg',
             5: 'story_level_5.ogg',
         }
-        self.setup_ui()
-        self.player = Player(100, self.screen_height, 34 * 3, 34 * 3)
-        self.enemy = Enemy(400, self.screen_height, 75, 110)
+
+        self.background = pygame.image.load('assets/images/Levels/Level1_800x600.png')
         
     def setup_ui(self):    
         surface = pygame.display.get_surface()
@@ -27,6 +27,8 @@ class StoryState:
             self.screen_width, self.screen_height = surface.get_size()
         else:
             self.screen_width, self.screen_height = BASE_WIDTH, BASE_HEIGHT
+        
+        self.tile_size = self.screen_height // ROWS
 
     def update(self, events):
         for event in events:
@@ -53,10 +55,16 @@ class StoryState:
         self.enemy.update()
         self.score_tracker.tick()
 
+        self.check_map_collision(self.player)
+        self.check_map_collision(self.enemy)
+
     def draw(self, surface):
-        surface.blit(pygame.image.load('assets/images/Levels/Level1_800x600.png'), (0, 0))
+        surface.fill(WHITE)
+        surface.blit(self.background, (0, 0))
         text = pygame.font.Font(None, 74).render(f"Level {self.current_level}", True, WHITE)
         surface.blit(text, (self.screen_width//2 - text.get_width()//2, 30))
+        
+        game_map.draw_map(surface, self.map, self.tile_size, 0)
 
         score_value = self.score_tracker.snapshot().level_score
         score_text = pygame.font.Font(None, 40).render(f"Score: {score_value}", True, BLACK)
@@ -69,6 +77,18 @@ class StoryState:
         self.setup_ui()
         self.score_tracker.start_level(f"story_{self.current_level}")
         self._play_level_music()
+
+        self.map = game_map.load_map(self.current_level, "story")
+
+        player_position = game_map.get_tile_position(self.map, "player", self.tile_size)
+        carrot_position = game_map.get_tile_position(self.map, "carrot", self.tile_size)
+        
+        self.player = Player(player_position[0], player_position[1], 34 * 3, 34 * 3)
+        self.map[player_position[3]][player_position[2]] = None # Remove from map to prevent collisons werid collisions
+
+        self.enemy = Enemy(carrot_position[0], carrot_position[1], 75, 110)
+        self.map[carrot_position[3]][carrot_position[2]] = None # Remove from map to prevent collisons werid collisions
+
 
     def set_level(self, level_number):
         self.current_level = level_number
@@ -88,3 +108,54 @@ class StoryState:
 
     def check_collision(self, rect1, rect2):
         return rect1.colliderect(rect2)
+
+    # check_map_collision and handle_collision proably should be handled by the player and enemy classes, but this is what I got working for now
+    def check_map_collision(self, entity):
+        # Determine the grid coordinates
+        grid_x = entity.rect.centerx // self.tile_size
+        grid_y = entity.rect.centery // self.tile_size
+        
+        # Check a 3x3 area
+        for row in range(grid_y - 1, grid_y + 2):
+            for col in range(grid_x - 1, grid_x + 2):
+                
+                # 1. Stay within the map boundaries to avoid "Index Out of Range" errors
+                if 0 <= row < len(self.map) and 0 <= col < len(self.map[0]):
+                    tile = self.map[row][col]
+
+                    if tile == None:
+                        continue
+                    
+                    elif tile.collision:
+                        object_rect = pygame.Rect(col * self.tile_size, row * self.tile_size, self.tile_size, self.tile_size)
+                        
+                        if entity.rect.colliderect(object_rect):
+                            self.handle_collision(entity, object_rect)
+    
+    # check_map_collision and handle_collision proably should be handled by the player and enemy classes, but this is what I got working for now
+    def handle_collision(self, entity, object_rect):
+        # Calculate overlap on both axes
+        overlap_x = min(entity.rect.right, object_rect.right) - max(entity.rect.left, object_rect.left)
+        overlap_y = min(entity.rect.bottom, object_rect.bottom) - max(entity.rect.top, object_rect.top)
+
+        # Snap the entity to the side of the wall it hit
+        if overlap_x < overlap_y:
+            if entity.rect.centerx < object_rect.centerx:
+                entity.rect.right = object_rect.left
+            else:
+                entity.rect.left = object_rect.right
+            if hasattr(entity, "on_wall_hit"):
+                entity.on_wall_hit()
+            else:
+                entity.vx = 0
+        else:
+            if entity.rect.centery < object_rect.centery:
+                entity.rect.bottom = object_rect.top
+                entity.vy = 0
+                entity.on_ground = True
+            else:
+                entity.rect.top = object_rect.bottom
+                entity.vy = 0
+        
+        entity.x = entity.rect.x
+        entity.y = entity.rect.y

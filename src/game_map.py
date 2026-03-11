@@ -21,13 +21,13 @@ def draw_map(screen, tile_map, tile_size, SCROLL):
 
                     screen.blit(image, (x, y))
 
-                elif tile.type == "player":
-                    player = Player(x, y, tile_size, tile_size)
-                    player.draw(screen)
+                # elif tile.type == "player":
+                #     player = Player(x, y, tile_size, tile_size)
+                #     player.draw(screen)
                 
-                elif tile.type == "carrot":
-                    player = Enemy(x, y, tile_size, tile_size)
-                    player.draw(screen)
+                # elif tile.type == "carrot":
+                #     player = Enemy(x, y, tile_size, tile_size)
+                #     player.draw(screen)
                 
 def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, tile_size, SCROLL):
     for row in range(ROWS + 1):
@@ -63,3 +63,11 @@ def check_tile(tile_map, tile_type):
                     return True
 
     return False
+
+def get_tile_position(tile_map, tile_type, tile_size):
+    for row in tile_map:
+            for tile in row:
+                if tile and tile.type == tile_type:
+                    # Returns (x, y) pixel coordinates
+                    return (tile.position[0] * tile_size, tile.position[1] * tile_size, tile.position[0], tile.position[1])
+    return None
