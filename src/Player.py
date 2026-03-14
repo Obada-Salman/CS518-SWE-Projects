@@ -9,8 +9,8 @@ class Player:
         self.y = float(y)
         self.width = width
         self.height = height
-        # self.screen_width = BASE_WIDTH 
-        # self.screen_height = BASE_HEIGHT - 80
+        self.screen_width = BASE_WIDTH 
+        self.screen_height = BASE_HEIGHT - 80
         self.speed = 5
         self.health = 5
 
@@ -29,11 +29,13 @@ class Player:
 
         self.sprites = SpriteHandler("assets/images/Characters/Onion_34x34.png", type='player', scale=3, anim_time=7)
         self.tear = pygame.image.load("assets/images/Misc/tear_34x34.png")
-        self.health_image = pygame.image.load('assets/images/Misc/health_50x50.png')
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.tear_rect = self.tear.get_rect()
         self.tears = [] # list to hold active tears
         self.x_pressed_last_frame = False  # used so that holding down X doesn't shoot tears every frame
+
+        self.snd_tear_shoot = pygame.mixer.Sound('assets/sounds/tear_shoot.ogg')
+        self.snd_jump = pygame.mixer.Sound('assets/sounds/jump.ogg')
 
     def handle_input(self):
         key = pygame.key.get_pressed()
@@ -60,6 +62,7 @@ class Player:
             self.vy = self.jump_strength
             self.on_ground = False
             self.state = 2
+            self.snd_jump.play()
 
         # shoot tear only on X press, not hold
         x_pressed_now = key[pygame.K_x]
@@ -67,34 +70,30 @@ class Player:
             self.shoot_tear()
         self.x_pressed_last_frame = x_pressed_now
 
-    # def apply_physics(self):
-    #     self.x += self.vx
-    #     self.vy += self.gravity
-    #     self.y += self.vy
-
-        # floor = self.screen_height - self.height
-        # if self.y >= floor:
-        #     self.y = floor
-        #     self.vy = 0.0
-        #     self.on_ground = True
-
-        # if self.x < 0:
-        #     self.x = 0
-        # if self.x + self.width > self.screen_width:
-        #     self.x = self.screen_width - self.width
-
-    def shoot_tear(self):
-        self.tear_rect = self.tear.get_rect(center=self.rect.center)
-        self.tears.append({'rect': self.tear_rect, 'direction': self.direction, 'speed': 10})
-
-    def update(self):
-        self.handle_input()
-
-        # self.apply_physics()
+    def apply_physics(self):
         self.x += self.vx
         self.vy += self.gravity
         self.y += self.vy
 
+        floor = self.screen_height - self.height
+        if self.y >= floor:
+            self.y = floor
+            self.vy = 0.0
+            self.on_ground = True
+
+        if self.x < 0:
+            self.x = 0
+        if self.x + self.width > self.screen_width:
+            self.x = self.screen_width - self.width
+
+    def shoot_tear(self):
+        self.tear_rect = self.tear.get_rect(center=self.rect.center)
+        self.tears.append({'rect': self.tear_rect, 'direction': self.direction, 'speed': 10})
+        self.snd_tear_shoot.play()
+
+    def update(self):
+        self.handle_input()
+        self.apply_physics()
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         
         for tear in self.tears:
@@ -103,8 +102,8 @@ class Player:
             else:
                 tear['rect'].x -= tear['speed']
 
-            # if tear['rect'].right < 0 or tear['rect'].left > self.screen_width:
-            #     self.tears.remove(tear)
+            if tear['rect'].right < 0 or tear['rect'].left > self.screen_width:
+                self.tears.remove(tear)
 
         if self.invincible:
             now = pygame.time.get_ticks()
@@ -136,5 +135,5 @@ class Player:
             self.sprites.draw(surface, int(self.x), int(self.y))
         for tear in self.tears:
             surface.blit(self.tear, tear['rect'])
-        surface.blit(self.health_image, (10, 10))
+        surface.blit(pygame.image.load('assets/images/Misc/health_50x50.png'), (10, 10))
         surface.blit(pygame.font.SysFont(None, 40).render(f"x {self.health}", True, (255, 255, 255)), (60, 20))

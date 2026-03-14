@@ -7,7 +7,7 @@ tile_lookup = {
     'nutrient': {"image": "assets/images/Misc/nutrient_sprite.png", "collision": True},
     'carrot': {"image": "assets/images/Characters/carrot_static.png", "collision": False},
     'goal': {"image": (128, 128, 128), "collision": True},
-    'player': {"image": "assets/images/Characters/onion_static.png", "collision": False}
+    'player': {"image": "assets/images/Characters/onion_static.png", "collision": True}
 }
 
 class Tile(pygame.sprite.Sprite):
