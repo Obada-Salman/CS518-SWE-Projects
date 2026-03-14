@@ -1,9 +1,18 @@
-# Level Builder User Manual  
+Git repo: https://github.com/Obada-Salman/CS518-SWE-Projects
 
-## Overview
+# Onions May Cry user manual
+Run the main.py file and the game should load up
+
+Story Mode provides you with levels to play (only level 1 available now)
+
+Controls: arrow keys left and right for movement, up or space for jump, X for tear attack
+
+To beat level 1, you need to defeat the carrot enemy to unlock the door and then you can go through that door
+
+## Level builder
 The level builder is interative map desiner that allows deveolper and player to create maps.
 
-## How to use
+## How to use level builder
 Load into level builder from the main menu level builder button.
 
 The level builder works by left clicking on spaces on the map to place tiles, and right click to remove them.  
