@@ -66,5 +66,8 @@ class Enemy:
     def take_damage(self, amount):
         self.health -= amount
 
+    def is_alive(self):
+        return self.health > 0
+
     def draw(self, surface):
         self.sprites.draw(surface, int(self.x), int(self.y))

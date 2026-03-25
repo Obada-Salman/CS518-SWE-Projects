@@ -35,6 +35,9 @@ class Player:
         self.tears = [] # list to hold active tears
         self.x_pressed_last_frame = False  # used so that holding down X doesn't shoot tears every frame
 
+        self.snd_tear_shoot = pygame.mixer.Sound('assets/sounds/tear_shoot.ogg')
+        self.snd_jump = pygame.mixer.Sound('assets/sounds/jump.ogg')
+
     def handle_input(self):
         key = pygame.key.get_pressed()
         self.vx = 0.0
@@ -60,6 +63,7 @@ class Player:
             self.vy = self.jump_strength
             self.on_ground = False
             self.state = 2
+            self.snd_jump.play()
 
         # shoot tear only on X press, not hold
         x_pressed_now = key[pygame.K_x]
@@ -86,6 +90,7 @@ class Player:
     def shoot_tear(self):
         self.tear_rect = self.tear.get_rect(center=self.rect.center)
         self.tears.append({'rect': self.tear_rect, 'direction': self.direction, 'speed': 10})
+        self.snd_tear_shoot.play()
 
     def update(self):
         self.handle_input()

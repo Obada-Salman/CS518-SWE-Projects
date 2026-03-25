@@ -20,6 +20,13 @@ class StoryState:
         }
 
         self.background = pygame.image.load('assets/images/Levels/Level1_800x600.png')
+        self.door = pygame.image.load("assets/images/Misc/door.png")
+        self.lock = pygame.image.load("assets/images/Misc/lock_52x68.png")
+        self.door_rect = pygame.Rect(720, 417, 68, 96)
+        self.door_locked = True
+
+        self.snd_tear_hit = pygame.mixer.Sound('assets/sounds/tear_hit.ogg')
+        self.snd_damage = pygame.mixer.Sound('assets/sounds/damage.ogg')
         
     def setup_ui(self):    
         surface = pygame.display.get_surface()
@@ -41,16 +48,28 @@ class StoryState:
         if self.check_collision(self.player.rect, self.enemy.rect):
             if self.player.can_damage():
                 self.enemy.take_damage(1)
+                self.snd_damage.play()
             self.player.take_damage(1)
 
         for tear in self.player.tears:
             if self.check_collision(tear['rect'], self.enemy.rect):
                 self.enemy.take_damage(1)
+                self.snd_tear_hit.play()
                 self.player.tears.remove(tear)
 
         if not self.player.is_alive():
             self.__init__(self.state_machine)
             self.state_machine.transition('menu')
+
+        if self.enemy.is_alive():
+            self.door_locked = True
+        else:
+            self.door_locked = False
+
+        if not self.door_locked:
+            if self.check_collision(self.player.rect, self.door_rect):
+                self.__init__(self.state_machine)
+                self.state_machine.transition('menu')
 
         self.player.update()
         self.enemy.update()
@@ -70,6 +89,10 @@ class StoryState:
         score_value = self.score_tracker.snapshot().level_score
         score_text = pygame.font.Font(None, 40).render(f"Score: {score_value}", True, BLACK)
         surface.blit(score_text, (650, 20))
+
+        surface.blit(self.door, (720, 417))
+        if self.door_locked:
+            surface.blit(self.lock, (727, 437))
 
         self.player.draw(surface)
         self.enemy.draw(surface)
