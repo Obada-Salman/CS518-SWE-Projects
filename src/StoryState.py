@@ -29,6 +29,7 @@ class StoryState:
             self.screen_width, self.screen_height = BASE_WIDTH, BASE_HEIGHT
         
         self.tile_size = self.screen_height // ROWS
+        self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
 
     def update(self, events):
         for event in events:
@@ -60,7 +61,7 @@ class StoryState:
 
     def draw(self, surface):
         surface.fill(WHITE)
-        surface.blit(self.background, (0, 0))
+        surface.blit(self.scaled_bg, (0, 0))
         text = pygame.font.Font(None, 74).render(f"Level {self.current_level}", True, WHITE)
         surface.blit(text, (self.screen_width//2 - text.get_width()//2, 30))
         
