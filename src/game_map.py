@@ -17,9 +17,9 @@ def draw_map(screen, tile_map, tile_size, SCROLL):
                 if isinstance(image, pygame.Surface):
                     image = pygame.transform.scale(image, (tile_size, tile_size))
 
-                if tile.type != "player" and tile.type != "carrot":
+                # if tile.type != "player" and tile.type != "carrot":
 
-                    screen.blit(image, (x, y))
+                screen.blit(image, (x, y))
 
                 # elif tile.type == "player":
                 #     player = Player(x, y, tile_size, tile_size)

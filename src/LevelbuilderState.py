@@ -111,7 +111,7 @@ class LevelBuilderState:
                     self.message_text = "Missing Player and/or Goal"
                     self.message_color = (200, 0, 0)
                 else:
-                    game_map.save_map(self.LEVEL, self.tile_map, "community")
+                    game_map.save_map(self.LEVEL, self.tile_map, self.level_type)
                     self.message_text = f"Level {self.LEVEL} Saved"
                     self.message_color = (0, 150, 0)
 

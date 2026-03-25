@@ -55,7 +55,7 @@ python -m unittest tests/test_sprites.py
 
 Run leader-board tests:
 ```bash
-python -m unittest tests/test_sprites.py
+python -m unittest tests/test_leaderboard.py
 ```
 
 Run all unittest tests:

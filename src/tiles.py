@@ -2,6 +2,7 @@ import pygame
 
 tile_lookup = {
     'grass': {"image": (0, 255, 0), "collision": True},
+    'floor': {"image": "assets/images/Levels/cave_floor.png", "collision": True},
     'water': {"image": "assets/images/Misc/water_sprite.png", "collision": True},
     'sunlight': {"image": "assets/images/Misc/sun_sprite.png", "collision": True},
     'nutrient': {"image": "assets/images/Misc/nutrient_sprite.png", "collision": True},
