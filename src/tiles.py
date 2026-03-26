@@ -7,7 +7,8 @@ tile_lookup = {
     'sunlight': {"image": "assets/images/Misc/sun_sprite.png", "collision": True},
     'nutrient': {"image": "assets/images/Misc/nutrient_sprite.png", "collision": True},
     'carrot': {"image": "assets/images/Characters/carrot_static.png", "collision": False},
-    'goal': {"image": (128, 128, 128), "collision": True},
+    # 'goal': {"image": (128, 128, 128), "collision": True},
+    'goal': {"image": "assets/images/Misc/door.png", "collision": False},
     'player': {"image": "assets/images/Characters/onion_static.png", "collision": False}
 }
 
