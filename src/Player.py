@@ -141,6 +141,7 @@ class Player:
     def draw(self, surface):
         if self.visible:
             self.sprites.draw(surface, self.rect.x, self.rect.y)
+        
         for tear in self.tears:
             surface.blit(self.tear, tear['rect'])
         surface.blit(self.health_image, (10, 10))

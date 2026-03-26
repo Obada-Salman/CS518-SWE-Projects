@@ -15,7 +15,6 @@ class StoryState:
         self.background = pygame.image.load('assets/images/Levels/Level1_800x600.png')
         self.door_image = pygame.image.load("assets/images/Misc/door.png")
         self.lock_image = pygame.image.load("assets/images/Misc/lock_52x68.png")
-        # self.door_rect = pygame.Rect(720, 417, 68, 96)
         self.door_locked = True
 
         self.snd_tear_hit = pygame.mixer.Sound('assets/sounds/tear_hit.ogg')
@@ -74,9 +73,14 @@ class StoryState:
 
     def draw(self, surface):
         surface.blit(self.scaled_bg, (0, 0))
+        
         game_map.draw_map(surface, self.map, self.tile_size, 0)
-        surface.blit(self.door_image, (self.door.x, self.door.y))
-        if self.door_locked: surface.blit(self.lock_image, (self.door.x, self.door.y))
+        
+        surface.blit(self.door_image, self.door.topleft)
+        
+        if self.door_locked:
+            surface.blit(self.lock_image, self.door.topleft)
+        
         self.player.draw(surface)
         
         # self.enemy.draw(surface)
@@ -91,15 +95,18 @@ class StoryState:
         door_position = game_map.get_tile_position(self.map, "goal", self.tile_size, False)
         
         self.player = Player(player_position[0], player_position[1], 34 * 3, 34 * 3)
+        self.map[player_position[3]][player_position[2]] = None
         
         self.enemy_list = []
         for enemy_position in enemy_positions:
             self.enemy_list.append(Enemy(enemy_position[0], enemy_position[1], 75, 110))
         
-            self.map[player_position[3]][player_position[2]] = None
             self.map[enemy_position[3]][enemy_position[2]] = None
         
-        self.door = pygame.Rect(door_position[0], door_position[1], 68, 96)
+        self.door = pygame.Rect(door_position[0], door_position[1], self.tile_size, self.tile_size)
+        self.map[door_position[3]][door_position[2]] = None
+        self.door_image = pygame.transform.smoothscale(self.door_image, (self.tile_size, self.tile_size))
+        self.lock_image = pygame.transform.smoothscale(self.lock_image, (self.tile_size, self.tile_size))
 
         self._play_level_music()
 
