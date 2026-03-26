@@ -36,27 +36,36 @@ class StoryState:
 
         # Update Movement and Map Collisions
         self.player.update(self.map, self.tile_size)
-        self.enemy.update(self.map, self.tile_size)
+        # self.enemy.update(self.map, self.tile_size)
 
-        # Combat Collision
-        if self.player.rect.colliderect(self.enemy.rect):
-            if self.player.can_damage():
-                self.enemy.take_damage(1)
-                self.snd_damage.play()
-            self.player.take_damage(1)
+        for enemy in self.enemy_list:
+            enemy.update(self.map, self.tile_size)
 
-        # Tear Collision
-        for tear in self.player.tears[:]:
-            if tear['rect'].colliderect(self.enemy.rect):
-                self.enemy.take_damage(1)
-                self.snd_tear_hit.play()
-                self.player.tears.remove(tear)
+            # Combat Collision
+            # if self.player.rect.colliderect(self.enemy.rect):
+            if self.player.rect.colliderect(enemy.rect):
+                if self.player.can_damage():
+                    enemy.take_damage(1)
+                    self.snd_damage.play()
+                self.player.take_damage(1)
+
+            # Tear Collision
+            for tear in self.player.tears[:]:
+                if tear['rect'].colliderect(enemy.rect):
+                    enemy.take_damage(1)
+                    self.snd_tear_hit.play()
+                    self.player.tears.remove(tear)
+
+            if not enemy.is_alive():
+                self.enemy_list.remove(enemy)
 
         if not self.player.is_alive():
             self.__init__(self.state_machine)
             self.state_machine.transition('menu')
 
-        self.door_locked = self.enemy.is_alive()
+        # self.door_locked = self.enemy.is_alive()
+        self.door_locked = len(self.enemy_list) > 0
+
         if not self.door_locked and self.player.rect.colliderect(self.door_rect):
             self.__init__(self.state_machine)
             self.state_machine.transition('menu')
@@ -69,19 +78,29 @@ class StoryState:
         surface.blit(self.door, (720, 417))
         if self.door_locked: surface.blit(self.lock, (727, 437))
         self.player.draw(surface)
-        self.enemy.draw(surface)
+        
+        # self.enemy.draw(surface)
+        for enemy in self.enemy_list:
+            enemy.draw(surface)
         
     def enter(self):
         self.setup_ui()
         self.map = game_map.load_map(self.current_level, "story")
-        p_pos = game_map.get_tile_position(self.map, "player", self.tile_size)
-        e_pos = game_map.get_tile_position(self.map, "carrot", self.tile_size)
+        player_position = game_map.get_tile_position(self.map, "player", self.tile_size, False)
+        # enemy_position = game_map.get_tile_position(self.map, "carrot", self.tile_size)
         
-        self.player = Player(p_pos[0], p_pos[1], 34 * 3, 34 * 3)
-        self.enemy = Enemy(e_pos[0], e_pos[1], 75, 110)
+        enemy_positions = game_map.get_tile_position(self.map, "carrot", self.tile_size, True)
         
-        self.map[p_pos[3]][p_pos[2]] = None 
-        self.map[e_pos[3]][e_pos[2]] = None 
+        self.player = Player(player_position[0], player_position[1], 34 * 3, 34 * 3)
+        
+        self.enemy_list = []
+        for enemy_position in enemy_positions:
+            # self.enemy = Enemy(enemy_position[0], enemy_position[1], 75, 110)
+            self.enemy_list.append(Enemy(enemy_position[0], enemy_position[1], 75, 110))
+        
+            self.map[player_position[3]][player_position[2]] = None
+            self.map[enemy_position[3]][enemy_position[2]] = None
+
         self._play_level_music()
 
     def _play_level_music(self):
