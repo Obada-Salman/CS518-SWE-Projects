@@ -7,6 +7,7 @@ from StoryState import StoryState
 from SettingsState import SettingsState
 from LevelSelect import LevelSelectState
 from LevelbuilderState import LevelBuilderState
+from PauseState import PauseState
 
 
 
@@ -23,6 +24,7 @@ def main():
     state_manager.add_state('level_select',LevelSelectState('level_select', state_manager))
     state_manager.add_state('settings', SettingsState(state_manager))
     state_manager.add_state('level_builder', LevelBuilderState(state_manager))
+    state_manager.add_state('pause', PauseState('pause', state_manager))
     
     state_manager.transition('menu')
     

@@ -13,6 +13,7 @@ class StateManager:
         self.window_height = 600
         self.sound_manager = SoundManager()
         self.score_tracker = ScoreTracker()
+        self.max_unlocked_level = 1
         self.state_music = {
             'menu': 'menu_theme.ogg',
             'level_select': 'menu_theme.ogg',
@@ -23,6 +24,7 @@ class StateManager:
     
     def transition(self ,name):
         if(name in self.states):
+            previous_state_name = self.current_state_name
         # If in the future we want to add additional things when entering and leaving states, we can add them here.
         # Can only be done if they have leave and enter functions.
             if self.current_state and hasattr(self.current_state, 'leave'):
@@ -30,7 +32,8 @@ class StateManager:
             self.current_state = self.states[name]
             self.current_state_name = name
             if hasattr(self.current_state, 'enter'):
-                self.current_state.enter()
+                if not (name == 'story' and previous_state_name == 'pause'):
+                    self.current_state.enter()
             self._play_state_music(name)
         return
 

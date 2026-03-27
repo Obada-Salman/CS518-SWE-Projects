@@ -31,29 +31,31 @@ class LevelSelectState:
         total_empty_space = self.screen_width - total_button_width
         btn_spacing = total_empty_space // (num_buttons + 1)
         button_y = (self.screen_height // 3) - (btn_height // 2)
-        
-        
         button_x = (self.screen_width // 5) - int(150 * scale)
+        
+        max_level = getattr(self.state_machine, 'max_unlocked_level', 1)
+        GRAY = (150, 150, 150)
        
         
-        self.btn_1 = Button(btn_spacing, button_y, btn_width, btn_height, "1", btn_font, BLACK, WHITE)
-        self.btn_2 = Button(btn_spacing + 1 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "2", btn_font, BLACK, WHITE)
-        self.btn_3 = Button(btn_spacing + 2 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "3", btn_font, BLACK, WHITE)
-        self.btn_4 = Button(btn_spacing + 3 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "4", btn_font, BLACK, WHITE)
-        self.btn_5 = Button(btn_spacing + 4 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "5", btn_font, BLACK, WHITE)
+        self.btn_1 = Button(btn_spacing, button_y, btn_width, btn_height, "1", btn_font, BLACK if max_level >= 1 else GRAY, WHITE)
+        self.btn_2 = Button(btn_spacing + 1 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "2", btn_font, BLACK if max_level >= 2 else GRAY, WHITE)
+        self.btn_3 = Button(btn_spacing + 2 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "3", btn_font, BLACK if max_level >= 3 else GRAY, WHITE)
+        self.btn_4 = Button(btn_spacing + 3 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "4", btn_font, BLACK if max_level >= 4 else GRAY, WHITE)
+        self.btn_5 = Button(btn_spacing + 4 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "5", btn_font, BLACK if max_level >= 5 else GRAY, WHITE)
         self.btn_back = Button(self.screen_width - btn_width - 10, self.screen_height - int(50 * scale) - 10, btn_width, 50 * scale, "Back", btn_font, BLACK, WHITE)
         
     def update(self, events):
+        max_level = getattr(self.state_machine, 'max_unlocked_level', 1)
         for event in events:
-            if self.btn_1.is_clicked(event):
+            if self.btn_1.is_clicked(event) and max_level >= 1:
                 self._start_level(1)
-            elif self.btn_2.is_clicked(event):
+            elif self.btn_2.is_clicked(event) and max_level >= 2:
                 self._start_level(2)
-            elif self.btn_3.is_clicked(event):
+            elif self.btn_3.is_clicked(event) and max_level >= 3:
                 self._start_level(3)
-            elif self.btn_4.is_clicked(event):
+            elif self.btn_4.is_clicked(event) and max_level >= 4:
                 self._start_level(4)
-            elif self.btn_5.is_clicked(event):
+            elif self.btn_5.is_clicked(event) and max_level >= 5:
                 self._start_level(5)
             elif self.btn_back.is_clicked(event):
                 self.state_machine.transition('menu')

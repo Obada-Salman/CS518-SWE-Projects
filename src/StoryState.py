@@ -41,7 +41,7 @@ class StoryState:
     def update(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.state_machine.transition('menu')
+                self.state_machine.transition('pause')
             elif event.type == pygame.VIDEORESIZE:
                 self.setup_ui()
 
@@ -68,8 +68,15 @@ class StoryState:
 
         if not self.door_locked:
             if self.check_collision(self.player.rect, self.door_rect):
-                self.__init__(self.state_machine)
-                self.state_machine.transition('menu')
+                if self.current_level == self.state_machine.max_unlocked_level and self.current_level < 5:
+                    self.state_machine.max_unlocked_level += 1
+                if self.current_level < 5:
+                    self.leave()
+                    self.current_level += 1
+                    self.enter() 
+                else:
+                    self.leave()
+                    self.state_machine.transition('level_select')
 
         self.player.update()
         self.enemy.update()
@@ -106,6 +113,11 @@ class StoryState:
 
         player_position = game_map.get_tile_position(self.map, "player", self.tile_size)
         carrot_position = game_map.get_tile_position(self.map, "carrot", self.tile_size)
+        
+        if player_position is None or carrot_position is None:
+            print(f"Error: Map for level {self.current_level} isnt integrated properly. Missing player or carrot position. Returning to level select.")
+            self.state_machine.transition('level_select')
+            return
         
         self.player = Player(player_position[0], player_position[1], 34 * 3, 34 * 3)
         self.map[player_position[3]][player_position[2]] = None # Remove from map to prevent collisons werid collisions
