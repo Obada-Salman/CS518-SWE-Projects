@@ -64,10 +64,19 @@ def check_tile(tile_map, tile_type):
 
     return False
 
-def get_tile_position(tile_map, tile_type, tile_size):
+def get_tile_position(tile_map, tile_type, tile_size, find_all=False):
+    results = []
+    
     for row in tile_map:
             for tile in row:
                 if tile and tile.type == tile_type:
-                    # Returns (x, y) pixel coordinates
-                    return (tile.position[0] * tile_size, tile.position[1] * tile_size, tile.position[0], tile.position[1])
-    return None
+                    
+                    # Returns (x, y, tile_size_x, tile_size_y) pixel coordinates
+                    positions = (tile.position[0] * tile_size, tile.position[1] * tile_size, tile.position[0], tile.position[1])
+
+                    if not find_all:
+                        return positions
+                    
+                    results.append(positions)
+
+    return results if find_all else None

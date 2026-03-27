@@ -1,7 +1,6 @@
 import pygame
 from SpriteHandler import *
 from settings import *
-from configs import *
 
 class Player:
     def __init__(self, x, y, width, height):
@@ -9,31 +8,28 @@ class Player:
         self.y = float(y)
         self.width = width
         self.height = height
-        # self.screen_width = BASE_WIDTH 
-        # self.screen_height = BASE_HEIGHT - 80
+        self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
+        
         self.speed = 5
         self.health = 5
-
         self.vx = 0.0
         self.vy = 0.0
-        self.gravity = 0.6
+        self.gravity = 0.8  # Slightly increased for snappier feel
         self.jump_strength = -16.0
         self.on_ground = False
 
-        self.direction = 1  # Right = 1, Left = 0
-        self.state = 0      # Idle = 0, Walk = 1, Jump/Fall = 2
+        self.direction = 1 
+        self.state = 0 
         self.invincible = False
         self.time_since_hit = 0
         self.visible = True
-        self.invincibility_time = 2000 # milliseconds
+        self.invincibility_time = 2000
 
         self.sprites = SpriteHandler("assets/images/Characters/Onion_34x34.png", type='player', scale=3, anim_time=7)
         self.tear = pygame.image.load("assets/images/Misc/tear_34x34.png")
         self.health_image = pygame.image.load('assets/images/Misc/health_50x50.png')
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.tear_rect = self.tear.get_rect()
-        self.tears = [] # list to hold active tears
-        self.x_pressed_last_frame = False  # used so that holding down X doesn't shoot tears every frame
+        self.tears = [] 
+        self.x_pressed_last_frame = False 
 
         self.snd_tear_shoot = pygame.mixer.Sound('assets/sounds/tear_shoot.ogg')
         self.snd_jump = pygame.mixer.Sound('assets/sounds/jump.ogg')
@@ -44,91 +40,97 @@ class Player:
         if key[pygame.K_LEFT]:
             self.vx = -self.speed
             self.direction = 0
-            if self.on_ground:
-                self.state = 1
-            else:
-                self.state = 2
         elif key[pygame.K_RIGHT]:
             self.vx = self.speed
             self.direction = 1
-            if self.on_ground:
-                self.state = 1
-            else:
-                self.state = 2
-        else:
-            if self.on_ground:
-                self.state = 0
 
         if (key[pygame.K_UP] or key[pygame.K_SPACE]) and self.on_ground:
             self.vy = self.jump_strength
             self.on_ground = False
-            self.state = 2
             self.snd_jump.play()
 
-        # shoot tear only on X press, not hold
         x_pressed_now = key[pygame.K_x]
         if x_pressed_now and not self.x_pressed_last_frame:
             self.shoot_tear()
         self.x_pressed_last_frame = x_pressed_now
 
-    # def apply_physics(self):
-    #     self.x += self.vx
-    #     self.vy += self.gravity
-    #     self.y += self.vy
-
-        # floor = self.screen_height - self.height
-        # if self.y >= floor:
-        #     self.y = floor
-        #     self.vy = 0.0
-        #     self.on_ground = True
-
-        # if self.x < 0:
-        #     self.x = 0
-        # if self.x + self.width > self.screen_width:
-        #     self.x = self.screen_width - self.width
-
     def shoot_tear(self):
-        self.tear_rect = self.tear.get_rect(center=self.rect.center)
-        self.tears.append({'rect': self.tear_rect, 'direction': self.direction, 'speed': 10})
+        tear_rect = self.tear.get_rect(center=self.rect.center)
+        self.tears.append({'rect': tear_rect, 'direction': self.direction, 'speed': 10})
         self.snd_tear_shoot.play()
 
-    def update(self):
+    def check_map_collision(self, game_map, tile_size, axis):
+        # Calculate exactly which tiles we are overlapping
+        start_col = int(self.rect.left // tile_size)
+        end_col = int(self.rect.right // tile_size)
+        start_row = int(self.rect.top // tile_size)
+        end_row = int(self.rect.bottom // tile_size)
+
+        for row in range(start_row, end_row + 1):
+            for col in range(start_col, end_col + 1):
+                if 0 <= row < len(game_map) and 0 <= col < len(game_map[0]):
+                    tile = game_map[row][col]
+                    if tile and tile.collision:
+                        tile_rect = pygame.Rect(col * tile_size, row * tile_size, tile_size, tile_size)
+                        if self.rect.colliderect(tile_rect):
+                            if axis == 'x':
+                                if self.vx > 0: 
+                                    self.rect.right = tile_rect.left
+                                    self.x = float(self.rect.x)
+                                elif self.vx < 0: 
+                                    self.rect.left = tile_rect.right
+                                    self.x = float(self.rect.x)
+                            elif axis == 'y':
+                                if self.vy > 0: # Falling
+                                    self.rect.bottom = tile_rect.top
+                                    self.y = float(self.rect.y)
+                                    self.vy = 0
+                                    self.on_ground = True
+                                elif self.vy < 0: # Jumping
+                                    self.rect.top = tile_rect.bottom
+                                    self.y = float(self.rect.y)
+                                    self.vy = 0
+
+    def update(self, game_map, tile_size):
         self.handle_input()
 
-        # self.apply_physics()
+        # 1. Move X
         self.x += self.vx
+        self.rect.x = int(round(self.x))
+        self.check_map_collision(game_map, tile_size, 'x')
+
+        # 2. Move Y
         self.vy += self.gravity
-        self.y += self.vy
-
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        # Terminal velocity check to prevent "teleporting" through thin floors
+        if self.vy > 14: self.vy = 14
         
-        for tear in self.tears:
-            if tear['direction'] == 1:
-                tear['rect'].x += tear['speed']
-            else:
-                tear['rect'].x -= tear['speed']
+        self.y += self.vy
+        self.rect.y = int(round(self.y))
+        self.on_ground = False 
+        self.check_map_collision(game_map, tile_size, 'y')
 
-            # if tear['rect'].right < 0 or tear['rect'].left > self.screen_width:
-            #     self.tears.remove(tear)
+        # Cleanup: sync tears and invincibility
+        for tear in self.tears[:]:
+            tear['rect'].x += tear['speed'] if tear['direction'] == 1 else -tear['speed']
 
         if self.invincible:
             now = pygame.time.get_ticks()
             if now - self.time_since_hit < self.invincibility_time:
                 self.visible = not self.visible
             else:
-                self.visible = True
-                self.invincible = False
+                self.visible, self.invincible = True, False
 
+        # Animation states
+        if not self.on_ground: self.state = 2
+        elif self.vx != 0: self.state = 1
+        else: self.state = 0
         self.sprites.update(self.direction, self.state)
 
     def take_damage(self, amount):
-        now = pygame.time.get_ticks()
         if not self.invincible:
             self.health -= amount
             self.invincible = True
-            self.time_since_hit = now
-        elif now - self.time_since_hit > self.invincibility_time:
-            self.invincible = False
+            self.time_since_hit = pygame.time.get_ticks()
 
     def can_damage(self):
         return not self.invincible
@@ -138,7 +140,8 @@ class Player:
 
     def draw(self, surface):
         if self.visible:
-            self.sprites.draw(surface, int(self.x), int(self.y))
+            self.sprites.draw(surface, self.rect.x, self.rect.y)
+        
         for tear in self.tears:
             surface.blit(self.tear, tear['rect'])
         surface.blit(self.health_image, (10, 10))
