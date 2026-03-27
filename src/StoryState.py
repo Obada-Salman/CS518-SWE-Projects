@@ -65,17 +65,11 @@ class StoryState:
         # self.door_locked = self.enemy.is_alive()
         self.door_locked = len(self.enemy_list) > 0
 
-        if not self.door_locked:
-            if self.check_collision(self.player.rect, self.door_rect):
-                if self.current_level == self.state_machine.max_unlocked_level and self.current_level < 5:
-                    self.state_machine.max_unlocked_level += 1
-                if self.current_level < 5:
-                    self.leave()
-                    self.current_level += 1
-                    self.enter() 
-                else:
-                    self.leave()
-                    self.state_machine.transition('level_select')
+        if not self.door_locked and self.player.rect.colliderect(self.door):
+            if self.current_level == self.state_machine.max_unlocked_level and self.current_level < 5:
+                self.state_machine.max_unlocked_level += 1
+                self.leave()
+                self.state_machine.transition('level_select')
 
         self.score_tracker.tick()
 
@@ -102,8 +96,9 @@ class StoryState:
         enemy_positions = game_map.get_tile_position(self.map, "carrot", self.tile_size, True)
         door_position = game_map.get_tile_position(self.map, "goal", self.tile_size, False)
         
-        if player_position is None or carrot_position is None:
-            print(f"Error: Map for level {self.current_level} isnt integrated properly. Missing player or carrot position. Returning to level select.")
+        if player_position is None or door_position is None:
+            print(f"ERROR: Level {self.current_level} is missing a player spawn or a goal")
+            # Fallback: sends user back to level select instead of crashing
             self.state_machine.transition('level_select')
             return
         
@@ -122,6 +117,9 @@ class StoryState:
         self.lock_image = pygame.transform.smoothscale(self.lock_image, (self.tile_size, self.tile_size))
 
         self._play_level_music()
+
+    def leave(self):
+        pass
 
     def _play_level_music(self):
         track = self.level_music.get(self.current_level)
