@@ -19,6 +19,7 @@ class StoryState:
 
         self.snd_tear_hit = pygame.mixer.Sound('assets/sounds/tear_hit.ogg')
         self.snd_damage = pygame.mixer.Sound('assets/sounds/damage.ogg')
+        self.level_cleared = False
         
     def setup_ui(self):    
         surface = pygame.display.get_surface()
@@ -68,8 +69,13 @@ class StoryState:
         if not self.door_locked and self.player.rect.colliderect(self.door):
             if self.current_level == self.state_machine.max_unlocked_level and self.current_level < 5:
                 self.state_machine.max_unlocked_level += 1
+                self.level_cleared = True
                 self.leave()
-                self.state_machine.transition('level_select')
+                self.current_level += 1
+                self.level_cleared = False
+                if self.state_machine.current_state == 'story' and hasattr(self.state_machine.current_state, 'set_level'):
+                    self.state_machine.current_state.set_level(self.current_level)
+                self.enter()
 
         self.score_tracker.tick()
 
@@ -118,8 +124,16 @@ class StoryState:
 
         self._play_level_music()
 
+    def set_level(self, level_number):
+        self.current_level = level_number
+        
     def leave(self):
-        pass
+        if hasattr(self, 'score_tracker'):
+            self.score_tracker.submit_current_level()
+        if self.level_cleared:
+            print(f"Finished Level {self.current_level}")
+        else:
+            print(f"Exited Level {self.current_level}")
 
     def _play_level_music(self):
         track = self.level_music.get(self.current_level)
