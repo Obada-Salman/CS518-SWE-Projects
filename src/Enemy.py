@@ -3,21 +3,40 @@ from settings import *
 from SpriteHandler import SpriteHandler
 
 class Enemy:
-    def __init__(self, x, y, width, height, type='enemy_carrot', speed=3):
+    ENEMY_TYPES = {
+        'enemy_carrot': {
+            'speed': 3,
+            'health': 8,
+            'sprite': 'assets/images/Characters/Carrot_75x110.png'
+        },
+        'enemy_potato': {
+            'speed': 2,
+            'health': 5,
+            'sprite': 'assets/images/Characters/Potato_83x94.png'
+        }
+    }
+
+    def __init__(self, x, y, width, height, type='enemy_carrot', speed=None):
         self.x = float(x)
         self.y = float(y)
         self.width = width
         self.height = height
         self.type = type
-        self.speed = speed
-        self.health = 8
+        
+        enemy_config = self.ENEMY_TYPES.get(type, self.ENEMY_TYPES['enemy_carrot'])
+        
+        self.speed = speed if speed is not None else enemy_config['speed']
+        self.health = enemy_config['health']
+        self.max_health = self.health
+        sprite_path = enemy_config['sprite']
+        
         self.vx = -self.speed
         self.vy = 0.0
         self.gravity = 0.8
         self.on_ground = False
         self.direction = 0 
         self.state = 1 
-        self.sprites = SpriteHandler("assets/images/Characters/Carrot_75x110.png", type=self.type)
+        self.sprites = SpriteHandler(sprite_path, type=self.type)
         self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
 
     def check_map_collision(self, game_map, tile_size, axis):

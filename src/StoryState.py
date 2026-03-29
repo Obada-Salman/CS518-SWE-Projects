@@ -99,7 +99,8 @@ class StoryState:
         self.setup_ui()
         self.map = game_map.load_map(self.current_level, "story")
         player_position = game_map.get_tile_position(self.map, "player", self.tile_size, False)        
-        enemy_positions = game_map.get_tile_position(self.map, "carrot", self.tile_size, True)
+        carrot_positions = game_map.get_tile_position(self.map, "carrot", self.tile_size, True)
+        potato_positions = game_map.get_tile_position(self.map, "potato", self.tile_size, True)
         door_position = game_map.get_tile_position(self.map, "goal", self.tile_size, False)
         
         if player_position is None or door_position is None:
@@ -112,9 +113,14 @@ class StoryState:
         self.map[player_position[3]][player_position[2]] = None
         
         self.enemy_list = []
-        for enemy_position in enemy_positions:
-            self.enemy_list.append(Enemy(enemy_position[0], enemy_position[1], 75, 110))
+        # Add carrots
+        for enemy_position in carrot_positions:
+            self.enemy_list.append(Enemy(enemy_position[0], enemy_position[1], 75, 110, type='enemy_carrot'))
+            self.map[enemy_position[3]][enemy_position[2]] = None
         
+        # Add potatoes
+        for enemy_position in potato_positions:
+            self.enemy_list.append(Enemy(enemy_position[0], enemy_position[1], 83, 94, type='enemy_potato'))
             self.map[enemy_position[3]][enemy_position[2]] = None
         
         self.door = pygame.Rect(door_position[0], door_position[1], self.tile_size, self.tile_size)
