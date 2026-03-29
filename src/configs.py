@@ -27,5 +27,20 @@ CONFIGS = {
             "walk_right": [1, 2, 4],
             "jump_right": [2]
         }
+    },
+
+    "enemy_potato": {
+        "frame_width": 83,
+        "frame_height": 94,
+        "rows": 1,
+        "cols": 6,
+        "animations": {
+            "idle_left": [0],
+            "walk_left": [0, 3, 5],
+            "jump_left": [3],
+            "idle_right": [1],
+            "walk_right": [1, 2, 4],
+            "jump_right": [2]
+        }
     }
 }
