@@ -17,6 +17,7 @@ class Player:
         self.gravity = 0.8  # Slightly increased for snappier feel
         self.jump_strength = -16.0
         self.on_ground = False
+        self.moving = False
 
         self.direction = 1 
         self.state = 0 
@@ -34,15 +35,22 @@ class Player:
         self.snd_tear_shoot = pygame.mixer.Sound('assets/sounds/tear_shoot.ogg')
         self.snd_jump = pygame.mixer.Sound('assets/sounds/jump.ogg')
 
+        self.mask = pygame.mask.from_surface(self.sprites.get_current_frame())
+
     def handle_input(self):
         key = pygame.key.get_pressed()
+        
         self.vx = 0.0
+        self.moving = False
+
         if key[pygame.K_LEFT]:
             self.vx = -self.speed
             self.direction = 0
+            self.moving = True
         elif key[pygame.K_RIGHT]:
             self.vx = self.speed
             self.direction = 1
+            self.moving = True
 
         if (key[pygame.K_UP] or key[pygame.K_SPACE]) and self.on_ground:
             self.vy = self.jump_strength
@@ -55,58 +63,34 @@ class Player:
         self.x_pressed_last_frame = x_pressed_now
 
     def shoot_tear(self):
+        tear_surface = self.tear
         tear_rect = self.tear.get_rect(center=self.rect.center)
-        self.tears.append({'rect': tear_rect, 'direction': self.direction, 'speed': 10})
+        tear_mask = pygame.mask.from_surface(tear_surface)
+
+        self.tears.append({'rect': tear_rect, 'direction': self.direction, 'speed': 10, 'mask': tear_mask})
         self.snd_tear_shoot.play()
 
-    def check_map_collision(self, game_map, tile_size, axis):
-        # Calculate exactly which tiles we are overlapping
-        start_col = int(self.rect.left // tile_size)
-        end_col = int(self.rect.right // tile_size)
-        start_row = int(self.rect.top // tile_size)
-        end_row = int(self.rect.bottom // tile_size)
-
-        for row in range(start_row, end_row + 1):
-            for col in range(start_col, end_col + 1):
-                if 0 <= row < len(game_map) and 0 <= col < len(game_map[0]):
-                    tile = game_map[row][col]
-                    if tile and tile.collision:
-                        tile_rect = pygame.Rect(col * tile_size, row * tile_size, tile_size, tile_size)
-                        if self.rect.colliderect(tile_rect):
-                            if axis == 'x':
-                                if self.vx > 0: 
-                                    self.rect.right = tile_rect.left
-                                    self.x = float(self.rect.x)
-                                elif self.vx < 0: 
-                                    self.rect.left = tile_rect.right
-                                    self.x = float(self.rect.x)
-                            elif axis == 'y':
-                                if self.vy > 0: # Falling
-                                    self.rect.bottom = tile_rect.top
-                                    self.y = float(self.rect.y)
-                                    self.vy = 0
-                                    self.on_ground = True
-                                elif self.vy < 0: # Jumping
-                                    self.rect.top = tile_rect.bottom
-                                    self.y = float(self.rect.y)
-                                    self.vy = 0
 
     def update(self, game_map, tile_size):
         self.handle_input()
+        self.on_ground = False
 
-        # 1. Move X
+        # Move X
         self.x += self.vx
-        self.rect.x = int(round(self.x))
+        self.rect.x = int(self.x)
         self.check_map_collision(game_map, tile_size, 'x')
 
-        # 2. Move Y
-        self.vy += self.gravity
-        # Terminal velocity check to prevent "teleporting" through thin floors
-        if self.vy > 14: self.vy = 14
+        # Move Y
+        if not self.on_ground:
+            self.vy += self.gravity
+            if self.vy > 14:
+                self.vy = 14
+        else:
+            self.vy = 0
+        
         
         self.y += self.vy
-        self.rect.y = int(round(self.y))
-        self.on_ground = False 
+        self.rect.y = int(self.y)
         self.check_map_collision(game_map, tile_size, 'y')
 
         # Cleanup: sync tears and invincibility
@@ -121,10 +105,17 @@ class Player:
                 self.visible, self.invincible = True, False
 
         # Animation states
-        if not self.on_ground: self.state = 2
-        elif self.vx != 0: self.state = 1
-        else: self.state = 0
+        if not self.on_ground:
+            self.state = 2
+        elif self.moving and abs(self.vx) > 0.1:
+            self.state = 1
+        else:
+            self.state = 0
+
         self.sprites.update(self.direction, self.state)
+        
+        current_frame = self.sprites.get_current_frame()
+        self.mask = pygame.mask.from_surface(current_frame)
 
     def take_damage(self, amount):
         if not self.invincible:
@@ -146,3 +137,57 @@ class Player:
             surface.blit(self.tear, tear['rect'])
         surface.blit(self.health_image, (10, 10))
         surface.blit(pygame.font.SysFont(None, 40).render(f"x {self.health}", True, (255, 255, 255)), (60, 20))
+    
+    def check_map_collision(self, game_map, tile_size, axis):
+        # Calculate exactly which tiles we are overlapping
+        start_col = int(self.rect.left // tile_size)
+        end_col = int((self.rect.right - 1) // tile_size)
+        start_row = int(self.rect.top // tile_size)
+        end_row = int((self.rect.bottom - 1) // tile_size)
+       
+        for row in range(start_row, end_row + 1):
+            for col in range(start_col, end_col + 1):
+                if 0 <= row < len(game_map) and 0 <= col < len(game_map[0]):
+                    tile = game_map[row][col]
+                    if tile and tile.collision:
+                        
+                        tile_rect = pygame.Rect(col * tile_size, row * tile_size, tile_size, tile_size)                        
+                        tile_mask = pygame.mask.Mask((tile_size, tile_size), fill=True)
+                        offset_x = tile_rect.x - self.rect.x
+                        offset_y = tile_rect.y - self.rect.y
+
+                        if self.mask.overlap(tile_mask, (offset_x, offset_y)):
+                            if axis == 'x':
+                                if self.vx > 0:  # moving right
+                                    while self.mask.overlap(tile_mask, (offset_x, offset_y)):
+                                        self.rect.x -= 1
+                                        self.x = float(self.rect.x)
+                                        offset_x = tile_rect.x - self.rect.x
+
+                                elif self.vx < 0:  # moving left
+                                    while self.mask.overlap(tile_mask, (offset_x, offset_y)):
+                                        self.rect.x += 1
+                                        self.x = float(self.rect.x)
+                                        offset_x = tile_rect.x - self.rect.x
+
+                                self.vx = 0
+                                return
+
+                            elif axis == 'y':
+                                if self.vy > 0:  # falling
+                                    while self.mask.overlap(tile_mask, (offset_x, offset_y)):
+                                        self.rect.y -= 1
+                                        self.y = float(self.rect.y)
+                                        offset_y = tile_rect.y - self.rect.y
+                                    
+                                    self.on_ground = True
+                                
+                                elif self.vy < 0:
+                                    while self.mask.overlap(tile_mask, (offset_x, offset_y)):
+                                        self.rect.y += 1
+                                        self.y = float(self.rect.y)
+                                        offset_y = tile_rect.y - self.rect.y
+                            
+                                self.vy = 0
+
+                            return

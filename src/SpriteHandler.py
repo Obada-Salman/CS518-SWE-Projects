@@ -64,6 +64,14 @@ class SpriteHandler:
                 return [frames[i] for i in jump_right_anim]
         # fallback to full list
         return frames
+    
+    def get_current_frame(self):
+        frames = self.get_current_frames()
+        
+        if not frames:
+            return None
+        
+        return frames[self.frame_idx]
 
     def update(self, direction=None, state=None):
         if direction is not None:
@@ -76,6 +84,7 @@ class SpriteHandler:
             self.state = state
 
         frames = self.get_current_frames()
+
         self.anim_counter += 1
         if self.anim_counter >= self.anim_speed:
             self.anim_counter = 0

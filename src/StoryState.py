@@ -43,7 +43,8 @@ class StoryState:
 
             # Combat Collision
             # if self.player.rect.colliderect(self.enemy.rect):
-            if self.player.rect.colliderect(enemy.rect):
+            # if self.player.rect.colliderect(enemy.rect):
+            if self.mask_collision(self.player, enemy):
                 if self.player.can_damage():
                     enemy.take_damage(1)
                     self.snd_damage.play()
@@ -51,11 +52,15 @@ class StoryState:
 
             # Tear Collision
             for tear in self.player.tears[:]:
-                if tear['rect'].colliderect(enemy.rect):
+                # if tear['rect'].colliderect(enemy.rect):
+                tear_offset_x = enemy.rect.x - tear['rect'].x
+                tear_offset_y = enemy.rect.y - tear['rect'].y
+                
+                if tear['mask'].overlap(enemy.mask, (tear_offset_x, tear_offset_y)):
                     enemy.take_damage(1)
                     self.snd_tear_hit.play()
                     self.player.tears.remove(tear)
-
+                
             if not enemy.is_alive():
                 self.enemy_list.remove(enemy)
 
@@ -139,3 +144,8 @@ class StoryState:
         track = self.level_music.get(self.current_level)
         if track and hasattr(self.state_machine, 'sound_manager'):
             self.state_machine.sound_manager.play_music_file(track)
+    
+    def mask_collision(self, object1, object2):
+        offset_x = object2.rect.x - object1.rect.x
+        offset_y = object2.rect.y - object1.rect.y
+        return object1.mask.overlap(object2.mask, (offset_x, offset_y))
