@@ -18,6 +18,29 @@ class StateManager:
             'menu': 'menu_theme.ogg',
             'level_select': 'menu_theme.ogg',
         }
+
+        # collectibles that save across levels
+        self.water_collected = 0
+        self.sunlight_collected = 0
+        self.nutrients_collected = 0
+
+    def get_water_collected(self):
+        return self.water_collected
+    
+    def get_sunlight_collected(self):
+        return self.sunlight_collected
+    
+    def get_nutrients_collected(self):
+        return self.nutrients_collected
+    
+    def add_water(self, amount):
+        self.water_collected += amount
+
+    def add_sunlight(self, amount):
+        self.sunlight_collected += amount
+
+    def add_nutrients(self, amount):
+        self.nutrients_collected += amount
     
     def add_state(self, name, state):
         self.states[name] = state
