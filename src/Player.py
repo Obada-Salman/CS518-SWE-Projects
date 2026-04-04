@@ -106,16 +106,17 @@ class Player:
 
         # Animation states
         if not self.on_ground:
-            self.state = 2
+            # self.state = 2
+            pass
         elif self.moving and abs(self.vx) > 0.1:
             self.state = 1
         else:
             self.state = 0
 
-        self.sprites.update(self.direction, self.state)
+        self.sprites.update(direction=self.direction, state=self.state)
         
-        current_frame = self.sprites.get_current_frame()
-        self.mask = pygame.mask.from_surface(current_frame)
+        # current_frame = self.sprites.get_current_frame()
+        # self.mask = pygame.mask.from_surface(current_frame)
 
     def take_damage(self, amount):
         if not self.invincible:

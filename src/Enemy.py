@@ -40,43 +40,6 @@ class Enemy:
         self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
         self.mask = pygame.mask.from_surface(self.sprites.get_current_frame())
 
-    def check_map_collision(self, game_map, tile_size, axis):
-        start_col = int(self.rect.left // tile_size)
-        end_col = int(self.rect.right // tile_size)
-        start_row = int(self.rect.top // tile_size)
-        end_row = int(self.rect.bottom // tile_size)
-
-        for row in range(start_row, end_row + 1):
-            for col in range(start_col, end_col + 1):
-                if 0 <= row < len(game_map) and 0 <= col < len(game_map[0]):
-                    tile = game_map[row][col]
-                    if tile and tile.collision:
-                        tile_rect = pygame.Rect(col * tile_size, row * tile_size, tile_size, tile_size)
-                        
-                        offset_x = tile_rect.x - self.rect.x
-                        offset_y = tile_rect.y - self.rect.y
-                        tile_mask = pygame.mask.Mask((tile_size, tile_size), fill=True)
-
-                        if self.mask.overlap(tile_mask, (offset_x, offset_y)):
-
-                            if axis == 'x':
-                                if self.vx > 0: self.rect.right = tile_rect.left
-                                else: self.rect.left = tile_rect.right
-                                self.x = float(self.rect.x)
-                                self.vx *= -1
-                                self.direction = 1 if self.vx > 0 else 0
-                                return # Exit after first wall hit to prevent double-bounce
-                            
-                            elif axis == 'y':
-                                if self.vy > 0:
-                                    self.rect.bottom = tile_rect.top
-                                    self.y = float(self.rect.y)
-                                    self.vy = 0
-                                    self.on_ground = True
-                                elif self.vy < 0:
-                                    self.rect.top = tile_rect.bottom
-                                    self.y = float(self.rect.y)
-                                    self.vy = 0
 
     def update(self, game_map, tile_size):
         # Move X
@@ -92,8 +55,8 @@ class Enemy:
         self.check_map_collision(game_map, tile_size, 'y')
         self.sprites.update(direction=self.direction, state=self.state)
 
-        current_frame = self.sprites.get_current_frame()
-        self.mask = pygame.mask.from_surface(current_frame)
+        # current_frame = self.sprites.get_current_frame()
+        # self.mask = pygame.mask.from_surface(current_frame)
         
         if self.health <= 0:
             self.x, self.y = -1000, -1000
@@ -108,3 +71,49 @@ class Enemy:
     
     def draw(self, surface):
         self.sprites.draw(surface, self.rect.x, self.rect.y)
+    
+    def check_map_collision(self, game_map, tile_size, axis):
+        # Calculate exactly which tiles we are overlapping
+        start_col = int(self.rect.left // tile_size)
+        end_col = int((self.rect.right - 1) // tile_size)
+        start_row = int(self.rect.top // tile_size)
+        end_row = int((self.rect.bottom - 1) // tile_size)
+
+        for row in range(start_row, end_row + 1):
+            for col in range(start_col, end_col + 1):
+                if 0 <= row < len(game_map) and 0 <= col < len(game_map[0]):
+                    tile = game_map[row][col]
+                    
+                    # Check if tile exists and has collision
+                    if tile and tile.collision:
+                        tile_rect = pygame.Rect(col * tile_size, row * tile_size, tile_size, tile_size)
+                        tile_mask = pygame.mask.Mask((tile_size, tile_size), fill=True)
+                        
+                        offset_x = tile_rect.x - self.rect.x
+                        offset_y = tile_rect.y - self.rect.y
+
+                        if self.mask.overlap(tile_mask, (offset_x, offset_y)):
+                            if axis == 'x':
+                                if self.mask.overlap(tile_mask, (offset_x, offset_y)):
+                                    self.vx *= -1
+                                    self.direction = 1 if self.vx > 0 else 0
+                                
+                                return
+
+                            elif axis == 'y':
+                                if self.vy > 0:  # Falling
+                                    while self.mask.overlap(tile_mask, (offset_x, offset_y)):
+                                        self.rect.y -= 1
+                                        self.y = float(self.rect.y)
+                                        offset_y = tile_rect.y - self.rect.y
+
+                                    self.on_ground = True
+                                
+                                elif self.vy < 0:  # Jumping/Up
+                                    while self.mask.overlap(tile_mask, (offset_x, offset_y)):
+                                        self.rect.y += 1
+                                        self.y = float(self.rect.y)
+                                        offset_y = tile_rect.y - self.rect.y
+                                
+                                self.vy = 0
+                                return
