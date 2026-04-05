@@ -15,6 +15,7 @@ if str(SRC_DIR) not in sys.path:
 
 from PauseState import PauseState
 from StoryState import StoryState
+from state_manager import StateManager
 
 
 class StoryPauseTransitionTests(unittest.TestCase):
@@ -43,6 +44,7 @@ class StoryPauseTransitionTests(unittest.TestCase):
         state.player.rect = pygame.Rect(0, 0, 20, 20)
         state.player.tears = []
         state.enemy_list = []
+        state.collectibles = []
         state.map = [[None]]
         state.tile_size = 1
         state.door = pygame.Rect(100, 100, 10, 10)
@@ -133,6 +135,44 @@ class PauseStateTests(unittest.TestCase):
 
         pause_state.setup_ui.assert_called_once()
         story_state.setup_ui.assert_called_once()
+
+
+class PauseCollectiblePersistenceTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        pygame.init()
+        pygame.display.set_mode((800, 600))
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    @patch("state_manager.ScoreTracker")
+    @patch("state_manager.SoundManager")
+    def test_pause_resume_does_not_reset_global_collectible_totals(
+        self, _mock_sound_manager_cls, _mock_score_tracker_cls
+    ):
+        state_machine = StateManager()
+        story_state = Mock()
+        state_machine.states = {"story": story_state}
+        state_machine.current_state_name = "pause"
+
+        state_machine.add_water(2)
+        state_machine.add_sunlight(3)
+        state_machine.add_nutrients(4)
+
+        pause_state = PauseState("pause", state_machine)
+        pause_state.btn_resume.is_clicked = Mock(return_value=False)
+        pause_state.btn_levels.is_clicked = Mock(return_value=False)
+        pause_state.btn_menu.is_clicked = Mock(return_value=False)
+
+        events = [pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_ESCAPE})]
+        pause_state.update(events)
+
+        self.assertEqual(state_machine.current_state_name, "story")
+        self.assertEqual(state_machine.get_water_collected(), 2)
+        self.assertEqual(state_machine.get_sunlight_collected(), 3)
+        self.assertEqual(state_machine.get_nutrients_collected(), 4)
 
 
 if __name__ == "__main__":
