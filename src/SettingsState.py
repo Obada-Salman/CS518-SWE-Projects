@@ -34,6 +34,14 @@ class SettingsState:
         self.btn_1920 = Button(button_x, button_y + btn_spacing * 2, btn_width, btn_height, "1920x1080", btn_font, BLACK, WHITE)
         self.btn_full = Button(button_x, button_y + btn_spacing * 3, btn_width, btn_height, "Fullscreen", btn_font, BLACK, WHITE)
         self.btn_back = Button(button_x, button_y + btn_spacing * 4, btn_width, btn_height, "Back", btn_font, BLACK, WHITE)
+        if self.state_machine.max_unlocked_level <= 2:
+            self.background = pygame.image.load('assets/images/Backgrounds/Menu1.png')
+        elif self.state_machine.max_unlocked_level <= 4:
+            self.background = pygame.image.load('assets/images/Backgrounds/Menu2.png')
+        else:
+            self.background = pygame.image.load('assets/images/Backgrounds/Menu3.png')
+            
+        self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
 
     def update(self, events):
         for event in events:
@@ -59,6 +67,7 @@ class SettingsState:
         
     def draw(self, surface):
         surface.fill(WHITE)
+        surface.blit(self.scaled_bg, (0, 0))
         
         title_scale = min(self.screen_width / self.BASE_WIDTH, self.screen_height / self.BASE_HEIGHT)
         title_font = pygame.font.Font(None, max(int(74 * title_scale), 20))

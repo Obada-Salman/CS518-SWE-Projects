@@ -44,6 +44,15 @@ class LevelSelectState:
         self.btn_5 = Button(btn_spacing + 4 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "5", btn_font, BLACK if max_level >= 5 else GRAY, WHITE)
         self.btn_back = Button(self.screen_width - btn_width - 10, self.screen_height - int(50 * scale) - 10, btn_width, 50 * scale, "Back", btn_font, BLACK, WHITE)
         
+        if self.state_machine.max_unlocked_level <= 2:
+            self.background = pygame.image.load('assets/images/Backgrounds/Menu1.png')
+        elif self.state_machine.max_unlocked_level <= 4:
+            self.background = pygame.image.load('assets/images/Backgrounds/Menu2.png')
+        else:
+            self.background = pygame.image.load('assets/images/Backgrounds/Menu3.png')
+            
+        self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
+        
     def update(self, events):
         max_level = getattr(self.state_machine, 'max_unlocked_level', 1)
         for event in events:
@@ -71,7 +80,7 @@ class LevelSelectState:
     
     def draw(self, surface):
         surface.fill(WHITE)
-        
+        surface.blit(self.scaled_bg, (0, 0))
         title_scale = min(self.screen_width / self.BASE_WIDTH, self.screen_height / self.BASE_HEIGHT)
         title_font = pygame.font.Font(None, max(int(74 * title_scale), 20))
         title = title_font.render("Stage Select", True, BLACK)

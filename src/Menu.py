@@ -37,6 +37,15 @@ class MainMenuState:
         self.level_bld = Button(button_x, button_y + btn_spacing * 3, btn_width, btn_height, "Level Builder", btn_font, BLACK, WHITE)
         self.quit = Button(button_x, button_y + btn_spacing * 4, btn_width, btn_height, "Quit", btn_font, RED, WHITE)
         
+        if self.state_machine.max_unlocked_level <= 2:
+            self.background = pygame.image.load('assets/images/Backgrounds/Menu1.png')
+        elif self.state_machine.max_unlocked_level <= 4:
+            self.background = pygame.image.load('assets/images/Backgrounds/Menu2.png')
+        else:
+            self.background = pygame.image.load('assets/images/Backgrounds/Menu3.png')
+            
+        self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
+        
     def update(self, events):
         for event in events:
             if self.story.is_clicked(event):
@@ -54,6 +63,7 @@ class MainMenuState:
                 
     def draw(self, surface):
         surface.fill(WHITE)
+        surface.blit(self.scaled_bg, (0, 0))
         title = pygame.font.Font(None, 74).render("Onions May Cry", True, BLACK)
         surface.blit(title, (self.screen_width//2 - title.get_width()//2, 50))
         self.story.draw(surface)
