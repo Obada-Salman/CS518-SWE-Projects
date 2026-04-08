@@ -130,12 +130,12 @@ class Player:
     def is_alive(self):
         return self.health > 0
 
-    def draw(self, surface):
+    def draw(self, surface, scroll):
         if self.visible:
-            self.sprites.draw(surface, self.rect.x, self.rect.y)
+            self.sprites.draw(surface, self.rect.x - scroll, self.rect.y)
         
         for tear in self.tears:
-            surface.blit(self.tear, tear['rect'])
+            surface.blit(self.tear, (tear['rect'].x - scroll, tear['rect'].y))
         surface.blit(self.health_image, (10, 10))
         surface.blit(pygame.font.SysFont(None, 40).render(f"x {self.health}", True, (255, 255, 255)), (60, 20))
     

@@ -71,8 +71,8 @@ class Enemy:
         return self.health > 0
     
     
-    def draw(self, surface):
-        self.sprites.draw(surface, self.rect.x, self.rect.y)
+    def draw(self, surface, scroll):
+        self.sprites.draw(surface, self.rect.x - scroll, self.rect.y)
     
     def check_map_collision(self, game_map, tile_size, axis):
         start_col = int(self.rect.left // tile_size)

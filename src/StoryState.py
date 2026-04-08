@@ -23,6 +23,7 @@ class StoryState:
         self.snd_tear_hit = pygame.mixer.Sound('assets/sounds/tear_hit.ogg')
         self.snd_damage = pygame.mixer.Sound('assets/sounds/damage.ogg')
         self.level_cleared = False
+        self.scroll = 0
         
     def setup_ui(self):    
         surface = pygame.display.get_surface()
@@ -39,6 +40,17 @@ class StoryState:
 
         # Update Movement and Map Collisions
         self.player.update(self.map, self.tile_size)
+
+        # Scroll with player movement
+        half_screen = self.screen_width // 2
+        self.scroll = self.player.rect.centerx - half_screen
+        map_width_px = len(self.map[0]) * self.tile_size
+
+        if self.scroll < 0:
+            self.scroll = 0
+        if self.scroll > map_width_px - self.screen_width:
+            self.scroll = map_width_px - self.screen_width
+
         # self.enemy.update(self.map, self.tile_size)
 
         for enemy in self.enemy_list:
@@ -104,23 +116,23 @@ class StoryState:
     def draw(self, surface):
         surface.blit(self.scaled_bg, (0, 0))
         
-        game_map.draw_map(surface, self.map, self.tile_size, 0)
+        game_map.draw_map(surface, self.map, self.tile_size, self.scroll)
         
-        surface.blit(self.door_image, self.door.topleft)
+        surface.blit(self.door_image, (self.door.x - self.scroll, self.door.y))
         
         if self.door_locked:
-            surface.blit(self.lock_image, self.door.topleft)
+            surface.blit(self.lock_image, (self.door.x - self.scroll, self.door.y))
         
-        self.player.draw(surface)
+        self.player.draw(surface, self.scroll)
         
         # self.enemy.draw(surface)
         for enemy in self.enemy_list:
-            enemy.draw(surface)
+            enemy.draw(surface, self.scroll)
 
         for c in self.collectibles:
             sprite = self.collectible_images[c['type']]
             offset_y = math.sin(pygame.time.get_ticks() * 0.007) * 10
-            center_x = c['rect'].centerx
+            center_x = c['rect'].centerx - self.scroll
             center_y = c['rect'].centery - 30 + offset_y
             sprite_rect = sprite.get_rect(center=(center_x, center_y))
             surface.blit(sprite, sprite_rect)
