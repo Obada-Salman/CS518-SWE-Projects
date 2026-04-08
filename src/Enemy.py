@@ -38,7 +38,9 @@ class Enemy:
         self.state = 1 
         self.sprites = SpriteHandler(sprite_path, type=self.type)
         self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
-        self.mask = pygame.mask.from_surface(self.sprites.get_current_frame())
+        self.mask_frame = self.sprites.get_current_frame()
+        self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)
+        self.mask = pygame.mask.from_surface(self.mask_frame)
 
 
     def update(self, game_map, tile_size):
@@ -73,7 +75,6 @@ class Enemy:
         self.sprites.draw(surface, self.rect.x, self.rect.y)
     
     def check_map_collision(self, game_map, tile_size, axis):
-        # Calculate exactly which tiles we are overlapping
         start_col = int(self.rect.left // tile_size)
         end_col = int((self.rect.right - 1) // tile_size)
         start_row = int(self.rect.top // tile_size)
@@ -84,7 +85,6 @@ class Enemy:
                 if 0 <= row < len(game_map) and 0 <= col < len(game_map[0]):
                     tile = game_map[row][col]
                     
-                    # Check if tile exists and has collision
                     if tile and tile.collision:
                         tile_rect = pygame.Rect(col * tile_size, row * tile_size, tile_size, tile_size)
                         tile_mask = pygame.mask.Mask((tile_size, tile_size), fill=True)
@@ -94,26 +94,27 @@ class Enemy:
 
                         if self.mask.overlap(tile_mask, (offset_x, offset_y)):
                             if axis == 'x':
-                                if self.mask.overlap(tile_mask, (offset_x, offset_y)):
-                                    self.vx *= -1
-                                    self.direction = 1 if self.vx > 0 else 0
+                                # When colliding on X, just flip velocity and stay there.
+                                # Don't adjust Y at all.
+                                self.vx *= -1
+                                self.direction = 1 if self.vx > 0 else 0
+                                self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)
+                                self.mask = pygame.mask.from_surface(self.mask_frame)
                                 
+                                # Optional: Push out of the wall slightly to prevent sticking
+                                if self.vx > 0: self.rect.left = tile_rect.right
+                                else: self.rect.right = tile_rect.left
+                                self.x = float(self.rect.x)
                                 return
 
                             elif axis == 'y':
+                                # Only adjust Y if we aren't moving horizontally into a wall
                                 if self.vy > 0:  # Falling
-                                    while self.mask.overlap(tile_mask, (offset_x, offset_y)):
-                                        self.rect.y -= 1
-                                        self.y = float(self.rect.y)
-                                        offset_y = tile_rect.y - self.rect.y
-
+                                    self.rect.bottom = tile_rect.top
                                     self.on_ground = True
+                                elif self.vy < 0:  # Jumping Up
+                                    self.rect.top = tile_rect.bottom
                                 
-                                elif self.vy < 0:  # Jumping/Up
-                                    while self.mask.overlap(tile_mask, (offset_x, offset_y)):
-                                        self.rect.y += 1
-                                        self.y = float(self.rect.y)
-                                        offset_y = tile_rect.y - self.rect.y
-                                
+                                self.y = float(self.rect.y)
                                 self.vy = 0
                                 return
