@@ -14,8 +14,13 @@ class StoryState:
         self.current_level = 1
         self.score_tracker = getattr(self.state_machine, 'score_tracker', ScoreTracker())
         self.level_music = {1: 'story_level_1.ogg', 2: 'story_level_2.ogg', 3: 'story_level_3.ogg'}
+        self.true_width = BASE_WIDTH
+        self.true_height = BASE_HEIGHT
+        self.internal_surface = pygame.Surface((self.true_width, self.true_height))
+        self.tile_size = self.true_height // ROWS
 
         self.background = pygame.image.load('assets/images/Levels/Level1_800x600.png')
+        self.scaled_bg = pygame.transform.scale(self.background, (self.true_width, self.true_height))
         self.door_image = pygame.image.load("assets/images/Misc/door.png")
         self.lock_image = pygame.image.load("assets/images/Misc/lock_52x68.png")
         self.door_locked = True
@@ -28,8 +33,14 @@ class StoryState:
     def setup_ui(self):    
         surface = pygame.display.get_surface()
         self.screen_width, self.screen_height = (surface.get_size() if surface else (BASE_WIDTH, BASE_HEIGHT))
-        self.tile_size = self.screen_height // ROWS
-        self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
+        scale_x = self.screen_width / self.true_width
+        scale_y = self.screen_height / self.true_height
+        self.scale = min(scale_x, scale_y)
+        self.scaled_width = int(self.true_width * self.scale)
+        self.scaled_height = int(self.true_height * self.scale)
+        self.offset_x = (self.screen_width - self.scaled_width) // 2
+        self.offset_y = (self.screen_height - self.scaled_height) // 2
+        # self.tile_size = self.true_height // ROWS
 
     def update(self, events):
         for event in events:
@@ -42,14 +53,14 @@ class StoryState:
         self.player.update(self.map, self.tile_size)
 
         # Scroll with player movement
-        half_screen = self.screen_width // 2
+        half_screen = self.true_width // 2
         self.scroll = self.player.rect.centerx - half_screen
         map_width_px = len(self.map[0]) * self.tile_size
 
         if self.scroll < 0:
             self.scroll = 0
-        if self.scroll > map_width_px - self.screen_width:
-            self.scroll = map_width_px - self.screen_width
+        if self.scroll > map_width_px - self.true_width:
+            self.scroll = map_width_px - self.true_width
 
         # self.enemy.update(self.map, self.tile_size)
 
@@ -114,20 +125,19 @@ class StoryState:
         self.score_tracker.tick()
 
     def draw(self, surface):
-        surface.blit(self.scaled_bg, (0, 0))
+        self.internal_surface.blit(self.scaled_bg, (0, 0))
         
-        game_map.draw_map(surface, self.map, self.tile_size, self.scroll)
+        game_map.draw_map(self.internal_surface, self.map, self.tile_size, self.scroll)
         
-        surface.blit(self.door_image, (self.door.x - self.scroll, self.door.y))
+        self.internal_surface.blit(self.door_image, (self.door.x - self.scroll, self.door.y))
         
         if self.door_locked:
-            surface.blit(self.lock_image, (self.door.x - self.scroll, self.door.y))
+            self.internal_surface.blit(self.lock_image, (self.door.x - self.scroll, self.door.y))
         
-        self.player.draw(surface, self.scroll)
+        self.player.draw(self.internal_surface, self.scroll)
         
-        # self.enemy.draw(surface)
         for enemy in self.enemy_list:
-            enemy.draw(surface, self.scroll)
+            enemy.draw(self.internal_surface, self.scroll)
 
         for c in self.collectibles:
             sprite = self.collectible_images[c['type']]
@@ -135,7 +145,14 @@ class StoryState:
             center_x = c['rect'].centerx - self.scroll
             center_y = c['rect'].centery - 30 + offset_y
             sprite_rect = sprite.get_rect(center=(center_x, center_y))
-            surface.blit(sprite, sprite_rect)
+            self.internal_surface.blit(sprite, sprite_rect)
+            
+        # scales internal surface to fit the window while maintaining aspect ratio
+        scaled_display = pygame.transform.scale(self.internal_surface, (self.scaled_width, self.scaled_height))
+        # Letterbox
+        surface.fill((0, 0, 0)) 
+        # scaled game onto the center of the window
+        surface.blit(scaled_display, (self.offset_x, self.offset_y))
         
     def enter(self):
         self.setup_ui()
