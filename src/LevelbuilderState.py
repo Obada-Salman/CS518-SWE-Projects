@@ -38,22 +38,22 @@ class LevelBuilderState:
         scale_x = self.screen_width / self.BASE_WIDTH
         scale_y = self.screen_height / self.BASE_HEIGHT
         scale = min(scale_x, scale_y)
-        btn_width = int(100 * scale)
-        btn_height = int(30 * scale)
+        self.btn_width = int(100 * scale)
+        self.btn_height = int(30 * scale)
 
         self.save_button = Button(
             self.screen_width // 2, self.screen_height - (self.margin_height // 2),
-            btn_width, btn_height, "Save", self.btn_font, BLACK, BLACK, WHITE, WHITE, False
+            self.btn_width, self.btn_height, "Save", self.btn_font, BLACK, BLACK, WHITE, WHITE, False
         )
 
         self.back_button = Button(
             (self.screen_width // 2) + 200, self.screen_height - (self.margin_height // 2),
-            btn_width, btn_height, "Exit", self.btn_font, BLACK, BLACK, WHITE, WHITE, False
+            self.btn_width, self.btn_height, "Exit", self.btn_font, BLACK, BLACK, WHITE, WHITE, False
         )
         
         self.level_type_button = Button(
             (self.screen_width // 2) - 200, self.screen_height - (self.margin_height // 2),
-            btn_width, btn_height, self.level_type, self.btn_font, BLACK, BLACK, WHITE, WHITE, False
+            self.btn_width, self.btn_height, self.level_type, self.btn_font, BLACK, BLACK, WHITE, WHITE, False
         )
 
         self.current_tile_type = ""
@@ -126,8 +126,8 @@ class LevelBuilderState:
                     self.level_type_button.text = "Community"
 
                 self.level_type_button = Button(
-                    (self.screen_width // 2) - 150, self.screen_height - (self.margin_height // 2),
-                    100, 50, self.level_type, self.btn_font, BLACK, BLACK, WHITE, WHITE, False
+                    (self.screen_width // 2) - 200, self.screen_height - (self.margin_height // 2),
+                    self.btn_width, self.btn_height, self.level_type, self.btn_font, BLACK, BLACK, WHITE, WHITE, False
                 )
             
                 self.tile_map = game_map.load_map(self.LEVEL, self.level_type)
@@ -152,6 +152,9 @@ class LevelBuilderState:
                 # left click place
                 if pygame.mouse.get_pressed()[0] == 1:                
                         if self.player_placed == True and self.current_tile == "player":
+                            pass
+
+                        elif self.goal_placed == True and self.current_tile == "goal":
                             pass
                         
                         elif tile != self.current_tile:
