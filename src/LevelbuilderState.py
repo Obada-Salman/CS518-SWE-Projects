@@ -85,7 +85,7 @@ class LevelBuilderState:
         keys = pygame.key.get_pressed()
 
         # scroll
-        if keys[pygame.K_d] and self.scroll < (COLS * self.tile_size) - self.screen_width:
+        if keys[pygame.K_d] and self.scroll < (COLS * self.tile_size) - (self.screen_width - self.margin_width):
             self.scroll += 5 * self.scroll_speed
         if keys[pygame.K_a] and self.scroll > 0:
             self.scroll -= 5 * self.scroll_speed
@@ -97,10 +97,12 @@ class LevelBuilderState:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT and self.LEVEL < 99:
                     self.LEVEL += 1
+                    self.scroll = 0
                     self.tile_map = game_map.load_map(self.LEVEL, self.level_type)
 
                 if event.key == pygame.K_LEFT and self.LEVEL > 1:
                     self.LEVEL -= 1
+                    self.scroll = 0
                     self.tile_map = game_map.load_map(self.LEVEL, self.level_type)
             
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -121,9 +123,11 @@ class LevelBuilderState:
                 if self.level_type == "community":
                     self.level_type = "story"
                     self.level_type_button.text = "Story"
+                    self.scroll = 0
                 else:
                     self.level_type = "community"
                     self.level_type_button.text = "Community"
+                    self.scroll = 0
 
                 self.level_type_button = Button(
                     (self.screen_width // 2) - 200, self.screen_height - (self.margin_height // 2),
