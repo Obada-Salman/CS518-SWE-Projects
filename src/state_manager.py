@@ -9,14 +9,15 @@ class StateManager:
         self.current_state = None
         self.current_state_name = None
         self.window_should_close = False
-        self.window_width = 800
-        self.window_height = 600
+        self.window_width = 1280
+        self.window_height = 720
         self.sound_manager = SoundManager()
         self.score_tracker = ScoreTracker()
         self.max_unlocked_level = 1
         self.state_music = {
             'menu': 'menu_theme.ogg',
             'level_select': 'menu_theme.ogg',
+                'settings': 'menu_theme.ogg',
         }
 
         # collectibles that save across levels
