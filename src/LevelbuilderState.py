@@ -97,11 +97,11 @@ class LevelBuilderState:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT and self.LEVEL < 99:
                     self.LEVEL += 1
+                    self.tile_map = game_map.load_map(self.LEVEL, self.level_type)
 
                 if event.key == pygame.K_LEFT and self.LEVEL > 1:
                     self.LEVEL -= 1
-
-                self.tile_map = game_map.load_map(self.LEVEL, self.level_type)
+                    self.tile_map = game_map.load_map(self.LEVEL, self.level_type)
             
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.state_machine.transition('menu')
@@ -142,7 +142,7 @@ class LevelBuilderState:
                 self.current_tile = button.type
         
         pos = pygame.mouse.get_pos()
-        x, y = (pos[0] + self.scroll) // self.tile_size, (pos[1] + self.scroll) // self.tile_size
+        x, y = (pos[0] + self.scroll) // self.tile_size, (pos[1]) // self.tile_size
 
         #check to make sure within the map bounds
         if pos[0] < self.screen_width - self.margin_width and pos[1] < self.screen_height - self.margin_height:
