@@ -18,6 +18,7 @@ class Player:
         self.jump_strength = -16.0
         self.on_ground = False
         self.moving = False
+        self.jumping = False
 
         self.direction = 1 
         self.state = 0 
@@ -55,6 +56,7 @@ class Player:
         if (key[pygame.K_UP] or key[pygame.K_SPACE]) and self.on_ground:
             self.vy = self.jump_strength
             self.on_ground = False
+            self.jumping = True
             self.snd_jump.play()
 
         x_pressed_now = key[pygame.K_x]
@@ -105,9 +107,8 @@ class Player:
                 self.visible, self.invincible = True, False
 
         # Animation states
-        if not self.on_ground:
-            # self.state = 2
-            pass
+        if self.jumping:
+            self.state = 2
         elif self.moving and abs(self.vx) > 0.1:
             self.state = 1
         else:
@@ -182,6 +183,7 @@ class Player:
                                         offset_y = tile_rect.y - self.rect.y
                                     
                                     self.on_ground = True
+                                    self.jumping = False
                                 
                                 elif self.vy < 0:
                                     while self.mask.overlap(tile_mask, (offset_x, offset_y)):
