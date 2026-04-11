@@ -2,7 +2,7 @@ import pygame
 from configs import *
 
 class SpriteHandler:
-    def __init__(self, sheet_path, type='enemy_carrot', scale=1, anim_time=7):
+    def __init__(self, sheet_path, type='carrot', scale=1, anim_time=7):
         self.sheet = pygame.image.load(sheet_path).convert_alpha()
         if scale != 1:
             self.sheet = pygame.transform.scale(

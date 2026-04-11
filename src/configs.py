@@ -14,7 +14,7 @@ CONFIGS = {
         }
     },
 
-    "enemy_carrot": {
+    "carrot": {
         "frame_width": 75,
         "frame_height": 110,
         "rows": 1,
@@ -29,7 +29,7 @@ CONFIGS = {
         }
     },
 
-    "enemy_potato": {
+    "potato": {
         "frame_width": 83,
         "frame_height": 94,
         "rows": 1,

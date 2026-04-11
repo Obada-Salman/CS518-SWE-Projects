@@ -15,7 +15,7 @@ if str(SRC_DIR) not in sys.path:
 
 from SpriteHandler import SpriteHandler
 from Player import Player
-from Enemy import Enemy
+from NPC import NPC
 from StoryState import StoryState
 from configs import CONFIGS
 
@@ -51,11 +51,11 @@ class SpriteHandlerTests(unittest.TestCase):
 
     @patch("pygame.image.load")
     def test_get_current_frames_uses_direction_and_state_animation_sets(self, mock_load):
-        cfg = CONFIGS["enemy_carrot"]
+        cfg = CONFIGS["carrot"]
         mock_sheet = pygame.Surface((cfg["frame_width"] * cfg["cols"], cfg["frame_height"]), pygame.SRCALPHA)
         mock_load.return_value = mock_sheet
 
-        handler = SpriteHandler("unused.png", type="enemy_carrot")
+        handler = SpriteHandler("unused.png", type="carrot")
         frames = handler.get_current_frames(direction=0, state=1)
 
         expected_indexes = cfg["animations"]["walk_left"]
@@ -155,7 +155,7 @@ class EnemySpriteAndPhysicsTests(unittest.TestCase):
         fake_sprite = Mock()
         mock_sprite_handler.return_value = fake_sprite
 
-        enemy = Enemy(0, 50, 75, 110, speed=5)
+        enemy = NPC(0, 50, 75, 110, speed=5)
         enemy.vx = -5
 
         enemy.apply_physics()
@@ -170,7 +170,7 @@ class EnemySpriteAndPhysicsTests(unittest.TestCase):
         fake_sprite = Mock()
         mock_sprite_handler.return_value = fake_sprite
 
-        enemy = Enemy(100, 50, 75, 110, speed=5)
+        enemy = NPC(100, 50, 75, 110, speed=5)
         enemy.direction = 0
         enemy.state = 1
 
@@ -182,7 +182,7 @@ class EnemySpriteAndPhysicsTests(unittest.TestCase):
     def test_apply_physics_bounces_off_right_edge_and_flips_direction(self, mock_sprite_handler):
         mock_sprite_handler.return_value = Mock()
 
-        enemy = Enemy(0, 50, 75, 110, speed=5)
+        enemy = NPC(0, 50, 75, 110, speed=5)
         enemy.x = enemy.screen_width - enemy.width
         enemy.vx = 5
 

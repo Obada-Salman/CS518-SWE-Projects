@@ -2,46 +2,55 @@ import pygame
 from settings import *
 from SpriteHandler import SpriteHandler
 
-class Enemy:
-    ENEMY_TYPES = {
-        'enemy_carrot': {
+class NPC:
+    NPC_TYPES = {
+        'carrot': {
             'speed': 3,
             'health': 8,
             'sprite': 'assets/images/Characters/Carrot_75x110.png'
         },
-        'enemy_potato': {
+        'potato': {
             'speed': 2,
             'health': 5,
             'sprite': 'assets/images/Characters/Potato_83x94.png'
         }
     }
 
-    def __init__(self, x, y, width, height, type='enemy_carrot', speed=None):
+    def __init__(self, x, y, width, height, type='carrot', speed=None):
         self.x = float(x)
         self.y = float(y)
         self.width = width
         self.height = height
         self.type = type
+        self.team = 'enemy'
+        self.recruited = False
         
-        enemy_config = self.ENEMY_TYPES.get(type, self.ENEMY_TYPES['enemy_carrot'])
+        npc_config = self.NPC_TYPES.get(type, self.NPC_TYPES['carrot'])
         
-        self.speed = speed if speed is not None else enemy_config['speed']
-        self.health = enemy_config['health']
+        self.speed = speed if speed is not None else npc_config['speed']
+        self.health = npc_config['health']
         self.max_health = self.health
-        sprite_path = enemy_config['sprite']
+        sprite_path = npc_config['sprite']
         
         self.vx = -self.speed
         self.vy = 0.0
         self.gravity = 0.8
         self.on_ground = False
         self.direction = 0 
-        self.state = 1 
+        self.state = 0 
+        self.moving = False
+        self.jumping = False
         self.sprites = SpriteHandler(sprite_path, type=self.type)
         self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
         self.mask_frame = self.sprites.get_current_frame()
         self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)
         self.mask = pygame.mask.from_surface(self.mask_frame)
 
+        # ally hit properties
+        self.invincible = False
+        self.time_since_hit = 0
+        self.visible = True
+        self.invincibility_time = 2000
 
     def update(self, game_map, tile_size):
         # Move X
@@ -55,6 +64,30 @@ class Enemy:
         self.rect.y = int(round(self.y))
         self.on_ground = False
         self.check_map_collision(game_map, tile_size, 'y')
+        
+        # Set animation flags
+        self.moving = abs(self.vx) > 0.1
+        if self.vy < 0:
+            self.jumping = True
+        elif self.on_ground:
+            self.jumping = False
+
+        # Make allies briefly invincible after getting hit
+        if self.team == 'ally' and self.invincible:
+            now = pygame.time.get_ticks()
+            if now - self.time_since_hit < self.invincibility_time:
+                self.visible = not self.visible
+            else:
+                self.visible, self.invincible = True, False
+        
+        # Animation states
+        if self.jumping:
+            self.state = 2
+        elif self.moving:
+            self.state = 1
+        else: # idle
+            self.state = 0
+        
         self.sprites.update(direction=self.direction, state=self.state)
 
         # current_frame = self.sprites.get_current_frame()
@@ -65,15 +98,39 @@ class Enemy:
             self.rect.topleft = (int(self.x), int(self.y))
 
     def take_damage(self, amount):
-        self.health -= amount
-    
+        if self.team == 'ally' and not self.invincible:
+            self.health -= amount
+            self.invincible = True
+            self.time_since_hit = pygame.time.get_ticks()
+        elif self.team == 'enemy':
+            self.health -= amount
+
+    def can_damage(self):
+        if self.team == 'ally':
+            return not self.invincible
+        return True
+
     def is_alive(self):
         return self.health > 0
-    
-    
+
     def draw(self, surface, scroll):
-        self.sprites.draw(surface, self.rect.x - scroll, self.rect.y)
-    
+        if self.team == 'ally' and self.visible:
+            self.sprites.draw(surface, self.rect.x - scroll, self.rect.y)
+        elif self.team == 'enemy':
+            self.sprites.draw(surface, self.rect.x - scroll, self.rect.y)
+
+        if self.team == 'ally':
+            if not self.recruited:
+                # draw gray circle above ally
+                pygame.draw.circle(surface, (128, 128, 128), (self.rect.centerx - scroll, self.rect.top - 20), 10)
+            else:
+                # draw green circle that gradually turns to red as health decreases
+                health_ratio = 0.0 if self.max_health <= 0 else self.health / self.max_health
+                health_ratio = max(0.0, min(1.0, health_ratio))
+                red = max(0, min(255, int(255 * (1 - health_ratio))))
+                green = max(0, min(255, int(255 * health_ratio)))
+                pygame.draw.circle(surface, (red, green, 0), (self.rect.centerx - scroll, self.rect.top - 20), 10)
+
     def check_map_collision(self, game_map, tile_size, axis):
         start_col = int(self.rect.left // tile_size)
         end_col = int((self.rect.right - 1) // tile_size)

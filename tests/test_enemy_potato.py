@@ -13,7 +13,7 @@ SRC_DIR = ROOT_DIR / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from Enemy import Enemy
+from NPC import NPC
 
 
 class PotatoEnemyTests(unittest.TestCase):
@@ -32,15 +32,15 @@ class PotatoEnemyTests(unittest.TestCase):
         sprite.get_current_frame.return_value = pygame.Surface((83, 94), pygame.SRCALPHA)
         mock_sprite_handler.return_value = sprite
 
-        enemy = Enemy(10, 20, 83, 94, type="enemy_potato")
+        enemy = NPC(10, 20, 83, 94, type="potato")
 
-        self.assertEqual(enemy.type, "enemy_potato")
+        self.assertEqual(enemy.type, "potato")
         self.assertEqual(enemy.speed, 2)
         self.assertEqual(enemy.health, 5)
         self.assertEqual(enemy.max_health, 5)
         self.assertEqual(enemy.vx, -2)
         mock_sprite_handler.assert_called_once_with(
-            "assets/images/Characters/Potato_83x94.png", type="enemy_potato"
+            "assets/images/Characters/Potato_83x94.png", type="potato"
         )
 
     @patch("Enemy.SpriteHandler")
@@ -49,7 +49,7 @@ class PotatoEnemyTests(unittest.TestCase):
         sprite.get_current_frame.return_value = pygame.Surface((83, 94), pygame.SRCALPHA)
         mock_sprite_handler.return_value = sprite
 
-        enemy = Enemy(10, 20, 83, 94, type="enemy_potato", speed=7)
+        enemy = NPC(10, 20, 83, 94, type="potato", speed=7)
 
         self.assertEqual(enemy.speed, 7)
         self.assertEqual(enemy.vx, -7)
@@ -61,7 +61,7 @@ class PotatoEnemyTests(unittest.TestCase):
         sprite.get_current_frame.return_value = pygame.Surface((83, 94), pygame.SRCALPHA)
         mock_sprite_handler.return_value = sprite
 
-        enemy = Enemy(10, 20, 83, 94, type="enemy_potato")
+        enemy = NPC(10, 20, 83, 94, type="potato")
         enemy.health = 0
         game_map = [[None]]
 

@@ -1,7 +1,7 @@
 import pygame
 from settings import *
 from Player import Player
-from Enemy import Enemy
+from NPC import NPC
 from score_tracker import ScoreTracker
 import game_map
 from tiles import Tile
@@ -70,7 +70,7 @@ class StoryState:
             # Combat Collision
             # if self.player.rect.colliderect(self.enemy.rect):
             # if self.player.rect.colliderect(enemy.rect):
-            if self.mask_collision(self.player, enemy):
+            if self.mask_collision(self.player, enemy) and enemy.team == 'enemy':
                 if self.player.can_damage():
                     enemy.take_damage(1)
                     self.snd_damage.play()
@@ -82,13 +82,62 @@ class StoryState:
                 tear_offset_x = enemy.rect.x - tear['rect'].x
                 tear_offset_y = enemy.rect.y - tear['rect'].y
                 
-                if tear['mask'].overlap(enemy.mask, (tear_offset_x, tear_offset_y)):
+                if tear['mask'].overlap(enemy.mask, (tear_offset_x, tear_offset_y)) and enemy.team == 'enemy':
                     enemy.take_damage(1)
                     self.snd_tear_hit.play()
                     self.player.tears.remove(tear)
                 
             if not enemy.is_alive():
                 self.enemy_list.remove(enemy)
+
+            for ally in self.ally_list:
+                if ally.recruited and ally.can_damage() and self.mask_collision(ally, enemy):
+                    enemy.take_damage(1)
+                    ally.take_damage(1)
+                    self.snd_damage.play()
+                    
+        keys = pygame.key.get_pressed()
+        for ally in self.ally_list:
+            if not ally.recruited:
+                dist = math.hypot(ally.x - self.player.x, ally.y - self.player.y)
+                if dist < 100 and keys[pygame.K_e]:
+                    ally.recruited = True
+                    ally.speed = 3
+                    pygame.mixer.Sound('assets/sounds/collect.ogg').play()
+            else:
+                # Find closest enemy
+                closest_enemy = None
+                min_dist = float('inf')
+                for enemy in self.enemy_list:
+                    dist = math.hypot(ally.x - enemy.x, ally.y - enemy.y)
+                    if dist < min_dist:
+                        min_dist = dist
+                        closest_enemy = enemy
+                if closest_enemy and min_dist < 400:
+                    # Go towards enemy
+                    if ally.x < closest_enemy.x:
+                        ally.vx = ally.speed
+                        ally.direction = 1
+                    elif ally.x > closest_enemy.x:
+                        ally.vx = -ally.speed
+                        ally.direction = 0
+                    else:
+                        ally.vx = 0
+                else:
+                    # Follow player with offset
+                    if ally.x < self.player.x - 50:
+                        ally.vx = ally.speed
+                        ally.direction = 1
+                    elif ally.x > self.player.x + 50:
+                        ally.vx = -ally.speed
+                        ally.direction = 0
+                    else:
+                        ally.vx = 0
+
+                if ally.on_ground and ally.y > self.player.y and abs(ally.x - self.player.x) > 60:
+                    ally.vy = -16.0
+            
+            ally.update(self.map, self.tile_size)
 
         for c in self.collectibles[:]:
             if self.player.rect.colliderect(c['rect']):
@@ -134,10 +183,13 @@ class StoryState:
         if self.door_locked:
             self.internal_surface.blit(self.lock_image, (self.door.x - self.scroll, self.door.y))
         
-        self.player.draw(self.internal_surface, self.scroll)
+        
         
         for enemy in self.enemy_list:
             enemy.draw(self.internal_surface, self.scroll)
+
+        for ally in self.ally_list:
+            ally.draw(self.internal_surface, self.scroll)
 
         for c in self.collectibles:
             sprite = self.collectible_images[c['type']]
@@ -146,6 +198,8 @@ class StoryState:
             center_y = c['rect'].centery - 30 + offset_y
             sprite_rect = sprite.get_rect(center=(center_x, center_y))
             self.internal_surface.blit(sprite, sprite_rect)
+
+        self.player.draw(self.internal_surface, self.scroll)
             
         # scales internal surface to fit the window while maintaining aspect ratio
         scaled_display = pygame.transform.scale(self.internal_surface, (self.scaled_width, self.scaled_height))
@@ -158,12 +212,14 @@ class StoryState:
         self.setup_ui()
         self.map = game_map.load_map(self.current_level, "story")
         player_position = game_map.get_tile_position(self.map, "player", self.tile_size, False)        
-        carrot_positions = game_map.get_tile_position(self.map, "carrot", self.tile_size, True)
-        potato_positions = game_map.get_tile_position(self.map, "potato", self.tile_size, True)
+        enemy_carrot_pos = game_map.get_tile_position(self.map, "carrot", self.tile_size, True)
+        enemy_potato_pos = game_map.get_tile_position(self.map, "potato", self.tile_size, True)
         door_position = game_map.get_tile_position(self.map, "goal", self.tile_size, False)
         water_positions = game_map.get_tile_position(self.map, "water", self.tile_size, True)
         sunlight_positions = game_map.get_tile_position(self.map, "sunlight", self.tile_size, True)
         nutrient_positions = game_map.get_tile_position(self.map, "nutrient", self.tile_size, True)
+        ally_carrot_pos = game_map.get_tile_position(self.map, "carrot_ally", self.tile_size, True)
+        ally_potato_pos = game_map.get_tile_position(self.map, "potato_ally", self.tile_size, True)
         
         if player_position is None or door_position is None:
             print(f"ERROR: Level {self.current_level} is missing a player spawn or a goal")
@@ -175,16 +231,31 @@ class StoryState:
         self.map[player_position[3]][player_position[2]] = None
         
         self.enemy_list = []
+        self.ally_list = []
+
         # Add carrots
-        for enemy_position in carrot_positions:
-            self.enemy_list.append(Enemy(enemy_position[0], enemy_position[1], 75, 110, type='enemy_carrot'))
+        for enemy_position in enemy_carrot_pos:
+            self.enemy_list.append(NPC(enemy_position[0], enemy_position[1], 75, 110, type='carrot'))
             self.map[enemy_position[3]][enemy_position[2]] = None
         
         # Add potatoes
-        for enemy_position in potato_positions:
-            self.enemy_list.append(Enemy(enemy_position[0], enemy_position[1], 83, 94, type='enemy_potato'))
+        for enemy_position in enemy_potato_pos:
+            self.enemy_list.append(NPC(enemy_position[0], enemy_position[1], 83, 94, type='potato'))
             self.map[enemy_position[3]][enemy_position[2]] = None
-        
+
+        # Add allies
+        for ally_position in ally_carrot_pos:
+            self.ally_list.append(NPC(ally_position[0], ally_position[1], 75, 110, type='carrot', speed=0))
+            self.map[ally_position[3]][ally_position[2]] = None
+            self.ally_list[-1].team = 'ally'
+            self.ally_list[-1].recruited = False
+
+        for ally_position in ally_potato_pos:
+            self.ally_list.append(NPC(ally_position[0], ally_position[1], 83, 94, type='potato', speed=0))
+            self.map[ally_position[3]][ally_position[2]] = None
+            self.ally_list[-1].team = 'ally'
+            self.ally_list[-1].recruited = False
+            
         self.collectible_sizes = {'water': (45, 53), 'sunlight': (40, 38), 'nutrient': (29, 46)}
         self.sprite_names = {'water': 'water_sprite.png', 'sunlight': 'sun_sprite.png', 'nutrient': 'nutrient_sprite.png'}
         self.collectible_images = {}

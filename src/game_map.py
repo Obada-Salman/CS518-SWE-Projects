@@ -2,7 +2,7 @@ import pygame
 import pickle
 from settings import ROWS, COLS, WHITE
 from Player import Player
-from Enemy import Enemy
+from NPC import NPC
 import os
 
 def draw_map(screen, tile_map, tile_size, SCROLL):
