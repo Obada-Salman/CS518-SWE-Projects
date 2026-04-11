@@ -16,6 +16,7 @@ if str(SRC_DIR) not in sys.path:
 from PauseState import PauseState
 from StoryState import StoryState
 from state_manager import StateManager
+from Menu import MainMenuState
 
 
 class StoryPauseTransitionTests(unittest.TestCase):
@@ -44,6 +45,7 @@ class StoryPauseTransitionTests(unittest.TestCase):
         state.player.rect = pygame.Rect(0, 0, 20, 20)
         state.player.tears = []
         state.enemy_list = []
+        state.ally_list = []
         state.collectibles = []
         state.map = [[None]]
         state.tile_size = 1
@@ -173,6 +175,70 @@ class PauseCollectiblePersistenceTests(unittest.TestCase):
         self.assertEqual(state_machine.get_water_collected(), 2)
         self.assertEqual(state_machine.get_sunlight_collected(), 3)
         self.assertEqual(state_machine.get_nutrients_collected(), 4)
+
+
+class MenuUsernameInputTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        pygame.init()
+        pygame.display.set_mode((1280, 720))
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    @patch("Menu.pygame.image.load")
+    def test_typing_username_applies_on_enter(self, mock_image_load):
+        mock_image_load.return_value = pygame.Surface((50, 50), pygame.SRCALPHA)
+
+        state_machine = Mock()
+        state_machine.max_unlocked_level = 1
+        state_machine.set_player_username = Mock(side_effect=lambda value: value.strip()[:32] if value.strip() else "player1")
+        state_machine.score_tracker = Mock()
+        state_machine.score_tracker.username = "player1"
+
+        menu = MainMenuState("menu", state_machine)
+        menu.story.is_clicked = Mock(return_value=False)
+        menu.custom.is_clicked = Mock(return_value=False)
+        menu.setting.is_clicked = Mock(return_value=False)
+        menu.level_bld.is_clicked = Mock(return_value=False)
+        menu.quit.is_clicked = Mock(return_value=False)
+
+        click_event = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"pos": menu.username_rect.center, "button": 1})
+        key_j = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_j, "unicode": "J"})
+        key_d = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_d, "unicode": "D"})
+        key_enter = pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_RETURN, "unicode": ""})
+
+        menu.username_input = ""
+        menu.update([click_event, key_j, key_d, key_enter])
+
+        state_machine.set_player_username.assert_called_with("JD")
+        self.assertEqual(menu.username_input, "JD")
+
+    @patch("Menu.pygame.image.load")
+    def test_story_click_applies_default_username_when_blank(self, mock_image_load):
+        mock_image_load.return_value = pygame.Surface((50, 50), pygame.SRCALPHA)
+
+        state_machine = Mock()
+        state_machine.max_unlocked_level = 1
+        state_machine.set_player_username = Mock(return_value="player1")
+        state_machine.score_tracker = Mock()
+        state_machine.score_tracker.username = "player1"
+
+        menu = MainMenuState("menu", state_machine)
+        menu.username_input = "   "
+
+        menu.story.is_clicked = Mock(return_value=True)
+        menu.custom.is_clicked = Mock(return_value=False)
+        menu.setting.is_clicked = Mock(return_value=False)
+        menu.level_bld.is_clicked = Mock(return_value=False)
+        menu.quit.is_clicked = Mock(return_value=False)
+
+        click_story = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"pos": menu.story.rect.center, "button": 1})
+        menu.update([click_story])
+
+        state_machine.set_player_username.assert_called_once()
+        state_machine.transition.assert_called_once_with("level_select")
 
 
 if __name__ == "__main__":

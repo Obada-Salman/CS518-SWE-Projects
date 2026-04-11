@@ -4,77 +4,315 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Leaderboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@500;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-top: #f7f2e8;
+            --bg-mid: #e7efe6;
+            --bg-bottom: #dce6f3;
+            --ink: #112433;
+            --muted: #4f6577;
+            --card: rgba(255, 255, 255, 0.76);
+            --stroke: rgba(17, 36, 51, 0.14);
+            --gold: #ffbf47;
+            --silver: #b7c3d0;
+            --bronze: #e18a53;
+            --good: #1f7a5a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 24px;
-            background: #f8f8f8;
-            color: #222;
+            font-family: "Space Grotesk", sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            background:
+                radial-gradient(1200px 700px at -10% -10%, #fff7cc 5%, transparent 65%),
+                radial-gradient(900px 600px at 110% 0%, #c7f5dd 0%, transparent 62%),
+                linear-gradient(170deg, var(--bg-top) 0%, var(--bg-mid) 53%, var(--bg-bottom) 100%);
+        }
+
+        .backdrop {
+            min-height: 100vh;
+            padding: 32px 18px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 16px;
+            width: min(1080px, 100%);
+            border-radius: 22px;
+            background: var(--card);
+            backdrop-filter: blur(9px);
+            border: 1px solid var(--stroke);
+            box-shadow:
+                0 20px 70px rgba(8, 22, 36, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.85);
+            padding: clamp(16px, 2.4vw, 28px);
+            animation: rise 560ms ease-out both;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: end;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .title {
+            margin: 0;
+            font-family: "Sora", sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            font-size: clamp(1.6rem, 4vw, 2.3rem);
+        }
+
+        .subtitle {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 0.96rem;
+        }
+
+        .meta {
+            font-size: 0.9rem;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid var(--stroke);
+            padding: 8px 12px;
+            border-radius: 999px;
+        }
+
+        .podium {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .podium-card {
+            border-radius: 14px;
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, 0.72);
+            padding: 12px;
+            display: grid;
+            gap: 5px;
+            min-height: 132px;
+        }
+
+        .podium-rank {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-family: "Sora", sans-serif;
+            color: #112433;
+        }
+
+        .gold { background: var(--gold); }
+        .silver { background: var(--silver); }
+        .bronze { background: var(--bronze); }
+
+        .podium-name {
+            font-weight: 700;
+            font-size: 1.02rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .podium-score {
+            font-weight: 700;
+            color: var(--good);
+        }
+
+        .table-wrap {
+            overflow: auto;
+            border-radius: 14px;
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, 0.8);
         }
 
         table {
-            border-collapse: collapse;
             width: 100%;
+            border-collapse: collapse;
+            min-width: 860px;
         }
 
         th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
+            padding: 11px 12px;
             text-align: left;
         }
 
         th {
-            background: #f1f1f1;
+            position: sticky;
+            top: 0;
+            background: #e8f0f7;
+            font-family: "Sora", sans-serif;
+            font-size: 0.86rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--stroke);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(17, 36, 51, 0.08);
+            transition: background 160ms ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(206, 235, 255, 0.32);
+        }
+
+        .rank-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            border: 1px solid rgba(17, 36, 51, 0.2);
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .score {
+            color: var(--good);
+            font-weight: 700;
+            font-feature-settings: "tnum";
+        }
+
+        .mono {
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+        }
+
+        .level-pill {
+            display: inline-block;
+            border-radius: 999px;
+            border: 1px solid rgba(17, 36, 51, 0.16);
+            padding: 4px 9px;
+            font-size: 0.82rem;
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .empty {
-            padding: 18px;
-            border: 1px dashed #bbb;
-            border-radius: 6px;
-            background: #fafafa;
+            padding: 24px;
+            border: 1px dashed rgba(17, 36, 51, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .endpoint {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #2f4b62;
+        }
+
+        @media (max-width: 850px) {
+            .podium {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Game Leaderboard</h1>
-        {% if entries %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Username</th>
-                    <th>Score</th>
-                    <th>Completion Time (ms)</th>
-                    <th>Level</th>
-                    <th>Submitted At (UTC)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in entries %}
-                <tr>
-                    <td>{{ entry.rank }}</td>
-                    <td>{{ entry.username }}</td>
-                    <td>{{ entry.score }}</td>
-                    <td>{{ entry.completion_time_ms }}</td>
-                    <td>{{ entry.level_name or "-" }}</td>
-                    <td>{{ entry.created_at }}</td>
-                </tr>
+    <div class="backdrop">
+        <div class="container">
+            <div class="header">
+                <div>
+                    <h1 class="title">Onions May Cry Leaderboard</h1>
+                    <p class="subtitle">Higher score wins. Tie-breaker is faster completion.</p>
+                </div>
+                <div class="meta">Entries: {{ entries|length }}</div>
+            </div>
+
+            {% if entries %}
+            <section class="podium" aria-label="Top Players">
+                {% set medal = ['gold', 'silver', 'bronze'] %}
+                {% for entry in entries[:3] %}
+                <article class="podium-card">
+                    <span class="podium-rank {{ medal[loop.index0] if loop.index0 < 3 else '' }}">{{ entry.rank }}</span>
+                    <div class="podium-name">{{ entry.username }}</div>
+                    <div class="podium-score">{{ entry.score }} pts</div>
+                    <div class="mono time-ms" data-ms="{{ entry.completion_time_ms }}">{{ entry.completion_time_ms }} ms</div>
+                    <div class="level-pill">{{ entry.level_name or "no-level" }}</div>
+                </article>
                 {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="empty">No scores yet. Add entries through <code>POST /api/scores</code>.</div>
-        {% endif %}
+            </section>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Username</th>
+                            <th>Score</th>
+                            <th>Completion Time</th>
+                            <th>Level</th>
+                            <th>Submitted At (UTC)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in entries %}
+                        <tr>
+                            <td><span class="rank-chip">{{ entry.rank }}</span></td>
+                            <td>{{ entry.username }}</td>
+                            <td class="score mono">{{ entry.score }}</td>
+                            <td class="mono time-ms" data-ms="{{ entry.completion_time_ms }}">{{ entry.completion_time_ms }} ms</td>
+                            <td><span class="level-pill">{{ entry.level_name or "-" }}</span></td>
+                            <td class="mono">{{ entry.created_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty">
+                <div>No scores yet.</div>
+                <div class="endpoint">Submit scores through POST /api/scores to populate this board.</div>
+            </div>
+            {% endif %}
+        </div>
     </div>
+
+    <script>
+        function formatMs(ms) {
+            const total = Number(ms);
+            if (!Number.isFinite(total) || total < 0) return ms + " ms";
+            const minutes = Math.floor(total / 60000);
+            const seconds = Math.floor((total % 60000) / 1000);
+            const millis = total % 1000;
+            return minutes + "m " + String(seconds).padStart(2, "0") + "s " + String(millis).padStart(3, "0") + "ms";
+        }
+
+        document.querySelectorAll(".time-ms").forEach(function(node) {
+            const raw = node.getAttribute("data-ms");
+            node.textContent = formatMs(raw);
+        });
+    </script>
 </body>
 </html>

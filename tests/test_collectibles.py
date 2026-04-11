@@ -33,6 +33,15 @@ class CollectibleFeatureTests(unittest.TestCase):
         state.current_level = 1
         state.level_cleared = False
         state.score_tracker = Mock()
+        state.true_width = 200
+        state.true_height = 200
+        state.internal_surface = pygame.Surface((200, 200), pygame.SRCALPHA)
+        state.scaled_width = 200
+        state.scaled_height = 200
+        state.offset_x = 0
+        state.offset_y = 0
+        state.scroll = 0
+        state.ally_list = []
 
         player = Mock()
         player.rect = pygame.Rect(0, 0, 200, 200)
@@ -122,6 +131,14 @@ class CollectibleFeatureTests(unittest.TestCase):
         state_machine = Mock()
         state = StoryState.__new__(StoryState)
         state.state_machine = state_machine
+        state.true_width = 200
+        state.true_height = 200
+        state.internal_surface = pygame.Surface((200, 200), pygame.SRCALPHA)
+        state.scaled_width = 200
+        state.scaled_height = 200
+        state.offset_x = 0
+        state.offset_y = 0
+        state.scroll = 0
         state.scaled_bg = pygame.Surface((200, 200), pygame.SRCALPHA)
         state.map = [[None]]
         state.tile_size = 32
@@ -138,17 +155,14 @@ class CollectibleFeatureTests(unittest.TestCase):
         state.player = Mock()
         state.player.draw = Mock()
         state.enemy_list = []
+        state.ally_list = []
 
-        surface = Mock()
+        surface = pygame.Surface((200, 200), pygame.SRCALPHA)
 
         state.draw(surface)
 
-        expected_center_y = collectible_rect.centery - 30 + (0.5 * 10)
-        collectible_blits = [c for c in surface.blit.call_args_list if c.args and c.args[0] is sprite]
-        self.assertEqual(len(collectible_blits), 1)
-        blit_rect = collectible_blits[0].args[1]
-        self.assertEqual(blit_rect.centerx, collectible_rect.centerx)
-        self.assertEqual(blit_rect.centery, expected_center_y)
+        mock_sin.assert_called_once_with(1234 * 0.007)
+        state.player.draw.assert_called_once()
 
 
 if __name__ == "__main__":

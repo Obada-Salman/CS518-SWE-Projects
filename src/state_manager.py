@@ -25,6 +25,14 @@ class StateManager:
         self.sunlight_collected = 0
         self.nutrients_collected = 0
 
+    def set_player_username(self, username: str) -> str:
+        cleaned = (username or "").strip()
+        if not cleaned:
+            cleaned = "player1"
+        cleaned = cleaned[:32]
+        self.score_tracker.username = cleaned
+        return cleaned
+
     def get_water_collected(self):
         return self.water_collected
     

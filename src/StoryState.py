@@ -9,6 +9,17 @@ from state_manager import StateManager
 import math
 
 class StoryState:
+    RESOURCE_POINTS = {
+        'water': 20,
+        'sunlight': 20,
+        'nutrient': 25,
+    }
+
+    ENEMY_KILL_POINTS = {
+        'carrot': 100,
+        'potato': 120,
+    }
+
     def __init__(self, state_machine):
         self.state_machine = state_machine
         self.current_level = 1
@@ -64,7 +75,7 @@ class StoryState:
 
         # self.enemy.update(self.map, self.tile_size)
 
-        for enemy in self.enemy_list:
+        for enemy in self.enemy_list[:]:
             enemy.update(self.map, self.tile_size)
 
             # Combat Collision
@@ -88,6 +99,7 @@ class StoryState:
                     self.player.tears.remove(tear)
                 
             if not enemy.is_alive():
+                self.score_tracker.record_enemy_kill(points=self._enemy_points(enemy))
                 self.enemy_list.remove(enemy)
 
             for ally in self.ally_list:
@@ -150,6 +162,10 @@ class StoryState:
                 elif c['type'] == 'nutrient':
                     self.state_machine.add_nutrients(1)
                     print(f"Total nutrients collected: {self.state_machine.get_nutrients_collected()}")
+                self.score_tracker.record_resource_collected(
+                    amount=1,
+                    points_per_unit=self.RESOURCE_POINTS.get(c['type'], 10),
+                )
                 self.collectibles.remove(c)
                 pygame.mixer.Sound('assets/sounds/collect.ogg').play()
 
@@ -164,6 +180,7 @@ class StoryState:
             if self.current_level == self.state_machine.max_unlocked_level and self.current_level < 5:
                 self.state_machine.max_unlocked_level += 1
                 self.level_cleared = True
+                self.score_tracker.finalize_level_completion()
                 self.leave()
                 self.current_level += 1
                 self.level_cleared = False
@@ -286,12 +303,13 @@ class StoryState:
         self.lock_image = pygame.transform.smoothscale(self.lock_image, (self.tile_size, self.tile_size))
 
         self._play_level_music()
+        self.score_tracker.start_level(f"story_level_{self.current_level}")
 
     def set_level(self, level_number):
         self.current_level = level_number
         
     def leave(self):
-        if hasattr(self, 'score_tracker'):
+        if self.level_cleared and hasattr(self, 'score_tracker'):
             self.score_tracker.submit_current_level()
         if self.level_cleared:
             print(f"Finished Level {self.current_level}")
@@ -307,3 +325,6 @@ class StoryState:
         offset_x = object2.rect.x - object1.rect.x
         offset_y = object2.rect.y - object1.rect.y
         return object1.mask.overlap(object2.mask, (offset_x, offset_y))
+
+    def _enemy_points(self, enemy):
+        return self.ENEMY_KILL_POINTS.get(getattr(enemy, 'type', None), 100)
