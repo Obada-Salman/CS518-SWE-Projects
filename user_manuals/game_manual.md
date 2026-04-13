@@ -28,6 +28,14 @@ Story Mode is the main campaign.
 3. Defeat enemies and collect resources.
 4. Reach the door after the stage is cleared.
 
+### Allies
+- You can see some vegetables standing still with a grey circle above them
+- Approach them, then press E to recruit them and have them fight for you
+
+### Resources/Collectibles
+- Collect sunlight, water, and nutrients across levels to plant more onions and have them as allies later
+- Currently missing the implementation for onion planting
+
 ### Gameplay Notes
 - The door stays locked until all enemies are defeated.
 - Your health is shown at the top-left of the screen.
