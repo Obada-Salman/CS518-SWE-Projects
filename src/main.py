@@ -13,7 +13,7 @@ from PauseState import PauseState
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((BASE_WIDTH, BASE_HEIGHT), pygame.RESIZABLE)
+    screen = pygame.display.set_mode((BASE_WIDTH, BASE_HEIGHT))
     pygame.display.set_caption("Onions May Cry")
     clock = pygame.time.Clock()
     state_manager = StateManager()

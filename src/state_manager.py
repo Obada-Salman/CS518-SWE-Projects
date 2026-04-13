@@ -66,6 +66,7 @@ class StateManager:
             if hasattr(self.current_state, 'enter'):
                 if not (name == 'story' and previous_state_name == 'pause'):
                     self.current_state.enter()
+            
             self._play_state_music(name)
         return
 

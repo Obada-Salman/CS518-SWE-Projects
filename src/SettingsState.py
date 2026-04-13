@@ -60,7 +60,7 @@ class SettingsState:
                 self.setup_ui()
                 
     def change_resolution(self, width, height):
-        pygame.display.set_mode((width, height), pygame.RESIZABLE)
+        pygame.display.set_mode((width, height))
         self.screen_width = width
         self.screen_height = height
         self.setup_ui()
