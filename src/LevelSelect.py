@@ -8,6 +8,7 @@ class LevelSelectState:
         self.BASE_HEIGHT = BASE_HEIGHT
         self.name = name
         self.state_machine = state_machine
+        self.current_stage = 1
         self.setup_ui()
         
     def setup_ui(self):
@@ -35,18 +36,31 @@ class LevelSelectState:
         
         max_level = getattr(self.state_machine, 'max_unlocked_level', 1)
         GRAY = (150, 150, 150)
-       
         
-        self.btn_1 = Button(btn_spacing, button_y, btn_width, btn_height, "1", btn_font, BLACK if max_level >= 1 else GRAY, WHITE)
-        self.btn_2 = Button(btn_spacing + 1 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "2", btn_font, BLACK if max_level >= 2 else GRAY, WHITE)
-        self.btn_3 = Button(btn_spacing + 2 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "3", btn_font, BLACK if max_level >= 3 else GRAY, WHITE)
-        self.btn_4 = Button(btn_spacing + 3 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "4", btn_font, BLACK if max_level >= 4 else GRAY, WHITE)
-        self.btn_5 = Button(btn_spacing + 4 * (btn_width + btn_spacing), button_y, btn_width, btn_height, "5", btn_font, BLACK if max_level >= 5 else GRAY, WHITE)
+        self.level_buttons = []
+        start_level = (self.current_stage - 1) * 5
+        
+        for i in range(num_buttons):
+            level_num = start_level + i + 1
+            x_pos = btn_spacing + i * (btn_width + btn_spacing)
+            color = BLACK if max_level >= level_num else GRAY
+            
+            btn = Button(x_pos, button_y, btn_width, btn_height, str(level_num), btn_font, color, WHITE)
+            self.level_buttons.append((btn, level_num))
+        
+        arrow_w = int(50 * scale)
+        arrow_h = int(50 * scale)
+        arrow_y = button_y + (btn_height // 2) - (arrow_h // 2)
+        
+        self.btn_prev = Button(btn_spacing // 4, arrow_y, arrow_w, arrow_h, "<", btn_font, BLACK, WHITE)
+        self.btn_next = Button(self.screen_width - (btn_spacing // 4) - arrow_w, arrow_y, arrow_w, arrow_h, ">", btn_font, BLACK, WHITE)
+        
+        
         self.btn_back = Button(self.screen_width - btn_width - 10, self.screen_height - int(50 * scale) - 10, btn_width, 50 * scale, "Back", btn_font, BLACK, WHITE)
         
-        if self.state_machine.max_unlocked_level <= 2:
+        if max_level <= 5:
             self.background = pygame.image.load('assets/images/Backgrounds/Menu1.png')
-        elif self.state_machine.max_unlocked_level <= 4:
+        elif max_level <= 10:
             self.background = pygame.image.load('assets/images/Backgrounds/Menu2.png')
         else:
             self.background = pygame.image.load('assets/images/Backgrounds/Menu3.png')
@@ -56,17 +70,19 @@ class LevelSelectState:
     def update(self, events):
         max_level = getattr(self.state_machine, 'max_unlocked_level', 1)
         for event in events:
-            if self.btn_1.is_clicked(event) and max_level >= 1:
-                self._start_level(1)
-            elif self.btn_2.is_clicked(event) and max_level >= 2:
-                self._start_level(2)
-            elif self.btn_3.is_clicked(event) and max_level >= 3:
-                self._start_level(3)
-            elif self.btn_4.is_clicked(event) and max_level >= 4:
-                self._start_level(4)
-            elif self.btn_5.is_clicked(event) and max_level >= 5:
-                self._start_level(5)
-            elif self.btn_back.is_clicked(event):
+            for btn, level_num in self.level_buttons:
+                if btn.is_clicked(event) and max_level >= level_num:
+                    self._start_level(level_num)
+                    
+            if self.current_stage < 3 and self.btn_next.is_clicked(event):
+                self.current_stage += 1
+                self.setup_ui()
+            
+            if self.current_stage > 1 and self.btn_prev.is_clicked(event):
+                self.current_stage -= 1
+                self.setup_ui()
+                
+            if self.btn_back.is_clicked(event):
                 self.state_machine.transition('menu')
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.state_machine.transition('menu')
@@ -83,15 +99,18 @@ class LevelSelectState:
         surface.blit(self.scaled_bg, (0, 0))
         title_scale = min(self.screen_width / self.BASE_WIDTH, self.screen_height / self.BASE_HEIGHT)
         title_font = pygame.font.Font(None, max(int(74 * title_scale), 20))
-        title = title_font.render("Stage Select", True, BLACK)
+        title = title_font.render(f"Stage {self.current_stage}", True, BLACK)
         
         surface.blit(title, (self.screen_width // 2 - title.get_width() // 2, int(50 * title_scale)))
         
-        self.btn_1.draw(surface)
-        self.btn_2.draw(surface)
-        self.btn_3.draw(surface)
-        self.btn_4.draw(surface)
-        self.btn_5.draw(surface)
+        for btn, _ in self.level_buttons:
+            btn.draw(surface)
+            
+        if self.current_stage > 1:
+            self.btn_prev.draw(surface)
+        if self.current_stage < 3:
+            self.btn_next.draw(surface)
+            
         self.btn_back.draw(surface)
     
     def enter(self):
