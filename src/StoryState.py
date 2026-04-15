@@ -30,7 +30,7 @@ class StoryState:
         self.internal_surface = pygame.Surface((self.true_width, self.true_height))
         self.tile_size = self.true_height // ROWS
 
-        self.background = pygame.image.load('assets/images/Levels/Level1_800x512.png')
+        self.background = pygame.image.load('assets/images/Levels/Caves.png')
         self.scaled_bg = pygame.transform.scale(self.background, (self.true_width, self.true_height))
         self.door_image = pygame.image.load("assets/images/Misc/door.png")
         self.lock_image = pygame.image.load("assets/images/Misc/lock_52x68.png")
