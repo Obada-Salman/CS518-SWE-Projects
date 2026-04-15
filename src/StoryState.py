@@ -177,16 +177,21 @@ class StoryState:
         self.door_locked = len(self.enemy_list) > 0
 
         if not self.door_locked and self.player.rect.colliderect(self.door):
-            if self.current_level == self.state_machine.max_unlocked_level and self.current_level < 5:
+            self.level_cleared = True
+            self.score_tracker.finalize_level_completion()
+            self.leave()
+            
+            if self.current_level == self.state_machine.max_unlocked_level and self.current_level < 15:
                 self.state_machine.max_unlocked_level += 1
-                self.level_cleared = True
-                self.score_tracker.finalize_level_completion()
-                self.leave()
+            if self.current_level < 15:
                 self.current_level += 1
                 self.level_cleared = False
                 if self.state_machine.current_state == 'story' and hasattr(self.state_machine.current_state, 'set_level'):
                     self.state_machine.current_state.set_level(self.current_level)
                 self.enter()
+            else:
+                self.level_cleared = False
+                self.state_machine.transition('level_select')
 
         self.score_tracker.tick()
 

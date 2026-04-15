@@ -48,9 +48,9 @@ class MainMenuState:
             existing = getattr(getattr(self.state_machine, "score_tracker", None), "username", "player1")
             self.username_input = self._normalize_username(existing)
         
-        if self.state_machine.max_unlocked_level <= 2:
+        if self.state_machine.max_unlocked_level <= 5:
             self.background = pygame.image.load('assets/images/Backgrounds/Menu1.png')
-        elif self.state_machine.max_unlocked_level <= 4:
+        elif self.state_machine.max_unlocked_level <= 10:
             self.background = pygame.image.load('assets/images/Backgrounds/Menu2.png')
         else:
             self.background = pygame.image.load('assets/images/Backgrounds/Menu3.png')
