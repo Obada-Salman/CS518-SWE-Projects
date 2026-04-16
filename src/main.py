@@ -8,6 +8,8 @@ from SettingsState import SettingsState
 from LevelSelect import LevelSelectState
 from LevelbuilderState import LevelBuilderState
 from PauseState import PauseState
+from CustomLevelSelect import CustomLevelSelect
+from CustomState import CustomState
 
 
 
@@ -20,9 +22,10 @@ def main():
     
     state_manager.add_state('menu', MainMenuState('menu', state_manager))
     state_manager.add_state('story', StoryState(state_manager))
-    # state_manager.add_state('custom', CustomLevelState(state_manager))
     state_manager.add_state('level_select',LevelSelectState('level_select', state_manager))
+    state_manager.add_state('custom_select', CustomLevelSelect('custom_select',state_manager))
     state_manager.add_state('settings', SettingsState(state_manager))
+    state_manager.add_state('custom', CustomState(state_manager))
     state_manager.add_state('level_builder', LevelBuilderState(state_manager))
     state_manager.add_state('pause', PauseState('pause', state_manager))
     

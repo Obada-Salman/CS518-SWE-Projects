@@ -77,7 +77,7 @@ class MainMenuState:
                 self._apply_username()
                 self.state_machine.transition('level_select')
             elif self.custom.is_clicked(event):
-                self.state_machine.transition('custom')
+                self.state_machine.transition('custom_select')
             elif self.setting.is_clicked(event):
                 self.state_machine.transition('settings')
             elif self.level_bld.is_clicked(event):
