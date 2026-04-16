@@ -6,6 +6,7 @@ class PauseState:
     def __init__(self, name, state_machine):
         self.name = name
         self.state_machine = state_machine
+        self.previous_state = 'story'
         self.setup_ui()
 
     def setup_ui(self):
@@ -34,25 +35,30 @@ class PauseState:
     def update(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.state_machine.transition('story')
+                self.state_machine.transition(self.previous_state)
             
             if self.btn_resume.is_clicked(event):
-                self.state_machine.transition('story')
+                self.state_machine.transition(self.previous_state)
             
             if self.btn_levels.is_clicked(event):
-                self.state_machine.transition('level_select')
+                if self.previous_state == 'custom':
+                    self.state_machine.transition('custom_select')
+                elif self.previous_state == 'story':
+                    self.state_machine.transition('level_select')
+                else:
+                    self.state_machine.transition('menu')
                 
             if self.btn_menu.is_clicked(event):
                 self.state_machine.transition('menu')
                 
             if event.type == pygame.VIDEORESIZE:
                 self.setup_ui()
-                if 'story' in self.state_machine.states:
-                    self.state_machine.states['story'].setup_ui()
+                if self.previous_state in self.state_machine.states:
+                    self.state_machine.states[self.previous_state].setup_ui()
 
     def draw(self, surface):
-        if 'story' in self.state_machine.states:
-            self.state_machine.states['story'].draw(surface)
+        if self.previous_state in self.state_machine.states:
+            self.state_machine.states[self.previous_state].draw(surface)
         overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
         overlay.fill((255, 255, 255, 128)) 
         surface.blit(overlay, (0,0))
@@ -67,4 +73,6 @@ class PauseState:
         self.btn_menu.draw(surface)
 
     def enter(self):
+        if hasattr(self.state_machine, 'previous_state_name'):
+            self.previous_state = self.state_machine.previous_state_name
         self.setup_ui()

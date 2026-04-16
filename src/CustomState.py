@@ -183,7 +183,7 @@ class CustomState:
             
             
             self.level_cleared = False
-            self.state_machine.transition('custom_level_select')
+            self.state_machine.transition('custom_select')
 
         self.score_tracker.tick()
 
@@ -237,8 +237,8 @@ class CustomState:
         
         if player_position is None or door_position is None:
             print(f"ERROR: Level {self.current_level} is missing a player spawn or a goal")
-            # Fallback: sends user back to level select instead of crashing
-            self.state_machine.transition('custom_level_select')
+            # Fallback: sends user back to custom level select instead of crashing
+            self.state_machine.transition('custom_select')
             return
         
         self.player = Player(player_position[0], player_position[1], 34 * 3, 34 * 3)

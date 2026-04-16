@@ -6,6 +6,7 @@ from score_tracker import ScoreTracker
 class StateManager:
     def __init__(self):
         self.states = {}
+        self.previous_state_name = None
         self.current_state = None
         self.current_state_name = None
         self.window_should_close = False
@@ -64,7 +65,7 @@ class StateManager:
             self.current_state = self.states[name]
             self.current_state_name = name
             if hasattr(self.current_state, 'enter'):
-                if not (name == 'story' and self.previous_state_name == 'pause'):
+                if not (name in ['story', 'custom'] and self.previous_state_name == 'pause'):
                     self.current_state.enter()
             
             self._play_state_music(name)
