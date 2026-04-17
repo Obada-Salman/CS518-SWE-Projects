@@ -25,7 +25,7 @@ class StoryState:
         self.current_level = 1
         self.score_tracker = getattr(self.state_machine, 'score_tracker', ScoreTracker())
         self.current_stage = 1
-        self.stage_music = {1: 'Cave2.ogg', 2: 'Surface.ogg', 3: 'story_stage_3.ogg'}
+        self.stage_music = {1: 'stage1.ogg', 2: 'stage2.ogg', 3: 'stage3.ogg'}
         self.true_width = BASE_WIDTH
         self.true_height = BASE_HEIGHT
         self.internal_surface = pygame.Surface((self.true_width, self.true_height))
