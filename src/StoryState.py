@@ -24,7 +24,8 @@ class StoryState:
         self.state_machine = state_machine
         self.current_level = 1
         self.score_tracker = getattr(self.state_machine, 'score_tracker', ScoreTracker())
-        self.level_music = {1: 'story_level_1.ogg', 2: 'story_level_2.ogg', 3: 'story_level_3.ogg'}
+        self.current_stage = 1
+        self.stage_music = {1: 'Cave2.ogg', 2: 'Surface.ogg', 3: 'story_stage_3.ogg'}
         self.true_width = BASE_WIDTH
         self.true_height = BASE_HEIGHT
         self.internal_surface = pygame.Surface((self.true_width, self.true_height))
@@ -192,6 +193,7 @@ class StoryState:
             else:
                 self.level_cleared = False
                 self.state_machine.transition('level_select')
+            self.current_stage = self.current_level // 5 + 1 
 
         self.score_tracker.tick()
 
@@ -322,7 +324,7 @@ class StoryState:
             print(f"Exited Level {self.current_level}")
 
     def _play_level_music(self):
-        track = self.level_music.get(self.current_level)
+        track = self.stage_music.get(self.current_stage)
         if track and hasattr(self.state_machine, 'sound_manager'):
             self.state_machine.sound_manager.play_music_file(track)
     
