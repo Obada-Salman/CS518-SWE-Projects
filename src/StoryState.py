@@ -52,6 +52,18 @@ class StoryState:
         self.scaled_height = int(self.true_height * self.scale)
         self.offset_x = (self.screen_width - self.scaled_width) // 2
         self.offset_y = (self.screen_height - self.scaled_height) // 2
+        if self.current_stage == 1:
+            self.background = pygame.image.load('assets/images/Levels/Caves.png')
+        elif self.current_stage == 2:
+            if self.state_machine.max_unlocked_level <= 5:
+                self.background = pygame.image.load('assets/images/Levels/Surface1.png')
+            elif self.state_machine.max_unlocked_level <= 10:
+                self.background = pygame.image.load('assets/images/Levels/Surface2.png')
+            else:
+                self.background = pygame.image.load('assets/images/Levels/Surface3.png')
+        else:
+            self.background = pygame.image.load('assets/images/Levels/creepy.png')
+        self.scaled_bg = pygame.transform.scale(self.background, (self.true_width, self.true_height))
         # self.tile_size = self.true_height // ROWS
 
     def update(self, events):
@@ -193,7 +205,7 @@ class StoryState:
             else:
                 self.level_cleared = False
                 self.state_machine.transition('level_select')
-            self.current_stage = self.current_level // 5 + 1 
+        self.current_stage = self.current_level // 5 + 1
 
         self.score_tracker.tick()
 

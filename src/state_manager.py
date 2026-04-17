@@ -20,7 +20,7 @@ class StateManager:
             'level_select': 'menu_theme.ogg',
                 'settings': 'menu_theme.ogg',
                 'custom': 'Surface.ogg',
-                'level_builder': 'Cave.ogg',
+                'level_builder': 'Waiting.ogg',
         }
 
         # collectibles that save across levels
