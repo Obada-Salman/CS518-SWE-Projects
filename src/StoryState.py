@@ -164,6 +164,37 @@ class StoryState:
             
             ally.update(self.map, self.tile_size)
 
+        for pot in self.pot_list[:]:
+            dist = math.hypot(self.player.x - pot.position[0], self.player.y - pot.position[1])
+            sufficient_resources = (self.state_machine.get_water_collected() >= 5 and self.state_machine.get_sunlight_collected() >= 3
+                                    and self.state_machine.get_nutrients_collected() >= 2)
+            if keys[pygame.K_e] and dist < 100 and sufficient_resources:
+                # consume resources
+                self.state_machine.add_water(-5)
+                self.state_machine.add_sunlight(-3)
+                self.state_machine.add_nutrients(-2)
+                print(f"Total water collected: {self.state_machine.get_water_collected()}")
+                print(f"Total sunlight collected: {self.state_machine.get_sunlight_collected()}")
+                print(f"Total nutrients collected: {self.state_machine.get_nutrients_collected()}")
+
+                # plant onion ally
+                self.ally_list.append(NPC(pot.position[0], pot.position[1], 102, 102, type='onion', speed=3))
+                self.ally_list[-1].team = 'ally'
+                self.ally_list[-1].recruited = True
+                self.pot_list.remove(pot)
+                pygame.mixer.Sound('assets/sounds/collect.ogg').play()
+                break
+
+        # spikes damage player
+        for spike in self.spike_list:
+            offset_x = spike.rect.x - self.player.rect.x
+            offset_y = spike.rect.y - self.player.rect.y
+            spike_mask = pygame.mask.from_surface(spike.image)
+            if self.player.mask.overlap(spike_mask, (offset_x, offset_y)) and self.player.can_damage():
+                self.player.take_damage(1)
+                self.snd_damage.play()
+                break
+
         for c in self.collectibles[:]:
             if self.player.rect.colliderect(c['rect']):
                 if c['type'] == 'water':
@@ -235,6 +266,12 @@ class StoryState:
             sprite_rect = sprite.get_rect(center=(center_x, center_y))
             self.internal_surface.blit(sprite, sprite_rect)
 
+        for pot in self.pot_list:
+            self.internal_surface.blit(pot.image, (pot.position[0] - self.scroll, pot.position[1]))
+
+        for spike in self.spike_list:
+            self.internal_surface.blit(spike.image, (spike.position[0] - self.scroll, spike.position[1]))
+
         self.player.draw(self.internal_surface, self.scroll)
             
         # scales internal surface to fit the window while maintaining aspect ratio
@@ -256,6 +293,8 @@ class StoryState:
         nutrient_positions = game_map.get_tile_position(self.map, "nutrient", self.tile_size, True)
         ally_carrot_pos = game_map.get_tile_position(self.map, "carrot_ally", self.tile_size, True)
         ally_potato_pos = game_map.get_tile_position(self.map, "potato_ally", self.tile_size, True)
+        flower_pot_pos = game_map.get_tile_position(self.map, "flower_pot", self.tile_size, True)
+        spike_positions = game_map.get_tile_position(self.map, "spike", self.tile_size, True)
         
         if player_position is None or door_position is None:
             print(f"ERROR: Level {self.current_level} is missing a player spawn or a goal")
@@ -268,6 +307,8 @@ class StoryState:
         
         self.enemy_list = []
         self.ally_list = []
+        self.pot_list = []
+        self.spike_list = []
 
         # Add carrots
         for enemy_position in enemy_carrot_pos:
@@ -291,7 +332,16 @@ class StoryState:
             self.map[ally_position[3]][ally_position[2]] = None
             self.ally_list[-1].team = 'ally'
             self.ally_list[-1].recruited = False
-            
+
+        for pot_pos in flower_pot_pos:
+            self.pot_list.append(Tile((pot_pos[0], pot_pos[1]), (55, 59), 'flower_pot'))
+            self.map[pot_pos[3]][pot_pos[2]] = None
+
+        # Add spikes
+        for spike_pos in spike_positions:
+            self.spike_list.append(Tile((spike_pos[0], spike_pos[1]), (self.tile_size, self.tile_size), 'spike'))
+            self.map[spike_pos[3]][spike_pos[2]] = None
+
         self.collectible_sizes = {'water': (45, 53), 'sunlight': (40, 38), 'nutrient': (29, 46)}
         self.sprite_names = {'water': 'water_sprite.png', 'sunlight': 'sun_sprite.png', 'nutrient': 'nutrient_sprite.png'}
         self.collectible_images = {}

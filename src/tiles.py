@@ -14,7 +14,11 @@ tile_lookup = {
 
     # allies
     'carrot_ally': {"image": "assets/images/Characters/carrot_static_ally.png", "collision": False},
-    'potato_ally': {"image": "assets/images/Characters/potato_static_ally.png", "collision": False}
+    'potato_ally': {"image": "assets/images/Characters/potato_static_ally.png", "collision": False},
+    'onion_ally': {"image": "assets/images/Characters/onion_static_ally.png", "collision": False},
+    'flower_pot': {"image": "assets/images/Misc/flower_pot.png", "collision": False},
+
+    'spike': {"image": "assets/images/Misc/spike.png", "collision": False}
 }
 
 class Tile(pygame.sprite.Sprite):

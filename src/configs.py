@@ -1,5 +1,5 @@
 CONFIGS = {
-    "player": {
+    "onion": {
         "frame_width": 34,
         "frame_height": 34,
         "rows": 1,

@@ -27,7 +27,7 @@ class Player:
         self.visible = True
         self.invincibility_time = 2000
 
-        self.sprites = SpriteHandler("assets/images/Characters/Onion_34x34.png", type='player', scale=3, anim_time=7)
+        self.sprites = SpriteHandler("assets/images/Characters/Onion_34x34.png", type='onion', scale=3, anim_time=7)
         self.tear = pygame.image.load("assets/images/Misc/tear_34x34.png")
         self.health_image = pygame.image.load('assets/images/Misc/health_50x50.png')
         self.tears = [] 

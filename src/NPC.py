@@ -7,12 +7,20 @@ class NPC:
         'carrot': {
             'speed': 3,
             'health': 8,
+            'scale': 1,
             'sprite': 'assets/images/Characters/Carrot_75x110.png'
         },
         'potato': {
             'speed': 2,
             'health': 5,
+            'scale': 1,
             'sprite': 'assets/images/Characters/Potato_83x94.png'
+        },
+        'onion': {
+            'speed': 2,
+            'health': 5,
+            'scale': 2,
+            'sprite': 'assets/images/Characters/Onion_34x34.png'
         }
     }
 
@@ -40,7 +48,7 @@ class NPC:
         self.state = 0 
         self.moving = False
         self.jumping = False
-        self.sprites = SpriteHandler(sprite_path, type=self.type)
+        self.sprites = SpriteHandler(sprite_path, type=self.type, scale=npc_config['scale'])
         self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
         self.mask_frame = self.sprites.get_current_frame()
         self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)
