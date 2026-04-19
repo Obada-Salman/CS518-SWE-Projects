@@ -2,14 +2,15 @@
 
 ## Build
 ```
-git clone [text](https://github.com/Obada-Salman/CS518-SWE-Projects.git)
+git clone https://github.com/Obada-Salman/CS518-SWE-Projects.git
 
-# Game was developted on python 3.14
+# Game was developed on python 3.14
 python3.14 -m venv .env
 
 # Activate enviorment os dependent
 # linux/macOS
 source .env/bin/activate
+
 # windows (powershell)
 .env\Scripts\Activate.ps1
 # windows (cmd)
