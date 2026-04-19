@@ -1,5 +1,25 @@
 # CS518-SWE-Projects
 
+## Build
+```
+git clone [text](https://github.com/Obada-Salman/CS518-SWE-Projects.git)
+
+# Game was developted on python 3.14
+python3.14 -m venv .env
+
+# Activate enviorment os dependent
+# linux/macOS
+source .env/bin/activate
+# windows (powershell)
+.env\Scripts\Activate.ps1
+# windows (cmd)
+venv\Scripts\activate.bat
+
+pip install -r requirements.txt
+pip install pyinstaller # pyinstaller for python 3.14 isn't compatiable with pathlib
+pyinstaller --name vegtable_wars --onefile --add-data "assets:assets" --add-data "levels/story:levels/story" src/main.py
+```
+
 ## Leaderboard scaffold (online + persistent)
 
 This project now includes a minimal online leaderboard backend using Flask + SQLite.
