@@ -124,10 +124,12 @@ class LevelBuilderState:
                     self.level_type = "story"
                     self.level_type_button.text = "Story"
                     self.scroll = 0
+                    self.LEVEL = 1
                 else:
                     self.level_type = "community"
                     self.level_type_button.text = "Community"
                     self.scroll = 0
+                    self.LEVEL = 1
 
                 self.level_type_button = Button(
                     (self.screen_width // 2) - 200, self.screen_height - (self.margin_height // 2),

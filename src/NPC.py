@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from SpriteHandler import SpriteHandler
+import resource_path
 
 class NPC:
     NPC_TYPES = {
@@ -48,7 +49,7 @@ class NPC:
         self.state = 0 
         self.moving = False
         self.jumping = False
-        self.sprites = SpriteHandler(sprite_path, type=self.type, scale=npc_config['scale'])
+        self.sprites = SpriteHandler(resource_path.get_resource_path(sprite_path), type=self.type, scale=npc_config['scale'])
         self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
         self.mask_frame = self.sprites.get_current_frame()
         self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)

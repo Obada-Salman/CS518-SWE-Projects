@@ -2,3 +2,6 @@
 __pycache__
 **/__pycache__/
 data/*.db
+dist
+build
+vegtable_wars.spec

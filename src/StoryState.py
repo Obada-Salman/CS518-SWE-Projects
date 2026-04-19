@@ -7,6 +7,7 @@ import game_map
 from tiles import Tile
 from state_manager import StateManager
 import math
+import resource_path
 
 class StoryState:
     RESOURCE_POINTS = {
@@ -31,14 +32,14 @@ class StoryState:
         self.internal_surface = pygame.Surface((self.true_width, self.true_height))
         self.tile_size = self.true_height // ROWS
 
-        self.background = pygame.image.load('assets/images/Levels/Caves.png')
+        self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Caves.png'))
         self.scaled_bg = pygame.transform.scale(self.background, (self.true_width, self.true_height))
-        self.door_image = pygame.image.load("assets/images/Misc/door.png")
-        self.lock_image = pygame.image.load("assets/images/Misc/lock_52x68.png")
+        self.door_image = pygame.image.load(resource_path.get_resource_path("assets/images/Misc/door.png"))
+        self.lock_image = pygame.image.load(resource_path.get_resource_path("assets/images/Misc/lock_52x68.png"))
         self.door_locked = True
 
-        self.snd_tear_hit = pygame.mixer.Sound('assets/sounds/tear_hit.ogg')
-        self.snd_damage = pygame.mixer.Sound('assets/sounds/damage.ogg')
+        self.snd_tear_hit = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/tear_hit.ogg'))
+        self.snd_damage = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/damage.ogg'))
         self.level_cleared = False
         self.scroll = 0
         
@@ -53,16 +54,16 @@ class StoryState:
         self.offset_x = (self.screen_width - self.scaled_width) // 2
         self.offset_y = (self.screen_height - self.scaled_height) // 2
         if self.current_stage == 1:
-            self.background = pygame.image.load('assets/images/Levels/Caves.png')
+            self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Caves.png'))
         elif self.current_stage == 2:
             if self.state_machine.max_unlocked_level <= 5:
-                self.background = pygame.image.load('assets/images/Levels/Surface1.png')
+                self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Surface1.png'))
             elif self.state_machine.max_unlocked_level <= 10:
-                self.background = pygame.image.load('assets/images/Levels/Surface2.png')
+                self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Surface2.png'))
             else:
-                self.background = pygame.image.load('assets/images/Levels/Surface3.png')
+                self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Surface3.png'))
         else:
-            self.background = pygame.image.load('assets/images/Levels/creepy.png')
+            self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/creepy.png'))
         self.scaled_bg = pygame.transform.scale(self.background, (self.true_width, self.true_height))
         # self.tile_size = self.true_height // ROWS
 
@@ -128,7 +129,7 @@ class StoryState:
                 if dist < 100 and keys[pygame.K_e]:
                     ally.recruited = True
                     ally.speed = 3
-                    pygame.mixer.Sound('assets/sounds/collect.ogg').play()
+                    pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/collect.ogg')).play()
             else:
                 # Find closest enemy
                 closest_enemy = None
@@ -182,7 +183,7 @@ class StoryState:
                 self.ally_list[-1].team = 'ally'
                 self.ally_list[-1].recruited = True
                 self.pot_list.remove(pot)
-                pygame.mixer.Sound('assets/sounds/collect.ogg').play()
+                pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/collect.ogg')).play()
                 break
 
         # spikes damage player
@@ -211,7 +212,7 @@ class StoryState:
                     points_per_unit=self.RESOURCE_POINTS.get(c['type'], 10),
                 )
                 self.collectibles.remove(c)
-                pygame.mixer.Sound('assets/sounds/collect.ogg').play()
+                pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/collect.ogg')).play()
 
         if not self.player.is_alive():
             self.__init__(self.state_machine)
@@ -346,7 +347,7 @@ class StoryState:
         self.sprite_names = {'water': 'water_sprite.png', 'sunlight': 'sun_sprite.png', 'nutrient': 'nutrient_sprite.png'}
         self.collectible_images = {}
         for typ, size in self.collectible_sizes.items():
-            img = pygame.image.load(f"assets/images/Misc/{self.sprite_names[typ]}")
+            img = pygame.image.load(resource_path.get_resource_path(f"assets/images/Misc/{self.sprite_names[typ]}"))
             self.collectible_images[typ] = img # pygame.transform.smoothscale(img, size)
 
         self.collectibles = []

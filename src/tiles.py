@@ -1,14 +1,13 @@
 import pygame
+import resource_path
 
 tile_lookup = {
-    # 'grass': {"image": (0, 255, 0), "collision": True},
     'floor': {"image": "assets/images/Levels/cave_floor.png", "collision": True},
     'water': {"image": "assets/images/Misc/water_sprite.png", "collision": True},
     'sunlight': {"image": "assets/images/Misc/sun_sprite.png", "collision": True},
     'nutrient': {"image": "assets/images/Misc/nutrient_sprite.png", "collision": True},
     'carrot': {"image": "assets/images/Characters/carrot_static.png", "collision": False},
     'potato': {"image": "assets/images/Characters/potato_static.png", "collision": False},
-    # 'goal': {"image": (128, 128, 128), "collision": True},
     'goal': {"image": "assets/images/Misc/door.png", "collision": False},
     'player': {"image": "assets/images/Characters/onion_static.png", "collision": False},
 
@@ -31,13 +30,13 @@ class Tile(pygame.sprite.Sprite):
         if self.tile_info == None:
             raise ValueError(f"Invalid tile tyle: {tile_lookup}\n Try: {list(tile_lookup.keys())}")
 
-        self.image = self.tile_info["image"]
+        self.image = resource_path.get_resource_path(self.tile_info["image"])
         self.collision = self.tile_info["collision"]
         self.position = postion
         self.size = size
 
         if isinstance(self.image, str):
-            self.image = pygame.image.load(self.tile_info["image"])
+            self.image = pygame.image.load(self.image)
             self.image = pygame.transform.scale(self.image, (int(self.size[0] * 1), int(self.size[1] * 1)))
         elif isinstance(self.image, tuple):
             self.image = pygame.Surface(self.size)
@@ -49,13 +48,14 @@ class Tile(pygame.sprite.Sprite):
         state = self.__dict__.copy()
 
         state['image'] = self.tile_info["image"]
+        # state['image'] = self.image
         return state
     
     def __setstate__(self, state):
         self.__dict__.update(state)
 
         if isinstance(self.image, str):
-            self.image = pygame.image.load(self.tile_info["image"])
+            self.image = pygame.image.load(resource_path.get_resource_path(self.image))
             self.image = pygame.transform.scale(self.image, (int(self.size[0] * 1), int(self.size[1] * 1)))
         elif isinstance(self.image, tuple):
             self.image = pygame.Surface(self.size)

@@ -4,6 +4,7 @@ from settings import ROWS, COLS, WHITE
 from Player import Player
 from NPC import NPC
 import os
+import resource_path
 
 def draw_map(screen, tile_map, tile_size, SCROLL):
     for row in tile_map:
@@ -17,17 +18,7 @@ def draw_map(screen, tile_map, tile_size, SCROLL):
                 if isinstance(image, pygame.Surface):
                     image = pygame.transform.scale(image, (tile_size, tile_size))
 
-                # if tile.type != "player" and tile.type != "carrot":
-
                 screen.blit(image, (x, y))
-
-                # elif tile.type == "player":
-                #     player = Player(x, y, tile_size, tile_size)
-                #     player.draw(screen)
-                
-                # elif tile.type == "carrot":
-                #     player = Enemy(x, y, tile_size, tile_size)
-                #     player.draw(screen)
                 
 def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, tile_size, SCROLL):
     for row in range(ROWS + 1):
@@ -37,21 +28,38 @@ def draw_grid(screen, SCREEN_WIDTH, SCREEN_HEIGHT, tile_size, SCROLL):
         pygame.draw.line(screen, WHITE, (col * tile_size - SCROLL, 0), (col * tile_size - SCROLL, SCREEN_HEIGHT))
 
 def save_map(filename, tile_map, level_type="community"):
-        file_path = os.path.join("levels", level_type, f"{filename}.pkl")
+    # file_path = os.path.join("levels", level_type, f"{filename}.pkl")
 
-        with open(file_path, "wb") as f:
-            pickle.dump(tile_map, f)
+    if level_type == "community":
+        file_path = resource_path.get_community_level_path()
+    elif level_type == "story":
+        file_path = resource_path.get_resource_path(f"levels/{level_type}/")
+        
+    file_path = os.path.join(file_path, f"{filename}.pkl")
+
+    with open(file_path, "wb") as f:
+        pickle.dump(tile_map, f)
 
 def load_map(filename, level_type="story"):
-    file_path = os.path.join("levels", level_type, f"{filename}.pkl")
-    default_path = os.path.join("levels", "default", f"deafult_map.pkl")
+    # file_path = os.path.join("levels", level_type, f"{filename}.pkl")
+    default_map = [[None]*20 for _ in range(100)] # os.path.join("levels", "default", f"deafult_map.pkl") #TODO change to empty 2x2 matrix of 100x20
+
+    if level_type == "community":
+            file_path = resource_path.get_community_level_path()
+    elif level_type == "story":
+            file_path = resource_path.get_resource_path(f"levels/{level_type}/")
+        
+    file_path = os.path.join(file_path, f"{filename}.pkl")
+    print(file_path)
 
     try:
         with open(file_path, "rb") as f:
             tile_map = pickle.load(f)
-    except FileNotFoundError:
-        with open(default_path, "rb") as f:
-            tile_map = pickle.load(f)
+    except TypeError as e:
+        print(f"TypeError{e}")
+    except FileNotFoundError as e:
+        print(f"FileNotFoundError: {e}")
+        tile_map = default_map
 
     return tile_map
 

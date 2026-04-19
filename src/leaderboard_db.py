@@ -1,16 +1,18 @@
 import sqlite3
 import threading
-from pathlib import Path
+# from pathlib import Path #-> incomtabale with pyisntaller
 from typing import Any, Optional
+import resource_path
 
 
-DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / "data" / "leaderboard.db"
+# DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / "data" / "leaderboard.db"
+DEFAULT_DB_PATH = resource_path.get_leaderboard_database()
 
 
 class LeaderboardRepository:
-    def __init__(self, db_path: Optional[Path] = None) -> None:
-        self.db_path = Path(db_path) if db_path else DEFAULT_DB_PATH
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+    def __init__(self, db_path: Optional[str] = None) -> None:
+        self.db_path = db_path if db_path else DEFAULT_DB_PATH
+        # self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
         self._initialize()
 

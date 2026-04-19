@@ -1,6 +1,7 @@
 import pygame
 from SpriteHandler import *
 from settings import *
+import resource_path
 
 class Player:
     def __init__(self, x, y, width, height):
@@ -27,14 +28,14 @@ class Player:
         self.visible = True
         self.invincibility_time = 2000
 
-        self.sprites = SpriteHandler("assets/images/Characters/Onion_34x34.png", type='onion', scale=3, anim_time=7)
-        self.tear = pygame.image.load("assets/images/Misc/tear_34x34.png")
-        self.health_image = pygame.image.load('assets/images/Misc/health_50x50.png')
+        self.sprites = SpriteHandler(resource_path.get_resource_path("assets/images/Characters/Onion_34x34.png"), type='onion', scale=3, anim_time=7)
+        self.tear = pygame.image.load(resource_path.get_resource_path("assets/images/Misc/tear_34x34.png"))
+        self.health_image = pygame.image.load(resource_path.get_resource_path('assets/images/Misc/health_50x50.png'))
         self.tears = [] 
         self.x_pressed_last_frame = False 
 
-        self.snd_tear_shoot = pygame.mixer.Sound('assets/sounds/tear_shoot.ogg')
-        self.snd_jump = pygame.mixer.Sound('assets/sounds/jump.ogg')
+        self.snd_tear_shoot = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/tear_shoot.ogg'))
+        self.snd_jump = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/jump.ogg'))
 
         self.mask = pygame.mask.from_surface(self.sprites.get_current_frame())
 

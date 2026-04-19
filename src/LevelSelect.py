@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from button import Button
+import resource_path
 
 class LevelSelectState:
     def __init__(self, name, state_machine):
@@ -59,16 +60,16 @@ class LevelSelectState:
         self.btn_back = Button(self.screen_width - btn_width - 10, self.screen_height - int(50 * scale) - 10, btn_width, 50 * scale, "Back", btn_font, BLACK, WHITE)
         
         if self.current_stage == 1:
-            self.background = pygame.image.load('assets/images/Levels/Caves.png')
+            self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Caves.png'))
         elif self.current_stage == 2:
             if self.state_machine.max_unlocked_level <= 5:
-                self.background = pygame.image.load('assets/images/Levels/Surface1.png')
+                self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Surface1.png'))
             elif self.state_machine.max_unlocked_level <= 10:
-                self.background = pygame.image.load('assets/images/Levels/Surface2.png')
+                self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Surface2.png'))
             else:
-                self.background = pygame.image.load('assets/images/Levels/Surface3.png')
+                self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Surface3.png'))
         else:
-            self.background = pygame.image.load('assets/images/Levels/creepy.png')
+            self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/creepy.png'))
             
         self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
         

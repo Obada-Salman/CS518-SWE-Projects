@@ -2,6 +2,7 @@ import pygame
 from settings import *
 from button import Button
 from Player import Player
+import resource_path
 
 class MainMenuState:
     def __init__(self, name, state_machine):
@@ -49,11 +50,11 @@ class MainMenuState:
             self.username_input = self._normalize_username(existing)
         
         if self.state_machine.max_unlocked_level <= 5:
-            self.background = pygame.image.load('assets/images/Backgrounds/Menu1.png')
+            self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Backgrounds/Menu1.png'))
         elif self.state_machine.max_unlocked_level <= 10:
-            self.background = pygame.image.load('assets/images/Backgrounds/Menu2.png')
+            self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Backgrounds/Menu2.png'))
         else:
-            self.background = pygame.image.load('assets/images/Backgrounds/Menu3.png')
+            self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Backgrounds/Menu3.png'))
             
         self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
         
