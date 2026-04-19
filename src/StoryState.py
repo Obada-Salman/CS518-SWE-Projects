@@ -7,7 +7,10 @@ import game_map
 from tiles import Tile
 from state_manager import StateManager
 import math
+import random
 import resource_path
+from dialogue_cutscene import SequencePlayer
+from story_content import RECRUIT_DIALOGUE_BANK, STORY_CUTSCENE_FRAMES
 
 class StoryState:
     RESOURCE_POINTS = {
@@ -40,8 +43,11 @@ class StoryState:
 
         self.snd_tear_hit = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/tear_hit.ogg'))
         self.snd_damage = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/damage.ogg'))
+        self.snd_collect = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/collect.ogg'))
         self.level_cleared = False
         self.scroll = 0
+        self.sequence_player = SequencePlayer()
+        self.cutscenes_seen = set()
         
     def setup_ui(self):    
         surface = pygame.display.get_surface()
@@ -69,10 +75,18 @@ class StoryState:
 
     def update(self, events):
         for event in events:
+            if event.type == pygame.VIDEORESIZE:
+                self.setup_ui()
+
+        if self.sequence_player.active:
+            self.sequence_player.process_events(events)
+            return
+
+        for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.state_machine.transition('pause')
-            elif event.type == pygame.VIDEORESIZE:
-                self.setup_ui()
+                self.score_tracker.tick()
+                return
 
         # Update Movement and Map Collisions
         self.player.update(self.map, self.tile_size)
@@ -127,9 +141,8 @@ class StoryState:
             if not ally.recruited:
                 dist = math.hypot(ally.x - self.player.x, ally.y - self.player.y)
                 if dist < 100 and keys[pygame.K_e]:
-                    ally.recruited = True
-                    ally.speed = 3
-                    pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/collect.ogg')).play()
+                    self._start_recruitment_dialogue(ally)
+                    return
             else:
                 # Find closest enemy
                 closest_enemy = None
@@ -183,7 +196,7 @@ class StoryState:
                 self.ally_list[-1].team = 'ally'
                 self.ally_list[-1].recruited = True
                 self.pot_list.remove(pot)
-                pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/collect.ogg')).play()
+                self.snd_collect.play()
                 break
 
         # spikes damage player
@@ -212,7 +225,7 @@ class StoryState:
                     points_per_unit=self.RESOURCE_POINTS.get(c['type'], 10),
                 )
                 self.collectibles.remove(c)
-                pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/collect.ogg')).play()
+                self.snd_collect.play()
 
         if not self.player.is_alive():
             self.__init__(self.state_machine)
@@ -281,6 +294,7 @@ class StoryState:
         surface.fill((0, 0, 0)) 
         # scaled game onto the center of the window
         surface.blit(scaled_display, (self.offset_x, self.offset_y))
+        self.sequence_player.draw(surface)
         
     def enter(self):
         self.setup_ui()
@@ -374,6 +388,7 @@ class StoryState:
 
         self._play_level_music()
         self.score_tracker.start_level(f"story_level_{self.current_level}")
+        self._start_level_cutscene_if_needed()
 
     def set_level(self, level_number):
         self.current_level = level_number
@@ -398,3 +413,34 @@ class StoryState:
 
     def _enemy_points(self, enemy):
         return self.ENEMY_KILL_POINTS.get(getattr(enemy, 'type', None), 100)
+
+    def _start_recruitment_dialogue(self, ally):
+        if ally.recruited:
+            return
+
+        bank = list(RECRUIT_DIALOGUE_BANK.get(ally.type, RECRUIT_DIALOGUE_BANK['carrot']))
+        random.shuffle(bank)
+        dialogue = bank[:4]
+
+        self.sequence_player.start_dialogue(
+            dialogue,
+            on_complete=lambda: self._complete_recruitment(ally),
+        )
+
+    def _complete_recruitment(self, ally):
+        if ally.recruited:
+            return
+        ally.recruited = True
+        ally.speed = 3
+        self.snd_collect.play()
+
+    def _start_level_cutscene_if_needed(self):
+        if self.current_level in self.cutscenes_seen:
+            return
+
+        frames = STORY_CUTSCENE_FRAMES.get(self.current_level)
+        if not frames:
+            return
+
+        self.cutscenes_seen.add(self.current_level)
+        self.sequence_player.start_cutscene(frames)
