@@ -34,13 +34,14 @@ class NPC:
     def __init__(self, x, y, width, height, type='carrot', speed=None):
         self.x = float(x)
         self.y = float(y)
-        self.width = width
-        self.height = height
+        
+        npc_config = self.NPC_TYPES.get(type, self.NPC_TYPES['carrot'])
         self.type = type
         self.team = 'enemy'
         self.recruited = False
+        self.width = width * npc_config['scale']
+        self.height = height * npc_config['scale']
         
-        npc_config = self.NPC_TYPES.get(type, self.NPC_TYPES['carrot'])
         
         self.speed = speed if speed is not None else npc_config['speed']
         self.health = npc_config['health']
