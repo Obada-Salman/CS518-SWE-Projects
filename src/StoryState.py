@@ -59,6 +59,7 @@ class StoryState:
         self.scaled_height = int(self.true_height * self.scale)
         self.offset_x = (self.screen_width - self.scaled_width) // 2
         self.offset_y = (self.screen_height - self.scaled_height) // 2
+        self.current_stage = (self.current_level - 1) // 5 + 1
         if self.current_stage == 1:
             self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Levels/Caves.png'))
         elif self.current_stage == 2:
@@ -250,11 +251,12 @@ class StoryState:
             else:
                 self.level_cleared = False
                 self.state_machine.transition('level_select')
-        self.current_stage = self.current_level // 5 + 1
+        self.current_stage = (self.current_level - 1) // 5 + 1
 
         self.score_tracker.tick()
 
     def draw(self, surface):
+        self.setup_ui()
         self.internal_surface.blit(self.scaled_bg, (0, 0))
         
         game_map.draw_map(self.internal_surface, self.map, self.tile_size, self.scroll)
