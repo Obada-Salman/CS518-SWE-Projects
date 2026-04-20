@@ -302,6 +302,7 @@ class StoryState:
         player_position = game_map.get_tile_position(self.map, "player", self.tile_size, False)        
         enemy_carrot_pos = game_map.get_tile_position(self.map, "carrot", self.tile_size, True)
         enemy_potato_pos = game_map.get_tile_position(self.map, "potato", self.tile_size, True)
+        enemy_tomato_pos = game_map.get_tile_position(self.map, "tomato", self.tile_size, True)
         door_position = game_map.get_tile_position(self.map, "goal", self.tile_size, False)
         water_positions = game_map.get_tile_position(self.map, "water", self.tile_size, True)
         sunlight_positions = game_map.get_tile_position(self.map, "sunlight", self.tile_size, True)
@@ -310,7 +311,8 @@ class StoryState:
         ally_potato_pos = game_map.get_tile_position(self.map, "potato_ally", self.tile_size, True)
         flower_pot_pos = game_map.get_tile_position(self.map, "flower_pot", self.tile_size, True)
         spike_positions = game_map.get_tile_position(self.map, "spike", self.tile_size, True)
-        
+        ally_tomato_pos = game_map.get_tile_position(self.map, "tomato_ally", self.tile_size, True)
+
         if player_position is None or door_position is None:
             print(f"ERROR: Level {self.current_level} is missing a player spawn or a goal")
             # Fallback: sends user back to level select instead of crashing
@@ -335,6 +337,11 @@ class StoryState:
             self.enemy_list.append(NPC(enemy_position[0], enemy_position[1], 83, 94, type='potato'))
             self.map[enemy_position[3]][enemy_position[2]] = None
 
+        # Add tomatoes
+        for enemy_position in enemy_tomato_pos:
+            self.enemy_list.append(NPC(enemy_position[0], enemy_position[1], 94, 190, type='tomato'))
+            self.map[enemy_position[3]][enemy_position[2]] = None
+
         # Add allies
         for ally_position in ally_carrot_pos:
             self.ally_list.append(NPC(ally_position[0], ally_position[1], 75, 110, type='carrot', speed=0))
@@ -344,6 +351,12 @@ class StoryState:
 
         for ally_position in ally_potato_pos:
             self.ally_list.append(NPC(ally_position[0], ally_position[1], 83, 94, type='potato', speed=0))
+            self.map[ally_position[3]][ally_position[2]] = None
+            self.ally_list[-1].team = 'ally'
+            self.ally_list[-1].recruited = False
+
+        for ally_position in ally_tomato_pos:
+            self.ally_list.append(NPC(ally_position[0], ally_position[1], 94, 190, type='tomato', speed=0))
             self.map[ally_position[3]][ally_position[2]] = None
             self.ally_list[-1].team = 'ally'
             self.ally_list[-1].recruited = False
