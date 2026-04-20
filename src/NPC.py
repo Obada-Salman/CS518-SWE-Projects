@@ -22,6 +22,12 @@ class NPC:
             'health': 5,
             'scale': 2,
             'sprite': 'assets/images/Characters/Onion_34x34.png'
+        },
+        'tomato': {
+            'speed': 7,
+            'health': 3,
+            'scale': 0.6,
+            'sprite': 'assets/images/Characters/Tomato_94x190.png'
         }
     }
 
