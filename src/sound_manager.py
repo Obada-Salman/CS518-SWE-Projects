@@ -1,13 +1,14 @@
-from pathlib import Path
 import pygame
-
+import resource_path
+import os
 
 class SoundManager:
     def __init__(self):
         self.enabled = self._init_mixer()
         self.current_track = None
         self.volume = 0.5
-        self.sounds_dir = Path(__file__).resolve().parent.parent / "assets" / "sounds"
+        # self.sounds_dir = Path(__file__).resolve().parent.parent / "assets" / "sounds"
+        self.sounds_dir = resource_path.get_resource_path(os.path.join("assets", "sounds"))
 
     def _init_mixer(self):
         if pygame.mixer.get_init():
@@ -38,8 +39,8 @@ class SoundManager:
         if self.current_track == file_name:
             return
 
-        track_path = self.sounds_dir / file_name
-        if not track_path.exists():
+        track_path = os.path.join(self.sounds_dir, file_name)
+        if not os.path.exists(track_path):
             print(f"[SoundManager] Missing music file: {track_path}")
             return
 

@@ -142,6 +142,33 @@ class Player:
         surface.blit(pygame.font.SysFont(None, 40).render(f"x {self.health}", True, (255, 255, 255)), (60, 20))
     
     def check_map_collision(self, game_map, tile_size, axis):
+        map_width = len(game_map[0]) * tile_size
+        map_height = len(game_map) * tile_size
+
+        mask_rects = self.mask.get_bounding_rects()
+        if not mask_rects:
+            return
+        
+        mask_bounding_rect = mask_rects[0]
+        
+        if axis == 'x':
+            # Left Edge current position + mask offset
+            if self.rect.x + mask_bounding_rect.left < 0:
+                self.rect.x = -mask_bounding_rect.left
+                self.x = float(self.rect.x)
+                self.vx = 0
+                
+            # Right Edge current position + mask width
+            elif self.rect.x + mask_bounding_rect.right > map_width:
+                self.rect.x = map_width - mask_bounding_rect.right
+                self.x = float(self.rect.x)
+                self.vx = 0
+        
+        elif axis == 'y':
+            # Bottom Edge
+            if self.rect.y + mask_bounding_rect.bottom > map_height:
+                self.health = 0
+
         # Calculate exactly which tiles we are overlapping
         start_col = int(self.rect.left // tile_size)
         end_col = int((self.rect.right - 1) // tile_size)
