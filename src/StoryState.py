@@ -241,7 +241,7 @@ class StoryState:
             self.leave()
             
             if self.current_level == self.state_machine.max_unlocked_level and self.current_level < 15:
-                self.state_machine.max_unlocked_level += 1
+                self.state_machine.set_max_unlocked_level(self.state_machine.max_unlocked_level + 1)
             if self.current_level < 15:
                 self.current_level += 1
                 self.level_cleared = False

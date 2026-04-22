@@ -28,6 +28,7 @@ def main():
     state_manager.add_state('custom', CustomState(state_manager))
     state_manager.add_state('level_builder', LevelBuilderState(state_manager))
     state_manager.add_state('pause', PauseState('pause', state_manager))
+    state_manager.load_save_slot(state_manager.active_save_slot)
     
     state_manager.transition('menu')
     

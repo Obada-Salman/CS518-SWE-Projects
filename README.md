@@ -83,3 +83,26 @@ Run all unittest tests:
 ```bash
 python -m unittest discover -s tests
 ```
+
+## Save Data
+
+The game stores progress in per-slot JSON files.
+
+### Save directory by platform
+- Linux/WSL: `~/.local/share/vegtable_wars/saves` (or `$XDG_DATA_HOME/vegtable_wars/saves` when set)
+- macOS: `~/Library/Application Support/vegtable_wars/saves`
+- Windows: `%LOCALAPPDATA%/vegtable_wars/saves` (fallback: `~/AppData/Local/vegtable_wars/saves`)
+
+### Save slot files
+- `slot_1.json`
+- `slot_2.json`
+- `slot_3.json`
+
+### What is saved
+- Player username
+- Max unlocked story level
+- Current story level
+- Resource totals (`water`, `sunlight`, `nutrients`)
+- Last updated timestamp (`updated_at`)
+
+Saves are written automatically during gameplay updates and on game quit.

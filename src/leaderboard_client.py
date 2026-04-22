@@ -35,9 +35,14 @@ def submit_score(
     try:
         with request.urlopen(req, timeout=timeout_seconds) as response:
             response_body = response.read().decode("utf-8")
-            return json.loads(response_body)
+            try:
+                return json.loads(response_body)
+            except json.JSONDecodeError:
+                return {"error": "Invalid JSON response from leaderboard server"}
     except HTTPError as error:
         detail = error.read().decode("utf-8", errors="replace")
         return {"error": f"HTTP {error.code}: {detail}"}
     except URLError as error:
         return {"error": f"Connection error: {error.reason}"}
+    except OSError as error:
+        return {"error": f"Connection error: {error}"}
