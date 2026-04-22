@@ -1,6 +1,7 @@
 
 from sound_manager import SoundManager
 from score_tracker import ScoreTracker
+from save_manager import SaveManager
 
 
 class StateManager:
@@ -14,6 +15,8 @@ class StateManager:
         self.window_height = 720
         self.sound_manager = SoundManager()
         self.score_tracker = ScoreTracker()
+        self.save_manager = SaveManager()
+        self.active_save_slot = 1
         self.max_unlocked_level = 1
         self.state_music = {
             'menu': 'menu_theme.ogg',
@@ -27,6 +30,17 @@ class StateManager:
         self.water_collected = 0
         self.sunlight_collected = 0
         self.nutrients_collected = 0
+        self.load_save_slot(self.active_save_slot)
+
+    def _default_progress(self):
+        return {
+            'username': 'player1',
+            'max_unlocked_level': 1,
+            'water_collected': 0,
+            'sunlight_collected': 0,
+            'nutrients_collected': 0,
+            'current_story_level': 1,
+        }
 
     def set_player_username(self, username: str) -> str:
         cleaned = (username or "").strip()
@@ -34,6 +48,7 @@ class StateManager:
             cleaned = "player1"
         cleaned = cleaned[:32]
         self.score_tracker.username = cleaned
+        self.autosave()
         return cleaned
 
     def get_water_collected(self):
@@ -47,12 +62,93 @@ class StateManager:
     
     def add_water(self, amount):
         self.water_collected += amount
+        if self.water_collected < 0:
+            self.water_collected = 0
+        self.autosave()
 
     def add_sunlight(self, amount):
         self.sunlight_collected += amount
+        if self.sunlight_collected < 0:
+            self.sunlight_collected = 0
+        self.autosave()
 
     def add_nutrients(self, amount):
         self.nutrients_collected += amount
+        if self.nutrients_collected < 0:
+            self.nutrients_collected = 0
+        self.autosave()
+
+    def set_max_unlocked_level(self, level: int):
+        self.max_unlocked_level = max(1, int(level))
+        self.autosave()
+
+    def get_save_slots(self):
+        return self.save_manager.list_slots()
+
+    def get_active_slot_summary(self):
+        for slot in self.get_save_slots():
+            if slot.slot == self.active_save_slot:
+                return slot
+        return None
+
+    def serialize_progress(self):
+        current_story_level = 1
+        story_state = self.states.get('story')
+        if story_state and hasattr(story_state, 'current_level'):
+            try:
+                current_story_level = max(1, int(story_state.current_level))
+            except (TypeError, ValueError):
+                current_story_level = 1
+
+        return {
+            'username': self.score_tracker.username,
+            'max_unlocked_level': int(max(1, self.max_unlocked_level)),
+            'water_collected': int(max(0, self.water_collected)),
+            'sunlight_collected': int(max(0, self.sunlight_collected)),
+            'nutrients_collected': int(max(0, self.nutrients_collected)),
+            'current_story_level': current_story_level,
+        }
+
+    def apply_progress(self, payload):
+        if not isinstance(payload, dict):
+            return
+
+        self.score_tracker.username = str(payload.get('username', 'player1')).strip()[:32] or 'player1'
+        self.max_unlocked_level = max(1, int(payload.get('max_unlocked_level', 1)))
+        self.water_collected = max(0, int(payload.get('water_collected', 0)))
+        self.sunlight_collected = max(0, int(payload.get('sunlight_collected', 0)))
+        self.nutrients_collected = max(0, int(payload.get('nutrients_collected', 0)))
+
+        story_level = max(1, int(payload.get('current_story_level', 1)))
+        if story_level > self.max_unlocked_level:
+            story_level = self.max_unlocked_level
+        if 'story' in self.states:
+            self.set_story_level(story_level)
+
+    def load_save_slot(self, slot: int):
+        self.active_save_slot = min(max(int(slot), 1), self.save_manager.slot_count)
+        payload = self.save_manager.load_slot(self.active_save_slot)
+        if payload is None:
+            self.apply_progress(self._default_progress())
+            return False
+        self.apply_progress(payload)
+        return True
+
+    def create_new_game(self, slot: int | None = None):
+        if slot is not None:
+            self.active_save_slot = min(max(int(slot), 1), self.save_manager.slot_count)
+        self.apply_progress(self._default_progress())
+        self.autosave()
+
+    def delete_save_slot(self, slot: int):
+        target_slot = min(max(int(slot), 1), self.save_manager.slot_count)
+        deleted = self.save_manager.delete_slot(target_slot)
+        if target_slot == self.active_save_slot:
+            self.create_new_game(target_slot)
+        return deleted
+
+    def autosave(self):
+        self.save_manager.save_slot(self.active_save_slot, self.serialize_progress())
     
     def add_state(self, name, state):
         self.states[name] = state
@@ -101,5 +197,6 @@ class StateManager:
             del self.states[name]
             
     def quit(self):
+        self.autosave()
         self.sound_manager.stop_music()
         self.window_should_close = True

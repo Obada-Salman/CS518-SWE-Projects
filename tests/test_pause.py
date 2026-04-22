@@ -151,9 +151,14 @@ class PauseCollectiblePersistenceTests(unittest.TestCase):
 
     @patch("state_manager.ScoreTracker")
     @patch("state_manager.SoundManager")
+    @patch("state_manager.SaveManager")
     def test_pause_resume_does_not_reset_global_collectible_totals(
-        self, _mock_sound_manager_cls, _mock_score_tracker_cls
+        self, mock_save_manager_cls, _mock_sound_manager_cls, _mock_score_tracker_cls
     ):
+        mock_save_manager = mock_save_manager_cls.return_value
+        mock_save_manager.slot_count = 3
+        mock_save_manager.load_slot.return_value = None
+
         state_machine = StateManager()
         story_state = Mock()
         state_machine.states = {"story": story_state}
@@ -239,6 +244,84 @@ class MenuUsernameInputTests(unittest.TestCase):
 
         state_machine.set_player_username.assert_called_once()
         state_machine.transition.assert_called_once_with("level_select")
+
+
+class MenuDeleteConfirmationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        pygame.init()
+        pygame.display.set_mode((1280, 720))
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
+    @patch("Menu.pygame.image.load")
+    def test_delete_save_requires_confirmation(self, mock_image_load):
+        mock_image_load.return_value = pygame.Surface((50, 50), pygame.SRCALPHA)
+
+        state_machine = Mock()
+        state_machine.max_unlocked_level = 1
+        state_machine.set_player_username = Mock(return_value="player1")
+        state_machine.score_tracker = Mock()
+        state_machine.score_tracker.username = "player1"
+        state_machine.save_manager = Mock()
+        state_machine.save_manager.slot_count = 3
+        state_machine.get_save_slots = Mock(return_value=[])
+        state_machine.delete_save_slot = Mock()
+
+        menu = MainMenuState("menu", state_machine)
+        menu.story.is_clicked = Mock(return_value=False)
+        menu.custom.is_clicked = Mock(return_value=False)
+        menu.setting.is_clicked = Mock(return_value=False)
+        menu.level_bld.is_clicked = Mock(return_value=False)
+        menu.quit.is_clicked = Mock(return_value=False)
+        menu.slot_prev.is_clicked = Mock(return_value=False)
+        menu.slot_next.is_clicked = Mock(return_value=False)
+        menu.btn_load_save.is_clicked = Mock(return_value=False)
+        menu.btn_new_game.is_clicked = Mock(return_value=False)
+        menu.btn_delete_save.is_clicked = Mock(return_value=True)
+
+        events = [pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"pos": menu.btn_delete_save.rect.center, "button": 1})]
+        menu.update(events)
+
+        self.assertTrue(menu.pending_delete_confirmation)
+        state_machine.delete_save_slot.assert_not_called()
+
+    @patch("Menu.pygame.image.load")
+    def test_delete_save_confirm_and_cancel_paths(self, mock_image_load):
+        mock_image_load.return_value = pygame.Surface((50, 50), pygame.SRCALPHA)
+
+        state_machine = Mock()
+        state_machine.max_unlocked_level = 1
+        state_machine.set_player_username = Mock(return_value="player1")
+        state_machine.score_tracker = Mock()
+        state_machine.score_tracker.username = "player1"
+        state_machine.save_manager = Mock()
+        state_machine.save_manager.slot_count = 3
+        state_machine.get_save_slots = Mock(return_value=[])
+        state_machine.delete_save_slot = Mock()
+
+        menu = MainMenuState("menu", state_machine)
+        menu.pending_delete_confirmation = True
+        menu.btn_confirm_delete_yes.is_clicked = Mock(return_value=False)
+        menu.btn_confirm_delete_no.is_clicked = Mock(return_value=True)
+
+        cancel_event = [pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"pos": menu.btn_confirm_delete_no.rect.center, "button": 1})]
+        menu.update(cancel_event)
+
+        self.assertFalse(menu.pending_delete_confirmation)
+        state_machine.delete_save_slot.assert_not_called()
+
+        menu.pending_delete_confirmation = True
+        menu.btn_confirm_delete_yes.is_clicked = Mock(return_value=True)
+        menu.btn_confirm_delete_no.is_clicked = Mock(return_value=False)
+
+        confirm_event = [pygame.event.Event(pygame.MOUSEBUTTONDOWN, {"pos": menu.btn_confirm_delete_yes.rect.center, "button": 1})]
+        menu.update(confirm_event)
+
+        state_machine.delete_save_slot.assert_called_once_with(menu.selected_slot)
+        self.assertFalse(menu.pending_delete_confirmation)
 
 
 if __name__ == "__main__":

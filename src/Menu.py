@@ -26,17 +26,60 @@ class MainMenuState:
         
         btn_width = int(200 * scale)
         btn_height = int(50 * scale)
-        btn_spacing = int(70 * scale)
+        btn_spacing = int(60 * scale)
         font_size = max(int(36 * scale), 10)
         btn_font = pygame.font.SysFont(None, font_size)
         
         button_x = (self.screen_width // 2) - (btn_width // 2)
         button_y = (self.screen_height // 2) - int(100 * scale)
-        self.story = Button(button_x, button_y, btn_width, btn_height, "Story Mode", btn_font, BLACK, WHITE)
+        self.story = Button(button_x, button_y, btn_width, btn_height, "Continue", btn_font, BLACK, WHITE)
         self.custom = Button(button_x, button_y + btn_spacing, btn_width, btn_height, "Custom Level", btn_font, BLACK, WHITE)
         self.setting = Button(button_x, button_y + btn_spacing * 2, btn_width, btn_height, "Settings", btn_font, BLACK, WHITE)
         self.level_bld = Button(button_x, button_y + btn_spacing * 3, btn_width, btn_height, "Level Builder", btn_font, BLACK, WHITE)
         self.quit = Button(button_x, button_y + btn_spacing * 4, btn_width, btn_height, "Quit", btn_font, RED, WHITE)
+
+        save_btn_font = pygame.font.SysFont(None, max(int(30 * scale), 10))
+        side_width = int(170 * scale)
+        slot_section_y = button_y
+        side_x = max(20, button_x - side_width - int(30 * scale))
+        delete_y = slot_section_y + int(110 * scale)
+        reset_y = delete_y + int(60 * scale)
+        load_y = reset_y + int(60 * scale)
+        self.slot_prev = Button(side_x, slot_section_y, int(44 * scale), btn_height, "<", save_btn_font, BLACK, WHITE)
+        self.slot_next = Button(side_x + side_width - int(44 * scale), slot_section_y, int(44 * scale), btn_height, ">", save_btn_font, BLACK, WHITE)
+        self.btn_delete_save = Button(side_x, delete_y, side_width, btn_height, "Delete Save", save_btn_font, RED, WHITE)
+        self.btn_new_game = Button(side_x, reset_y, side_width, btn_height, "New Game", save_btn_font, BLACK, WHITE)
+        self.btn_load_save = Button(side_x, load_y, side_width, btn_height, "Load Save", save_btn_font, BLACK, WHITE)
+
+        # Confirmation UI for destructive save deletion.
+        confirm_w = int(440 * scale)
+        confirm_h = int(220 * scale)
+        confirm_x = (self.screen_width - confirm_w) // 2
+        confirm_y = (self.screen_height - confirm_h) // 2
+        self.delete_confirm_rect = pygame.Rect(confirm_x, confirm_y, confirm_w, confirm_h)
+        confirm_btn_w = int(130 * scale)
+        confirm_btn_h = int(48 * scale)
+        confirm_btn_y = confirm_y + confirm_h - confirm_btn_h - int(25 * scale)
+        self.btn_confirm_delete_yes = Button(
+            confirm_x + int(35 * scale),
+            confirm_btn_y,
+            confirm_btn_w,
+            confirm_btn_h,
+            "Delete",
+            save_btn_font,
+            RED,
+            WHITE,
+        )
+        self.btn_confirm_delete_no = Button(
+            confirm_x + confirm_w - confirm_btn_w - int(35 * scale),
+            confirm_btn_y,
+            confirm_btn_w,
+            confirm_btn_h,
+            "Cancel",
+            save_btn_font,
+            BLACK,
+            WHITE,
+        )
 
         self.username_font = pygame.font.SysFont(None, max(int(32 * scale), 14))
         input_width = int(320 * scale)
@@ -48,6 +91,16 @@ class MainMenuState:
         if not hasattr(self, "username_input"):
             existing = getattr(getattr(self.state_machine, "score_tracker", None), "username", "player1")
             self.username_input = self._normalize_username(existing)
+        if not hasattr(self, "selected_slot"):
+            raw_slot = getattr(self.state_machine, "active_save_slot", 1)
+            try:
+                self.selected_slot = int(raw_slot)
+            except (TypeError, ValueError):
+                self.selected_slot = 1
+        if not hasattr(self, "pending_delete_confirmation"):
+            self.pending_delete_confirmation = False
+
+        self._refresh_slot_data()
         
         if self.state_machine.max_unlocked_level <= 5:
             self.background = pygame.image.load(resource_path.get_resource_path('assets/images/Backgrounds/Menu1.png'))
@@ -60,6 +113,20 @@ class MainMenuState:
         
     def update(self, events):
         for event in events:
+            if self.pending_delete_confirmation:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    self.pending_delete_confirmation = False
+                    continue
+                if self.btn_confirm_delete_yes.is_clicked(event):
+                    self._confirm_delete_selected_save()
+                    continue
+                if self.btn_confirm_delete_no.is_clicked(event):
+                    self.pending_delete_confirmation = False
+                    continue
+                if event.type == pygame.VIDEORESIZE:
+                    self.__init__(self.name, self.state_machine)
+                continue
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.username_active = self.username_rect.collidepoint(event.pos)
 
@@ -77,6 +144,16 @@ class MainMenuState:
             if self.story.is_clicked(event):
                 self._apply_username()
                 self.state_machine.transition('level_select')
+            elif self.slot_prev.is_clicked(event):
+                self._change_slot(-1)
+            elif self.slot_next.is_clicked(event):
+                self._change_slot(1)
+            elif self.btn_load_save.is_clicked(event):
+                self._load_selected_save()
+            elif self.btn_new_game.is_clicked(event):
+                self._new_game_selected_slot()
+            elif self.btn_delete_save.is_clicked(event):
+                self.pending_delete_confirmation = True
             elif self.custom.is_clicked(event):
                 self.state_machine.transition('custom_select')
             elif self.setting.is_clicked(event):
@@ -108,6 +185,34 @@ class MainMenuState:
         self.setting.draw(surface)
         self.level_bld.draw(surface)
         self.quit.draw(surface)
+
+        self.slot_prev.draw(surface)
+        self.slot_next.draw(surface)
+        self.btn_delete_save.draw(surface)
+        self.btn_new_game.draw(surface)
+        self.btn_load_save.draw(surface)
+
+        slot_text = self.username_font.render(f"Save Slot {self.selected_slot}", True, BLACK)
+        slot_x = self.slot_prev.rect.x + (self.btn_delete_save.rect.width // 2) - (slot_text.get_width() // 2)
+        slot_y = self.slot_prev.rect.y + 12
+        surface.blit(slot_text, (slot_x, slot_y))
+
+        slot_info = self._get_selected_slot_info()
+        if slot_info and slot_info.exists:
+            info_line_1 = f"{slot_info.username}"
+            info_line_2 = f"Unlocked: {slot_info.max_unlocked_level}/15"
+        else:
+            info_line_1 = "Empty slot"
+            info_line_2 = "Unlocked: 1/15"
+
+        info_1 = self.username_font.render(info_line_1, True, BLACK)
+        info_2 = self.username_font.render(info_line_2, True, BLACK)
+        info_x = self.btn_delete_save.rect.x
+        surface.blit(info_1, (info_x, self.btn_load_save.rect.bottom + 10))
+        surface.blit(info_2, (info_x, self.btn_load_save.rect.bottom + 40))
+
+        if self.pending_delete_confirmation:
+            self._draw_delete_confirmation(surface)
         
     def enter(self):
         self.__init__(self.name, self.state_machine)
@@ -123,5 +228,90 @@ class MainMenuState:
             self.username_input = self.state_machine.set_player_username(self.username_input)
         else:
             self.username_input = self._normalize_username(self.username_input)
+
+    def _refresh_slot_data(self):
+        if hasattr(self.state_machine, "get_save_slots"):
+            self.save_slots = self.state_machine.get_save_slots()
+        else:
+            self.save_slots = []
+
+    def _get_selected_slot_info(self):
+        for slot_info in getattr(self, "save_slots", []):
+            if slot_info.slot == self.selected_slot:
+                return slot_info
+        return None
+
+    def _change_slot(self, delta):
+        slot_count = max(1, int(getattr(getattr(self.state_machine, "save_manager", None), "slot_count", 3)))
+        self.selected_slot += delta
+        if self.selected_slot < 1:
+            self.selected_slot = slot_count
+        elif self.selected_slot > slot_count:
+            self.selected_slot = 1
+        self._refresh_slot_data()
+
+    def _load_selected_save(self):
+        if hasattr(self.state_machine, "load_save_slot"):
+            self.state_machine.load_save_slot(self.selected_slot)
+            score_tracker = getattr(self.state_machine, "score_tracker", None)
+            self.username_input = self._normalize_username(getattr(score_tracker, "username", "player1"))
+        self._refresh_slot_data()
+
+    def _new_game_selected_slot(self):
+        if hasattr(self.state_machine, "create_new_game"):
+            self.state_machine.create_new_game(self.selected_slot)
+            score_tracker = getattr(self.state_machine, "score_tracker", None)
+            self.username_input = self._normalize_username(getattr(score_tracker, "username", "player1"))
+        self._refresh_slot_data()
+
+    def _delete_selected_save(self):
+        if hasattr(self.state_machine, "delete_save_slot"):
+            self.state_machine.delete_save_slot(self.selected_slot)
+            score_tracker = getattr(self.state_machine, "score_tracker", None)
+            self.username_input = self._normalize_username(getattr(score_tracker, "username", "player1"))
+        self._refresh_slot_data()
+
+    def _confirm_delete_selected_save(self):
+        self._delete_selected_save()
+        self.pending_delete_confirmation = False
+
+    def _draw_delete_confirmation(self, surface):
+        overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 130))
+        surface.blit(overlay, (0, 0))
+
+        pygame.draw.rect(surface, WHITE, self.delete_confirm_rect, border_radius=12)
+        pygame.draw.rect(surface, BLACK, self.delete_confirm_rect, 2, border_radius=12)
+
+        title_font = pygame.font.SysFont(None, 40)
+        body_font = pygame.font.SysFont(None, 30)
+        title = title_font.render("Delete Save Slot?", True, BLACK)
+        line1 = body_font.render(f"This will erase Slot {self.selected_slot} progress.", True, BLACK)
+        line2 = body_font.render("This action cannot be undone.", True, RED)
+
+        surface.blit(
+            title,
+            (
+                self.delete_confirm_rect.centerx - title.get_width() // 2,
+                self.delete_confirm_rect.y + 24,
+            ),
+        )
+        surface.blit(
+            line1,
+            (
+                self.delete_confirm_rect.centerx - line1.get_width() // 2,
+                self.delete_confirm_rect.y + 78,
+            ),
+        )
+        surface.blit(
+            line2,
+            (
+                self.delete_confirm_rect.centerx - line2.get_width() // 2,
+                self.delete_confirm_rect.y + 114,
+            ),
+        )
+
+        self.btn_confirm_delete_yes.draw(surface)
+        self.btn_confirm_delete_no.draw(surface)
         
                 
