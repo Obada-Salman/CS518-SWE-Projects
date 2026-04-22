@@ -256,7 +256,6 @@ class StoryState:
         self.score_tracker.tick()
 
     def draw(self, surface):
-        self.setup_ui()
         self.internal_surface.blit(self.scaled_bg, (0, 0))
         
         game_map.draw_map(self.internal_surface, self.map, self.tile_size, self.scroll)
