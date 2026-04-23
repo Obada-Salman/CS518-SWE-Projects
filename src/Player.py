@@ -34,7 +34,7 @@ class Player:
         self.tears = [] 
         self.x_pressed_last_frame = False 
 
-        self.snd_tear_shoot = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/tear_shoot.ogg'))
+        self.snd_tear_shoot = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/tear_shoot.mp3'))
         self.snd_jump = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/jump.ogg'))
 
         self.mask = pygame.mask.from_surface(self.sprites.get_current_frame())
