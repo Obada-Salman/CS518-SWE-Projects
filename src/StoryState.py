@@ -12,6 +12,8 @@ import resource_path
 from dialogue_cutscene import SequencePlayer
 from story_content import RECRUIT_DIALOGUE_BANK, STORY_CUTSCENE_FRAMES
 
+
+
 class StoryState:
     RESOURCE_POINTS = {
         'water': 20,
@@ -302,18 +304,12 @@ class StoryState:
         self.setup_ui()
         self.map = game_map.load_map(self.current_level, "story")
         player_position = game_map.get_tile_position(self.map, "player", self.tile_size, False)        
-        enemy_carrot_pos = game_map.get_tile_position(self.map, "carrot", self.tile_size, True)
-        enemy_potato_pos = game_map.get_tile_position(self.map, "potato", self.tile_size, True)
-        enemy_tomato_pos = game_map.get_tile_position(self.map, "tomato", self.tile_size, True)
         door_position = game_map.get_tile_position(self.map, "goal", self.tile_size, False)
         water_positions = game_map.get_tile_position(self.map, "water", self.tile_size, True)
         sunlight_positions = game_map.get_tile_position(self.map, "sunlight", self.tile_size, True)
         nutrient_positions = game_map.get_tile_position(self.map, "nutrient", self.tile_size, True)
-        ally_carrot_pos = game_map.get_tile_position(self.map, "carrot_ally", self.tile_size, True)
-        ally_potato_pos = game_map.get_tile_position(self.map, "potato_ally", self.tile_size, True)
-        flower_pot_pos = game_map.get_tile_position(self.map, "flower_pot", self.tile_size, True)
         spike_positions = game_map.get_tile_position(self.map, "spike", self.tile_size, True)
-        ally_tomato_pos = game_map.get_tile_position(self.map, "tomato_ally", self.tile_size, True)
+        flower_pot_pos = game_map.get_tile_position(self.map, "flower_pot", self.tile_size, True)
 
         if player_position is None or door_position is None:
             print(f"ERROR: Level {self.current_level} is missing a player spawn or a goal")
@@ -329,39 +325,20 @@ class StoryState:
         self.pot_list = []
         self.spike_list = []
 
-        # Add carrots
-        for enemy_position in enemy_carrot_pos:
-            self.enemy_list.append(NPC(enemy_position[0], enemy_position[1], 75, 110, type='carrot'))
-            self.map[enemy_position[3]][enemy_position[2]] = None
-        
-        # Add potatoes
-        for enemy_position in enemy_potato_pos:
-            self.enemy_list.append(NPC(enemy_position[0], enemy_position[1], 83, 94, type='potato'))
-            self.map[enemy_position[3]][enemy_position[2]] = None
+        for character, params in NPC.NPC_CONFIG.items():
+            width, height, npc_type, speed, team = params
+            positions = game_map.get_tile_position(self.map, character, self.tile_size, True)
 
-        # Add tomatoes
-        for enemy_position in enemy_tomato_pos:
-            self.enemy_list.append(NPC(enemy_position[0], enemy_position[1], 94, 190, type='tomato'))
-            self.map[enemy_position[3]][enemy_position[2]] = None
+            for position in positions:
+                npc = NPC(position[0], position[1], width, height, type=npc_type, speed=speed)
 
-        # Add allies
-        for ally_position in ally_carrot_pos:
-            self.ally_list.append(NPC(ally_position[0], ally_position[1], 75, 110, type='carrot', speed=0))
-            self.map[ally_position[3]][ally_position[2]] = None
-            self.ally_list[-1].team = 'ally'
-            self.ally_list[-1].recruited = False
+                if team == 'ally':
+                    npc.recruited = False
+                    self.ally_list.append(npc)
+                elif team == 'enemy':
+                    self.enemy_list.append(npc)
 
-        for ally_position in ally_potato_pos:
-            self.ally_list.append(NPC(ally_position[0], ally_position[1], 83, 94, type='potato', speed=0))
-            self.map[ally_position[3]][ally_position[2]] = None
-            self.ally_list[-1].team = 'ally'
-            self.ally_list[-1].recruited = False
-
-        for ally_position in ally_tomato_pos:
-            self.ally_list.append(NPC(ally_position[0], ally_position[1], 94, 190, type='tomato', speed=0))
-            self.map[ally_position[3]][ally_position[2]] = None
-            self.ally_list[-1].team = 'ally'
-            self.ally_list[-1].recruited = False
+                self.map[position[3]][position[2]] = None
 
         for pot_pos in flower_pot_pos:
             self.pot_list.append(Tile((pot_pos[0], pot_pos[1]), (55, 59), 'flower_pot'))
@@ -380,6 +357,7 @@ class StoryState:
             self.collectible_images[typ] = img # pygame.transform.smoothscale(img, size)
 
         self.collectibles = []
+
         for w in water_positions:
             size = self.collectible_sizes['water']
             rect = pygame.Rect(w[0], w[1], *size)

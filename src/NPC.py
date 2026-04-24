@@ -31,6 +31,15 @@ class NPC:
         }
     }
 
+    NPC_CONFIG = {
+        'carrot': (75, 110, 'carrot', 3, 'enemy'),
+        'potato': (83, 94, 'potato', 3, 'enemy'),
+        'tomato': (94, 190, 'tomato', 3, 'enemy'),
+        'carrot_ally': (75, 110, 'carrot', 0, 'ally'),
+        'potato_ally': (83, 94, 'potato', 0, 'ally'),
+        'tomato_ally': (94, 190, 'tomato', 0, 'ally'),
+    }
+
     def __init__(self, x, y, width, height, type='carrot', speed=None):
         self.x = float(x)
         self.y = float(y)
