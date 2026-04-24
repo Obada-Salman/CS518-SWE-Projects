@@ -194,7 +194,7 @@ class StoryState:
                 print(f"Total nutrients collected: {self.state_machine.get_nutrients_collected()}")
 
                 # plant onion ally
-                self.ally_list.append(NPC(pot.position[0], pot.position[1], 102, 102, type='onion', speed=3))
+                self.ally_list.append(NPC(pot.position[0], pot.position[1], 34, 34, type='onion', speed=3))
                 self.ally_list[-1].team = 'ally'
                 self.ally_list[-1].recruited = True
                 self.pot_list.remove(pot)
