@@ -117,7 +117,7 @@ class StoryState:
                 if self.player.can_damage():
                     enemy.take_damage(1)
                     self.snd_damage.play()
-                self.player.take_damage(1)
+                self.player.take_damage(enemy.damage)
 
             # Tear Collision
             for tear in self.player.tears[:]:
@@ -136,8 +136,8 @@ class StoryState:
 
             for ally in self.ally_list:
                 if ally.recruited and ally.can_damage() and self.mask_collision(ally, enemy):
-                    enemy.take_damage(1)
-                    ally.take_damage(1)
+                    enemy.take_damage(ally.damage)
+                    ally.take_damage(enemy.damage)
                     self.snd_damage.play()
                     
         keys = pygame.key.get_pressed()
@@ -196,8 +196,7 @@ class StoryState:
                 print(f"Total nutrients collected: {self.state_machine.get_nutrients_collected()}")
 
                 # plant onion ally
-                self.ally_list.append(NPC(pot.position[0], pot.position[1], 34, 34, type='onion', speed=3))
-                self.ally_list[-1].team = 'ally'
+                self.ally_list.append(NPC(pot.position[0], pot.position[1], 34, 34, type='onion', speed=3, team='ally'))
                 self.ally_list[-1].recruited = True
                 self.pot_list.remove(pot)
                 self.snd_collect.play()
@@ -330,7 +329,7 @@ class StoryState:
             positions = game_map.get_tile_position(self.map, character, self.tile_size, True)
 
             for position in positions:
-                npc = NPC(position[0], position[1], width, height, type=npc_type, speed=speed)
+                npc = NPC(position[0], position[1], width, height, type=npc_type, speed=speed, team=team)
 
                 if team == 'ally':
                     npc.recruited = False

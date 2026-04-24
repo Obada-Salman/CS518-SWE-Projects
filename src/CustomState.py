@@ -98,7 +98,7 @@ class CustomState:
                 if self.player.can_damage():
                     enemy.take_damage(1)
                     self.snd_damage.play()
-                self.player.take_damage(1)
+                self.player.take_damage(enemy.damage)
 
             # Tear Collision
             for tear in self.player.tears[:]:
@@ -117,8 +117,8 @@ class CustomState:
 
             for ally in self.ally_list:
                 if ally.recruited and ally.can_damage() and self.mask_collision(ally, enemy):
-                    enemy.take_damage(1)
-                    ally.take_damage(1)
+                    enemy.take_damage(ally.damage)
+                    ally.take_damage(enemy.damage)
                     self.snd_damage.play()
                     
         keys = pygame.key.get_pressed()

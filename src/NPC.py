@@ -7,46 +7,77 @@ class NPC:
     NPC_TYPES = {
         'carrot': {
             'speed': 3,
-            'health': 8,
+            'health': 5,
+            'damage': 1,
             'scale': 1,
             'sprite': 'assets/images/Characters/Carrot_75x110.png'
         },
         'potato': {
             'speed': 2,
-            'health': 5,
+            'health': 7,
+            'damage': 1,
             'scale': 1,
             'sprite': 'assets/images/Characters/Potato_83x94.png'
         },
         'onion': {
             'speed': 2,
             'health': 5,
+            'damage': 1,
             'scale': 2,
             'sprite': 'assets/images/Characters/Onion_34x34.png'
         },
         'tomato': {
             'speed': 7,
             'health': 3,
+            'damage': 1,
             'scale': 0.6,
             'sprite': 'assets/images/Characters/Tomato_94x190.png'
+        },
+        'bokchoy': {
+            'speed': 5,
+            'health': 5,
+            'damage': 2,
+            'scale': 0.6,
+            'sprite': 'assets/images/Characters/BokChoy_94x184.png'
+        },
+        'pumpkin': {
+            'speed': 4.5,
+            'health': 12,
+            'damage': 3,
+            'scale': 0.6,
+            'sprite': 'assets/images/Characters/Pumpkin_94x177.png'
+        },
+        'broccoli': {
+            'speed': 9,
+            'health': 6,
+            'damage': 1,
+            'scale': 0.6,
+            'sprite': 'assets/images/Characters/Broccoli_101x178.png'
         }
     }
 
     NPC_CONFIG = {
         'carrot': (75, 110, 'carrot', 3, 'enemy'),
-        'potato': (83, 94, 'potato', 3, 'enemy'),
-        'tomato': (94, 190, 'tomato', 3, 'enemy'),
+        'potato': (83, 94, 'potato', 2, 'enemy'),
+        'tomato': (94, 190, 'tomato', 7, 'enemy'),
+        'bokchoy': (94, 184, 'bokchoy', 5, 'enemy'),
+        'pumpkin': (94, 177, 'pumpkin', 4.5, 'enemy'),
+        'broccoli': (101, 178, 'broccoli', 9, 'enemy'),
         'carrot_ally': (75, 110, 'carrot', 0, 'ally'),
         'potato_ally': (83, 94, 'potato', 0, 'ally'),
         'tomato_ally': (94, 190, 'tomato', 0, 'ally'),
+        'bokchoy_ally': (94, 184, 'bokchoy', 0, 'ally'),
+        'pumpkin_ally': (94, 177, 'pumpkin', 0, 'ally'),
+        'broccoli_ally': (101, 178, 'broccoli', 0, 'ally')
     }
 
-    def __init__(self, x, y, width, height, type='carrot', speed=None):
+    def __init__(self, x, y, width, height, type='carrot', speed=None, team='enemy'):
         self.x = float(x)
         self.y = float(y)
         
         npc_config = self.NPC_TYPES.get(type, self.NPC_TYPES['carrot'])
         self.type = type
-        self.team = 'enemy'
+        self.team = team
         self.recruited = False
         self.width = width * npc_config['scale']
         self.height = height * npc_config['scale']
@@ -54,6 +85,7 @@ class NPC:
         
         self.speed = speed if speed is not None else npc_config['speed']
         self.health = npc_config['health']
+        self.damage = npc_config.get('damage', 1)
         self.max_health = self.health
         sprite_path = npc_config['sprite']
         
