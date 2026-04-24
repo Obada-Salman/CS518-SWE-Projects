@@ -36,7 +36,8 @@ class MainMenuState:
         self.custom = Button(button_x, button_y + btn_spacing, btn_width, btn_height, "Custom Level", btn_font, BLACK, WHITE)
         self.setting = Button(button_x, button_y + btn_spacing * 2, btn_width, btn_height, "Settings", btn_font, BLACK, WHITE)
         self.level_bld = Button(button_x, button_y + btn_spacing * 3, btn_width, btn_height, "Level Builder", btn_font, BLACK, WHITE)
-        self.quit = Button(button_x, button_y + btn_spacing * 4, btn_width, btn_height, "Quit", btn_font, RED, WHITE)
+        self.gallery = Button(button_x, button_y + btn_spacing * 4, btn_width, btn_height, "Gallery", btn_font, BLACK, WHITE)
+        self.quit = Button(button_x, button_y + btn_spacing * 5, btn_width, btn_height, "Quit", btn_font, RED, WHITE)
 
         save_btn_font = pygame.font.SysFont(None, max(int(30 * scale), 10))
         side_width = int(170 * scale)
@@ -160,6 +161,8 @@ class MainMenuState:
                 self.state_machine.transition('settings')
             elif self.level_bld.is_clicked(event):
                 self.state_machine.transition('level_builder')
+            elif self.gallery.is_clicked(event):
+                self.state_machine.transition('gallery')
             elif self.quit.is_clicked(event):
                 self.state_machine.quit()
             elif event.type == pygame.VIDEORESIZE:
@@ -184,6 +187,7 @@ class MainMenuState:
         self.custom.draw(surface)
         self.setting.draw(surface)
         self.level_bld.draw(surface)
+        self.gallery.draw(surface)
         self.quit.draw(surface)
 
         self.slot_prev.draw(surface)

@@ -10,8 +10,7 @@ from LevelbuilderState import LevelBuilderState
 from PauseState import PauseState
 from CustomLevelSelect import CustomLevelSelect
 from CustomState import CustomState
-
-
+from GalleryState import GalleryState
 
 def main():
     pygame.init()
@@ -28,6 +27,7 @@ def main():
     state_manager.add_state('custom', CustomState(state_manager))
     state_manager.add_state('level_builder', LevelBuilderState(state_manager))
     state_manager.add_state('pause', PauseState('pause', state_manager))
+    state_manager.add_state('gallery', GalleryState('gallery', state_manager))
     state_manager.load_save_slot(state_manager.active_save_slot)
     
     state_manager.transition('menu')
