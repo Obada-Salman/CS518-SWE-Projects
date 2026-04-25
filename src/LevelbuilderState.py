@@ -15,7 +15,7 @@ class LevelBuilderState:
         self.LEVEL = 1
         self.level_type = "community"
         self.margin_height = 100
-        self.margin_width = 200
+        self.margin_width = 240
         self.btn_font = pygame.font.SysFont(None, 25)
         self.scroll = SCROLL
         self.scroll_speed = SCROLL_SPEED
@@ -64,14 +64,14 @@ class LevelBuilderState:
         for tile in tiles.tile_lookup:
             self.button_list.append(
                 tiles.TileButton(
-                    ((self.screen_width - self.margin_width + (50 * button_col) + 50, 75 * button_row + 50)),
+                    ((self.screen_width - self.margin_width + (70 * button_col) + 20, 75 * button_row + 50)),
                     (self.tile_size, self.tile_size),
                     tile
                 )
             )
         
             button_col += 1
-            if button_col == 2:
+            if button_col == 3:
                 button_col = 0
                 button_row += 1
         
