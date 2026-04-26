@@ -11,6 +11,8 @@ import random
 import resource_path
 from dialogue_cutscene import SequencePlayer
 from story_content import RECRUIT_DIALOGUE_BANK, STORY_CUTSCENE_FRAMES
+from pathfinding.core.grid import Grid
+from pathfinding.finder.a_star import AStarFinder
 
 
 
@@ -148,37 +150,69 @@ class StoryState:
                     self._start_recruitment_dialogue(ally)
                     return
             else:
-                # Find closest enemy
-                closest_enemy = None
-                min_dist = float('inf')
-                for enemy in self.enemy_list:
-                    dist = math.hypot(ally.x - enemy.x, ally.y - enemy.y)
-                    if dist < min_dist:
-                        min_dist = dist
-                        closest_enemy = enemy
-                if closest_enemy and min_dist < 400:
-                    # Go towards enemy
-                    if ally.x < closest_enemy.x:
-                        ally.vx = ally.speed
-                        ally.direction = 1
-                    elif ally.x > closest_enemy.x:
-                        ally.vx = -ally.speed
-                        ally.direction = 0
-                    else:
-                        ally.vx = 0
-                else:
-                    # Follow player with offset
-                    if ally.x < self.player.x - 50:
-                        ally.vx = ally.speed
-                        ally.direction = 1
-                    elif ally.x > self.player.x + 50:
-                        ally.vx = -ally.speed
-                        ally.direction = 0
-                    else:
-                        ally.vx = 0
+                # matrix = []
+                # for row in self.map:
+                #     new_row = []
+                #     for tile in row:
+                #         if tile is None:
+                #             new_row.append(1)
+                #         else:
+                #             new_row.append(0)
+                #     matrix.append(new_row)
+                # grid = Grid(matrix=matrix)
 
-                if ally.on_ground and ally.y > self.player.y and abs(ally.x - self.player.x) > 60:
-                    ally.vy = -16.0
+                # finder = AStarFinder()
+                # start = grid.node(int(ally.x // self.tile_size), int(ally.y // self.tile_size))
+                # end = grid.node(int(self.player.x // self.tile_size), int(self.player.y // self.tile_size))
+                # path, _ = finder.find_path(start, end, grid)
+
+                # # move in direction of the path
+                # if path and len(path) > 1:
+                #     next_node = path[1]
+                #     next_x = next_node.x * self.tile_size
+                #     next_y = next_node.y * self.tile_size
+                #     if ally.x < next_x:
+                #         ally.vx = ally.speed
+                #         ally.direction = 1
+                #     elif ally.x > next_x:
+                #         ally.vx = -ally.speed
+                #         ally.direction = 0
+                #     else:
+                #         ally.vx = 0
+                #     if ally.on_ground and ally.y > next_y + (self.tile_size // 2):
+                #         ally.vy = -16.0
+
+                # Find closest enemy
+                 closest_enemy = None
+                 min_dist = float('inf')
+                 for enemy in self.enemy_list:
+                     dist = math.hypot(ally.x - enemy.x, ally.y - enemy.y)
+                     if dist < min_dist:
+                         min_dist = dist
+                         closest_enemy = enemy
+                 if closest_enemy and min_dist < 200:
+                     # Go towards enemy
+                     if ally.x < closest_enemy.x:
+                         ally.vx = ally.speed
+                         ally.direction = 1
+                     elif ally.x > closest_enemy.x:
+                         ally.vx = -ally.speed
+                         ally.direction = 0
+                     else:
+                         ally.vx = 0
+                 else:
+                     # Follow player with offset
+                     if ally.x < self.player.x - 50:
+                         ally.vx = ally.speed
+                         ally.direction = 1
+                     elif ally.x > self.player.x + 50:
+                         ally.vx = -ally.speed
+                         ally.direction = 0
+                     else:
+                         ally.vx = 0
+
+                 if ally.on_ground and ally.y > self.player.y and abs(ally.x - self.player.x) > 60:
+                     ally.vy = -16.0
             
             ally.update(self.map, self.tile_size)
 
