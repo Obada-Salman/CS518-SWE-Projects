@@ -33,6 +33,7 @@ class Player:
         self.health_image = pygame.image.load(resource_path.get_resource_path('assets/images/Misc/health_50x50.png'))
         self.tears = [] 
         self.x_pressed_last_frame = False 
+        self.tear_range = 700
 
         self.snd_tear_shoot = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/tear_shoot.mp3'))
         self.snd_jump = pygame.mixer.Sound(resource_path.get_resource_path('assets/sounds/jump.ogg'))
@@ -70,7 +71,7 @@ class Player:
         tear_rect = self.tear.get_rect(center=self.rect.center)
         tear_mask = pygame.mask.from_surface(tear_surface)
 
-        self.tears.append({'rect': tear_rect, 'direction': self.direction, 'speed': 10, 'mask': tear_mask})
+        self.tears.append({'rect': tear_rect, 'direction': self.direction, 'speed': 10, 'mask': tear_mask, 'start_x': tear_rect.x})
         self.snd_tear_shoot.play()
 
 
@@ -96,9 +97,40 @@ class Player:
         self.rect.y = int(self.y)
         self.check_map_collision(game_map, tile_size, 'y')
 
-        # Cleanup: sync tears and invincibility
+        active_tears = []
         for tear in self.tears[:]:
             tear['rect'].x += tear['speed'] if tear['direction'] == 1 else -tear['speed']
+            distance_traveled = abs(tear['rect'].x - tear['start_x'])
+            if distance_traveled > self.tear_range:
+                continue
+            hit_wall = False
+            start_col = int(tear['rect'].left // tile_size)
+            end_col = int((tear['rect'].right - 1) // tile_size)
+            start_row = int(tear['rect'].top // tile_size)
+            end_row = int((tear['rect'].bottom - 1) // tile_size)
+            
+            for row in range(start_row, end_row + 1):
+                for col in range(start_col, end_col + 1):
+                    if 0 <= row < len(game_map) and 0 <= col < len(game_map[0]):
+                        tile = game_map[row][col]
+                        # If there is a tile and it has collision
+                        if tile and tile.collision:
+                            tile_rect = pygame.Rect(col * tile_size, row * tile_size, tile_size, tile_size)
+                            # Standard rect collision is perfect for fast-moving projectiles against square blocks
+                            if tear['rect'].colliderect(tile_rect):
+                                hit_wall = True
+                                break
+                if hit_wall:
+                    break
+            
+            
+            if hit_wall:
+                continue
+                
+            # If it survived distance and wall checks, keep it active
+            active_tears.append(tear)
+            # sets tears to only the active tears
+        self.tears = active_tears
 
         if self.invincible:
             now = pygame.time.get_ticks()
