@@ -98,11 +98,18 @@ class NPC:
         self.moving = False
         self.jumping = False
         self.sprites = SpriteHandler(resource_path.get_resource_path(sprite_path), type=self.type, scale=npc_config['scale'])
-        self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
         self.mask_frame = self.sprites.get_current_frame()
         self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)
         self.mask = pygame.mask.from_surface(self.mask_frame)
+        self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
 
+        mask_rects = self.mask.get_bounding_rects()
+        visible_pixels = mask_rects[0]
+        self.bottom_offset = self.rect.height - visible_pixels.bottom
+        self.top_offset = visible_pixels.top
+        self.left_offset = visible_pixels.left
+        self.right_offset = self.rect.width - visible_pixels.right
+        
         # ally hit properties
         self.invincible = False
         self.time_since_hit = 0
@@ -188,6 +195,9 @@ class NPC:
                 green = max(0, min(255, int(255 * health_ratio)))
                 pygame.draw.circle(surface, (red, green, 0), (self.rect.centerx - scroll, self.rect.top - 20), 10)
 
+        # DBUGGING for hoitboxes do not remove
+        # pygame.draw.rect(surface, (255, 0, 0), (self.rect.x - scroll, self.rect.y, self.rect.width, self.rect.height), 1)
+
     def check_map_collision(self, game_map, tile_size, axis):
         map_width = len(game_map[0]) * tile_size
         map_height = len(game_map) * tile_size
@@ -255,18 +265,25 @@ class NPC:
                                 self.mask = pygame.mask.from_surface(self.mask_frame)
                                 
                                 # Optional: Push out of the wall slightly to prevent sticking
-                                if self.vx > 0: self.rect.left = tile_rect.right
-                                else: self.rect.right = tile_rect.left
+                                if self.vx > 0: self.rect.left = tile_rect.right - self.left_offset
+                                else: self.rect.right = tile_rect.left + self.right_offset
                                 self.x = float(self.rect.x)
+
+                                self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)
+                                self.mask = pygame.mask.from_surface(self.mask_frame)
+                                mask_rects = self.mask.get_bounding_rects()
+                                self.left_offset = mask_rects[0].left
+                                self.right_offset = self.rect.width - mask_rects[0].right
+                                
                                 return
 
                             elif axis == 'y':
                                 # Only adjust Y if we aren't moving horizontally into a wall
                                 if self.vy > 0:  # Falling
-                                    self.rect.bottom = tile_rect.top
+                                    self.rect.bottom = tile_rect.top + self.bottom_offset
                                     self.on_ground = True
                                 elif self.vy < 0:  # Jumping Up
-                                    self.rect.top = tile_rect.bottom
+                                    self.rect.top = tile_rect.bottom - self.top_offset
                                 
                                 self.y = float(self.rect.y)
                                 self.vy = 0
