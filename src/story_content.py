@@ -20,6 +20,38 @@ RECRUIT_DIALOGUE_BANK = {
         ('Onion', 'Together we push forward.'),
         ('Onion', 'No patch gets left behind.'),
     ],
+    'tomato': [
+        ('Onion', 'We need your range. Join us?'),
+        ('Tomato', 'I throw in with the onions. Keep moving.'),
+        ('Onion', 'Stay behind the line and blast anything that moves.'),
+        ('Tomato', 'That is my kind of fight.'),
+        ('Onion', 'Your pressure could break their formation.'),
+        ('Tomato', 'Then point me at the front.'),
+    ],
+    'bokchoy': [
+        ('Onion', 'Your shield could change this fight. Come with us?'),
+        ('Bokchoy', 'I will stand the line if you stand with me.'),
+        ('Onion', 'Hold the lane and we can advance.'),
+        ('Bokchoy', 'I was made for this wall.'),
+        ('Onion', 'You look built for defense.'),
+        ('Bokchoy', 'Then let us anchor the push.'),
+    ],
+    'pumpkin': [
+        ('Onion', 'We could use your power up front.'),
+        ('Pumpkin', 'I have been waiting for a real crowd to break.'),
+        ('Onion', 'Join us and crush through their line.'),
+        ('Pumpkin', 'That sounds like a proper harvest.'),
+        ('Onion', 'You bring the weight. We bring the opening.'),
+        ('Pumpkin', 'A fair trade. I am in.'),
+    ],
+    'broccoli': [
+        ('Onion', 'You move fast. We need that speed.'),
+        ('Broccoli', 'Fast enough to keep up and hit harder.'),
+        ('Onion', 'Slip around them and strike where they cannot answer.'),
+        ('Broccoli', 'Done. I like the sound of that.'),
+        ('Onion', 'Your pace could save the whole patch.'),
+        ('Broccoli', 'Then let me run ahead.'),
+    ],
 }
 
 

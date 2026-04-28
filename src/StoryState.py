@@ -11,8 +11,7 @@ import random
 import resource_path
 from dialogue_cutscene import SequencePlayer
 from story_content import RECRUIT_DIALOGUE_BANK, STORY_CUTSCENE_FRAMES
-from pathfinding.core.grid import Grid
-from pathfinding.finder.a_star import AStarFinder
+import heapq
 
 
 
@@ -150,69 +149,16 @@ class StoryState:
                     self._start_recruitment_dialogue(ally)
                     return
             else:
-                # matrix = []
-                # for row in self.map:
-                #     new_row = []
-                #     for tile in row:
-                #         if tile is None:
-                #             new_row.append(1)
-                #         else:
-                #             new_row.append(0)
-                #     matrix.append(new_row)
-                # grid = Grid(matrix=matrix)
-
-                # finder = AStarFinder()
-                # start = grid.node(int(ally.x // self.tile_size), int(ally.y // self.tile_size))
-                # end = grid.node(int(self.player.x // self.tile_size), int(self.player.y // self.tile_size))
-                # path, _ = finder.find_path(start, end, grid)
-
-                # # move in direction of the path
-                # if path and len(path) > 1:
-                #     next_node = path[1]
-                #     next_x = next_node.x * self.tile_size
-                #     next_y = next_node.y * self.tile_size
-                #     if ally.x < next_x:
-                #         ally.vx = ally.speed
-                #         ally.direction = 1
-                #     elif ally.x > next_x:
-                #         ally.vx = -ally.speed
-                #         ally.direction = 0
-                #     else:
-                #         ally.vx = 0
-                #     if ally.on_ground and ally.y > next_y + (self.tile_size // 2):
-                #         ally.vy = -16.0
-
-                # Find closest enemy
-                 closest_enemy = None
-                 min_dist = float('inf')
-                 for enemy in self.enemy_list:
-                     dist = math.hypot(ally.x - enemy.x, ally.y - enemy.y)
-                     if dist < min_dist:
-                         min_dist = dist
-                         closest_enemy = enemy
-                 if closest_enemy and min_dist < 200:
-                     # Go towards enemy
-                     if ally.x < closest_enemy.x:
-                         ally.vx = ally.speed
-                         ally.direction = 1
-                     elif ally.x > closest_enemy.x:
-                         ally.vx = -ally.speed
-                         ally.direction = 0
-                     else:
-                         ally.vx = 0
-                 else:
-                     # Follow player with offset
-                     if ally.x < self.player.x - 50:
-                         ally.vx = ally.speed
-                         ally.direction = 1
-                     elif ally.x > self.player.x + 50:
-                         ally.vx = -ally.speed
-                         ally.direction = 0
-                     else:
-                         ally.vx = 0
-
-                 if ally.on_ground and ally.y > self.player.y and abs(ally.x - self.player.x) > 60:
-                     ally.vy = -16.0
+                target = self._select_ally_target(ally)
+                if target is not None:
+                    path = self._find_path(
+                        self._tile_from_position(ally.rect.centerx, ally.rect.centery),
+                        self._tile_from_position(target.rect.centerx, target.rect.centery),
+                    )
+                    if path and len(path) > 1:
+                        self._steer_ally_along_path(ally, path)
+                    else:
+                        self._steer_ally_directly(ally, target)
             
             ally.update(self.map, self.tile_size)
 
@@ -442,6 +388,109 @@ class StoryState:
 
     def _enemy_points(self, enemy):
         return self.ENEMY_KILL_POINTS.get(getattr(enemy, 'type', None), 100)
+
+    def _tile_from_position(self, x, y):
+        return int(x // self.tile_size), int(y // self.tile_size)
+
+    def _is_walkable_tile(self, tile_x, tile_y):
+        if tile_y < 0 or tile_y >= len(self.map):
+            return False
+        if tile_x < 0 or tile_x >= len(self.map[0]):
+            return False
+
+        tile = self.map[tile_y][tile_x]
+        return tile is None or not getattr(tile, 'collision', False)
+
+    def _find_path(self, start, goal):
+        if start == goal:
+            return [start]
+
+        open_set = []
+        heapq.heappush(open_set, (0, start))
+        came_from = {}
+        g_score = {start: 0}
+        closed = set()
+
+        def heuristic(a, b):
+            return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            if current in closed:
+                continue
+            if current == goal:
+                path = [current]
+                while current in came_from:
+                    current = came_from[current]
+                    path.append(current)
+                path.reverse()
+                return path
+
+            closed.add(current)
+            current_x, current_y = current
+            for neighbor in (
+                (current_x + 1, current_y),
+                (current_x - 1, current_y),
+                (current_x, current_y + 1),
+                (current_x, current_y - 1),
+            ):
+                if not self._is_walkable_tile(*neighbor) and neighbor != goal:
+                    continue
+
+                tentative = g_score[current] + 1
+                if tentative >= g_score.get(neighbor, float('inf')):
+                    continue
+
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative
+                priority = tentative + heuristic(neighbor, goal)
+                heapq.heappush(open_set, (priority, neighbor))
+
+        return None
+
+    def _select_ally_target(self, ally):
+        if self.enemy_list:
+            return min(
+                self.enemy_list,
+                key=lambda enemy: math.hypot(enemy.rect.centerx - ally.rect.centerx, enemy.rect.centery - ally.rect.centery),
+            )
+        return self.player
+
+    def _steer_ally_along_path(self, ally, path):
+        current_tile = self._tile_from_position(ally.rect.centerx, ally.rect.centery)
+        next_tile = path[1]
+
+        next_center_x = next_tile[0] * self.tile_size + self.tile_size / 2
+        next_center_y = next_tile[1] * self.tile_size + self.tile_size / 2
+
+        if next_center_x > ally.rect.centerx + 4:
+            ally.vx = ally.speed
+            ally.direction = 1
+        elif next_center_x < ally.rect.centerx - 4:
+            ally.vx = -ally.speed
+            ally.direction = 0
+        else:
+            ally.vx = 0
+
+        if next_center_y + (self.tile_size * 0.35) < ally.rect.centery and ally.on_ground:
+            ally.vy = -16.0
+
+        # If the path starts with a vertical move, keep the ally aggressive instead of stalling.
+        if current_tile[0] == next_tile[0] and abs(next_center_y - ally.rect.centery) > self.tile_size * 0.4:
+            ally.vx = 0
+
+    def _steer_ally_directly(self, ally, target):
+        if target.rect.centerx > ally.rect.centerx + 6:
+            ally.vx = ally.speed
+            ally.direction = 1
+        elif target.rect.centerx < ally.rect.centerx - 6:
+            ally.vx = -ally.speed
+            ally.direction = 0
+        else:
+            ally.vx = 0
+
+        if target.rect.centery + 10 < ally.rect.centery and ally.on_ground:
+            ally.vy = -16.0
 
     def _start_recruitment_dialogue(self, ally):
         if ally.recruited:

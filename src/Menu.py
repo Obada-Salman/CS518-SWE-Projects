@@ -23,6 +23,7 @@ class MainMenuState:
         scale_y = self.screen_height / self.BASE_HEIGHT
         
         scale = min(scale_x, scale_y)
+        self.scale = scale
         
         btn_width = int(200 * scale)
         btn_height = int(50 * scale)
@@ -39,18 +40,25 @@ class MainMenuState:
         self.gallery = Button(button_x, button_y + btn_spacing * 4, btn_width, btn_height, "Gallery", btn_font, BLACK, WHITE)
         self.quit = Button(button_x, button_y + btn_spacing * 5, btn_width, btn_height, "Quit", btn_font, RED, WHITE)
 
-        save_btn_font = pygame.font.SysFont(None, max(int(30 * scale), 10))
-        side_width = int(170 * scale)
-        slot_section_y = button_y
-        side_x = max(20, button_x - side_width - int(30 * scale))
-        delete_y = slot_section_y + int(110 * scale)
-        reset_y = delete_y + int(60 * scale)
-        load_y = reset_y + int(60 * scale)
-        self.slot_prev = Button(side_x, slot_section_y, int(44 * scale), btn_height, "<", save_btn_font, BLACK, WHITE)
-        self.slot_next = Button(side_x + side_width - int(44 * scale), slot_section_y, int(44 * scale), btn_height, ">", save_btn_font, BLACK, WHITE)
-        self.btn_delete_save = Button(side_x, delete_y, side_width, btn_height, "Delete Save", save_btn_font, RED, WHITE)
-        self.btn_new_game = Button(side_x, reset_y, side_width, btn_height, "New Game", save_btn_font, BLACK, WHITE)
-        self.btn_load_save = Button(side_x, load_y, side_width, btn_height, "Load Save", save_btn_font, BLACK, WHITE)
+        save_btn_font = pygame.font.SysFont(None, max(int(26 * scale), 10))
+        panel_w = int(300 * scale)
+        panel_h = int(310 * scale)
+        panel_x = int(24 * scale)
+        panel_y = int(140 * scale)
+        self.save_panel_rect = pygame.Rect(panel_x, panel_y, panel_w, panel_h)
+
+        slot_btn_h = int(44 * scale)
+        arrow_w = int(42 * scale)
+        action_btn_w = panel_w - int(32 * scale)
+        action_x = panel_x + int(16 * scale)
+        arrow_y = panel_y + int(88 * scale)
+
+        self.slot_prev = Button(panel_x + int(16 * scale), arrow_y, arrow_w, slot_btn_h, "<", save_btn_font, BLACK, WHITE)
+        self.slot_next = Button(panel_x + panel_w - arrow_w - int(16 * scale), arrow_y, arrow_w, slot_btn_h, ">", save_btn_font, BLACK, WHITE)
+
+        self.btn_load_save = Button(action_x, panel_y + int(150 * scale), action_btn_w, slot_btn_h, "Load Save", save_btn_font, BLACK, WHITE)
+        self.btn_new_game = Button(action_x, panel_y + int(200 * scale), action_btn_w, slot_btn_h, "New Game", save_btn_font, BLACK, WHITE)
+        self.btn_delete_save = Button(action_x, panel_y + int(250 * scale), action_btn_w, slot_btn_h, "Delete Save", save_btn_font, RED, WHITE)
 
         # Confirmation UI for destructive save deletion.
         confirm_w = int(440 * scale)
@@ -190,16 +198,13 @@ class MainMenuState:
         self.gallery.draw(surface)
         self.quit.draw(surface)
 
-        self.slot_prev.draw(surface)
-        self.slot_next.draw(surface)
-        self.btn_delete_save.draw(surface)
-        self.btn_new_game.draw(surface)
-        self.btn_load_save.draw(surface)
+        pygame.draw.rect(surface, (245, 240, 225), self.save_panel_rect, border_radius=16)
+        pygame.draw.rect(surface, BLACK, self.save_panel_rect, 2, border_radius=16)
 
-        slot_text = self.username_font.render(f"Save Slot {self.selected_slot}", True, BLACK)
-        slot_x = self.slot_prev.rect.x + (self.btn_delete_save.rect.width // 2) - (slot_text.get_width() // 2)
-        slot_y = self.slot_prev.rect.y + 12
-        surface.blit(slot_text, (slot_x, slot_y))
+        panel_title_font = pygame.font.SysFont(None, max(int(30 * self.scale), 12))
+        slot_text = panel_title_font.render(f"Save Slot {self.selected_slot}", True, BLACK)
+        slot_text_y = self.save_panel_rect.y + int(18 * self.scale)
+        surface.blit(slot_text, (self.save_panel_rect.centerx - slot_text.get_width() // 2, slot_text_y))
 
         slot_info = self._get_selected_slot_info()
         if slot_info and slot_info.exists:
@@ -209,11 +214,17 @@ class MainMenuState:
             info_line_1 = "Empty slot"
             info_line_2 = "Unlocked: 1/15"
 
-        info_1 = self.username_font.render(info_line_1, True, BLACK)
-        info_2 = self.username_font.render(info_line_2, True, BLACK)
-        info_x = self.btn_delete_save.rect.x
-        surface.blit(info_1, (info_x, self.btn_load_save.rect.bottom + 10))
-        surface.blit(info_2, (info_x, self.btn_load_save.rect.bottom + 40))
+        info_font = pygame.font.SysFont(None, max(int(24 * self.scale), 10))
+        info_1 = info_font.render(info_line_1, True, BLACK)
+        info_2 = info_font.render(info_line_2, True, BLACK)
+        surface.blit(info_1, (self.save_panel_rect.centerx - info_1.get_width() // 2, self.save_panel_rect.y + int(50 * self.scale)))
+        surface.blit(info_2, (self.save_panel_rect.centerx - info_2.get_width() // 2, self.save_panel_rect.y + int(72 * self.scale)))
+
+        self.slot_prev.draw(surface)
+        self.slot_next.draw(surface)
+        self.btn_delete_save.draw(surface)
+        self.btn_new_game.draw(surface)
+        self.btn_load_save.draw(surface)
 
         if self.pending_delete_confirmation:
             self._draw_delete_confirmation(surface)
