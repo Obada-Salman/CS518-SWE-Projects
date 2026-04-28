@@ -235,7 +235,8 @@ class NPC:
 
         elif axis == 'y':
             # Bottom Edge
-            if self.rect.y + mask_bounding_rect.bottom > map_height:
+            # if self.rect.y + mask_bounding_rect.bottom > map_height:
+            if self.rect.y + mask_bounding_rect.top > map_height + tile_size:
                 self.health = 0
 
         start_col = int(self.rect.left // tile_size)
