@@ -113,10 +113,8 @@ class Player:
                 for col in range(start_col, end_col + 1):
                     if 0 <= row < len(game_map) and 0 <= col < len(game_map[0]):
                         tile = game_map[row][col]
-                        # If there is a tile and it has collision
                         if tile and tile.collision:
                             tile_rect = pygame.Rect(col * tile_size, row * tile_size, tile_size, tile_size)
-                            # Standard rect collision is perfect for fast-moving projectiles against square blocks
                             if tear['rect'].colliderect(tile_rect):
                                 hit_wall = True
                                 break
@@ -127,7 +125,6 @@ class Player:
             if hit_wall:
                 continue
                 
-            # If it survived distance and wall checks, keep it active
             active_tears.append(tear)
             # sets tears to only the active tears
         self.tears = active_tears
