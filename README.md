@@ -1,24 +1,30 @@
 # CS518-SWE-Projects
 
 ## Build
+Requires python 3.12
+Python 3.12 download site https://www.python.org/downloads/release/python-3120/
+
+### Linux and Mac
 ```
 git clone https://github.com/Obada-Salman/CS518-SWE-Projects.git
+cd CS518-SWE-Projects
 
-# Game was developed on python 3.14
-python3.14 -m venv .env
-
-# Activate enviorment os dependent
-# linux/macOS
+python -m venv .env
 source .env/bin/activate
 
-# windows (powershell)
-.env\Scripts\Activate.ps1
-# windows (cmd)
-venv\Scripts\activate.bat
-
 pip install -r requirements.txt
-pip install pyinstaller # pyinstaller for python 3.14 isn't compatiable with pathlib
+
 pyinstaller --name vegtable_wars --onefile --add-data "assets:assets" --add-data "levels/story:levels/story" src/main.py
+```
+
+### Window
+```
+git clone https://github.com/Obada-Salman/CS518-SWE-Projects.git
+cd CS518-SWE-Projects
+
+python -m venv .env
+.\.env\Scripts\activate
+pip install -r requirements.txt
 ```
 
 ## Leaderboard scaffold (online + persistent)
