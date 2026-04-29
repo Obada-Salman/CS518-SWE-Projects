@@ -42,7 +42,7 @@ def save_map(filename, tile_map, level_type="community"):
 
 def load_map(filename, level_type="story"):
     # file_path = os.path.join("levels", level_type, f"{filename}.pkl")
-    default_map = [[None]*20 for _ in range(100)] # os.path.join("levels", "default", f"deafult_map.pkl") #TODO change to empty 2x2 matrix of 100x20
+    default_map = [[None]*100 for _ in range(20)] # os.path.join("levels", "default", f"deafult_map.pkl") #TODO change to empty 2x2 matrix of 100x20
 
     if level_type == "community":
             file_path = resource_path.get_community_level_path()
