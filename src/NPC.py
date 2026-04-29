@@ -53,6 +53,13 @@ class NPC:
             'damage': 1,
             'scale': 0.6,
             'sprite': 'assets/images/Characters/Broccoli_101x178.png'
+        },
+        'finalboss': {
+            'speed': 2,
+            'health': 200,
+            'damage': 4,
+            'scale': 2,
+            'sprite': 'assets/images/Characters/FinalBoss_110x180.png'
         }
     }
 
@@ -68,7 +75,8 @@ class NPC:
         'tomato_ally': (94, 190, 'tomato', 0, 'ally'),
         'bokchoy_ally': (94, 184, 'bokchoy', 0, 'ally'),
         'pumpkin_ally': (94, 177, 'pumpkin', 0, 'ally'),
-        'broccoli_ally': (101, 178, 'broccoli', 0, 'ally')
+        'broccoli_ally': (101, 178, 'broccoli', 0, 'ally'),
+        'finalboss': (110, 180, 'finalboss', 2, 'enemy')
     }
 
     def __init__(self, x, y, width, height, type='carrot', speed=None, team='enemy'):

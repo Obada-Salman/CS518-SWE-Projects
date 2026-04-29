@@ -37,6 +37,7 @@ def main():
         for event in events:
             if event.type == pygame.QUIT:
                 state_manager.quit()
+        state_manager.set_max_unlocked_level(15) # for debugging
         state_manager.update(events)
         state_manager.draw(screen)
         pygame.display.flip()

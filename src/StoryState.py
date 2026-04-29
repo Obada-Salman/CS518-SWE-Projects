@@ -12,6 +12,7 @@ import resource_path
 from dialogue_cutscene import SequencePlayer
 from story_content import RECRUIT_DIALOGUE_BANK, STORY_CUTSCENE_FRAMES
 import heapq
+from FinalBoss import FinalBoss
 
 
 
@@ -109,7 +110,10 @@ class StoryState:
         # self.enemy.update(self.map, self.tile_size)
 
         for enemy in self.enemy_list[:]:
-            enemy.update(self.map, self.tile_size)
+            if enemy.type == 'finalboss':
+                enemy.update(self.map, self.tile_size, self.scroll)
+            else:
+                enemy.update(self.map, self.tile_size)
 
             # Combat Collision
             # if self.player.rect.colliderect(self.enemy.rect):
@@ -119,6 +123,14 @@ class StoryState:
                     enemy.take_damage(1)
                     self.snd_damage.play()
                 self.player.take_damage(enemy.damage)
+
+            # Seed Collision (for FinalBoss)
+            if enemy.type == 'finalboss' and hasattr(enemy, 'seeds'):
+                for seed in enemy.seeds[:]:
+                    if self.player.rect.colliderect(seed['rect']) and self.player.can_damage():
+                        self.player.take_damage(seed['damage'])
+                        self.snd_damage.play()
+                        enemy.seeds.remove(seed)
 
             # Tear Collision
             for tear in self.player.tears[:]:
@@ -318,6 +330,9 @@ class StoryState:
                     self.enemy_list.append(npc)
 
                 self.map[position[3]][position[2]] = None
+        
+        if self.current_level == 15:
+            self.enemy_list.append(FinalBoss(400, 100))
 
         for pot_pos in flower_pot_pos:
             self.pot_list.append(Tile((pot_pos[0], pot_pos[1]), (55, 59), 'flower_pot'))
@@ -374,10 +389,13 @@ class StoryState:
             print(f"Exited Level {self.current_level}")
 
     def _play_level_music(self):
-        if self.current_stage >= (self.state_machine.max_unlocked_level - 1) // 5 + 1:
+        if self.current_level == 15:
+            track = 'final_boss.ogg'
+        elif self.current_stage >= (self.state_machine.max_unlocked_level - 1) // 5 + 1:
             track = self.stage_music.get(self.current_stage)
         else:
             track = self.stage_music_replay.get(self.current_stage)
+            
         if track and hasattr(self.state_machine, 'sound_manager'):
             self.state_machine.sound_manager.play_music_file(track)
     
