@@ -24,8 +24,18 @@ cd CS518-SWE-Projects
 
 python -m venv .env
 .\.env\Scripts\activate
+
 pip install -r requirements.txt
+
+pyinstaller --name vegtable_wars --onefile --add-data "assets:assets" --add-data "levels/story:levels/story" src/main.py
 ```
+
+## Run
+### Linux and Max
+```./dist/vegtable_wars```
+
+### Window
+```./dist/vegtable_wars.exe```
 
 ## Leaderboard scaffold (online + persistent)
 
