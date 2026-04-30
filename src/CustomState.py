@@ -75,7 +75,7 @@ class CustomState:
                 return
 
         # Update Movement and Map Collisions
-        self.player.update(self.map, self.tile_size)
+        self.player.update(self.map, self.tile_size, dt)
 
         # Scroll with player movement
         half_screen = self.true_width // 2
@@ -90,7 +90,7 @@ class CustomState:
         # self.enemy.update(self.map, self.tile_size)
 
         for enemy in self.enemy_list[:]:
-            enemy.update(self.map, self.tile_size)
+            enemy.update(self.map, self.tile_size, dt)
 
             # Combat Collision
             # if self.player.rect.colliderect(self.enemy.rect):
@@ -140,10 +140,10 @@ class CustomState:
                 if closest_enemy and min_dist < 350:
                     # Go towards enemy (allow leading ahead)
                     if ally.x < closest_enemy.x:
-                        ally.vx = ally.speed
+                        ally.vx = ally.speed * dt * 60
                         ally.direction = 1
                     elif ally.x > closest_enemy.x:
-                        ally.vx = -ally.speed
+                        ally.vx = -ally.speed * dt * 60
                         ally.direction = 0
                     else:
                         ally.vx = 0
@@ -155,19 +155,19 @@ class CustomState:
                     # This lets them scout ahead of player and engage enemies first
                     if ally.x < self.player.x - 50:
                         # Too far behind - catch up faster
-                        ally.vx = ally.speed * 1.2  # Speed boost to catch up
+                        ally.vx = ally.speed * 1.2 * dt * 60
                         ally.direction = 1
                     elif ally.x > self.player.x + 50:
                         # Too far ahead - slow down
-                        ally.vx = -ally.speed * 0.5
+                        ally.vx = -ally.speed * 0.5 * dt * 60
                         ally.direction = 0
                     else:
                         # In formation - move at player speed
                         if ally.x < self.player.x - 10:
-                            ally.vx = ally.speed
+                            ally.vx = ally.speed * dt * 60
                             ally.direction = 1
                         elif ally.x > self.player.x + 10:
-                            ally.vx = -ally.speed
+                            ally.vx = -ally.speed * dt * 60
                             ally.direction = 0
                         else:
                             ally.vx = 0
@@ -175,7 +175,7 @@ class CustomState:
                 if ally.on_ground and ally.y > self.player.y and abs(ally.x - self.player.x) > 30:
                     ally.vy = -16.0
             
-            ally.update(self.map, self.tile_size)
+            ally.update(self.map, self.tile_size, dt)
 
         for pot in self.pot_list[:]:
             dist = math.hypot(self.player.x - pot.position[0], self.player.y - pot.position[1])
@@ -191,7 +191,7 @@ class CustomState:
                 print(f"Total nutrients collected: {self.state_machine.get_nutrients_collected()}")
 
                 # plant onion ally
-                self.ally_list.append(NPC(pot.position[0], pot.position[1], 34, 34, type='onion', speed=3, team='ally'))
+                self.ally_list.append(NPC(pot.position[0], pot.position[1], 34, 34, type='onion', team='ally'))
                 self.ally_list[-1].recruited = True
                 self.pot_list.remove(pot)
                 self.snd_collect.play()
@@ -286,6 +286,7 @@ class CustomState:
         self.sequence_player.draw(surface)
         
     def enter(self):
+        self.state_machine.transition('pause')
         self.setup_ui()
         self.map = game_map.load_map(self.current_level, "community")
         player_position = game_map.get_tile_position(self.map, "player", self.tile_size, False)        
@@ -325,8 +326,6 @@ class CustomState:
 
                 self.map[position[3]][position[2]] = None
         
-        if self.current_level == 15:
-            self.enemy_list.append(FinalBoss(400, 100))
 
         for pot_pos in flower_pot_pos:
             self.pot_list.append(Tile((pot_pos[0], pot_pos[1]), (55, 59), 'flower_pot'))
@@ -524,5 +523,5 @@ class CustomState:
         if ally.recruited:
             return
         ally.recruited = True
-        ally.speed = 5  # Match player speed so they can keep up and scout ahead
+        ally.speed = 250.0  # Match player speed so they can keep up and scout ahead
         self.snd_collect.play()
