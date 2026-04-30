@@ -11,6 +11,7 @@ import random
 import resource_path
 from dialogue_cutscene import SequencePlayer
 from story_content import RECRUIT_DIALOGUE_BANK
+import heapq
 
 class CustomState:
     RESOURCE_POINTS = {
@@ -176,6 +177,36 @@ class CustomState:
             
             ally.update(self.map, self.tile_size)
 
+        for pot in self.pot_list[:]:
+            dist = math.hypot(self.player.x - pot.position[0], self.player.y - pot.position[1])
+            sufficient_resources = (self.state_machine.get_water_collected() >= 5 and self.state_machine.get_sunlight_collected() >= 3
+                                    and self.state_machine.get_nutrients_collected() >= 2)
+            if keys[pygame.K_e] and dist < 100 and sufficient_resources:
+                # consume resources
+                self.state_machine.add_water(-5)
+                self.state_machine.add_sunlight(-3)
+                self.state_machine.add_nutrients(-2)
+                print(f"Total water collected: {self.state_machine.get_water_collected()}")
+                print(f"Total sunlight collected: {self.state_machine.get_sunlight_collected()}")
+                print(f"Total nutrients collected: {self.state_machine.get_nutrients_collected()}")
+
+                # plant onion ally
+                self.ally_list.append(NPC(pot.position[0], pot.position[1], 34, 34, type='onion', speed=3, team='ally'))
+                self.ally_list[-1].recruited = True
+                self.pot_list.remove(pot)
+                self.snd_collect.play()
+                break
+
+        # spikes damage player
+        for spike in self.spike_list:
+            offset_x = spike.rect.x - self.player.rect.x
+            offset_y = spike.rect.y - self.player.rect.y
+            spike_mask = pygame.mask.from_surface(spike.image)
+            if self.player.mask.overlap(spike_mask, (offset_x, offset_y)) and self.player.can_damage():
+                self.player.take_damage(1)
+                self.snd_damage.play()
+                break
+
         for c in self.collectibles[:]:
             if self.player.rect.colliderect(c['rect']):
                 if c['type'] == 'water':
@@ -238,6 +269,12 @@ class CustomState:
             sprite_rect = sprite.get_rect(center=(center_x, center_y))
             self.internal_surface.blit(sprite, sprite_rect)
 
+        for pot in self.pot_list:
+            self.internal_surface.blit(pot.image, (pot.position[0] - self.scroll, pot.position[1]))
+
+        for spike in self.spike_list:
+            self.internal_surface.blit(spike.image, (spike.position[0] - self.scroll, spike.position[1]))
+
         self.player.draw(self.internal_surface, self.scroll)
             
         # scales internal surface to fit the window while maintaining aspect ratio
@@ -252,15 +289,13 @@ class CustomState:
         self.setup_ui()
         self.map = game_map.load_map(self.current_level, "community")
         player_position = game_map.get_tile_position(self.map, "player", self.tile_size, False)        
-        enemy_carrot_pos = game_map.get_tile_position(self.map, "carrot", self.tile_size, True)
-        enemy_potato_pos = game_map.get_tile_position(self.map, "potato", self.tile_size, True)
         door_position = game_map.get_tile_position(self.map, "goal", self.tile_size, False)
         water_positions = game_map.get_tile_position(self.map, "water", self.tile_size, True)
         sunlight_positions = game_map.get_tile_position(self.map, "sunlight", self.tile_size, True)
         nutrient_positions = game_map.get_tile_position(self.map, "nutrient", self.tile_size, True)
-        ally_carrot_pos = game_map.get_tile_position(self.map, "carrot_ally", self.tile_size, True)
-        ally_potato_pos = game_map.get_tile_position(self.map, "potato_ally", self.tile_size, True)
-        
+        spike_positions = game_map.get_tile_position(self.map, "spike", self.tile_size, True)
+        flower_pot_pos = game_map.get_tile_position(self.map, "flower_pot", self.tile_size, True)
+
         if player_position is None or door_position is None:
             print(f"ERROR: Level {self.current_level} is missing a player spawn or a goal")
             # Fallback: sends user back to custom level select instead of crashing
@@ -272,30 +307,36 @@ class CustomState:
         
         self.enemy_list = []
         self.ally_list = []
+        self.pot_list = []
+        self.spike_list = []
 
-        # Add carrots
-        for enemy_position in enemy_carrot_pos:
-            self.enemy_list.append(NPC(enemy_position[0], enemy_position[1], 75, 110, type='carrot'))
-            self.map[enemy_position[3]][enemy_position[2]] = None
+        for character, params in NPC.NPC_CONFIG.items():
+            width, height, npc_type, speed, team = params
+            positions = game_map.get_tile_position(self.map, character, self.tile_size, True)
+
+            for position in positions:
+                npc = NPC(position[0], position[1], width, height, type=npc_type, speed=speed, team=team)
+
+                if team == 'ally':
+                    npc.recruited = False
+                    self.ally_list.append(npc)
+                elif team == 'enemy':
+                    self.enemy_list.append(npc)
+
+                self.map[position[3]][position[2]] = None
         
-        # Add potatoes
-        for enemy_position in enemy_potato_pos:
-            self.enemy_list.append(NPC(enemy_position[0], enemy_position[1], 83, 94, type='potato'))
-            self.map[enemy_position[3]][enemy_position[2]] = None
+        if self.current_level == 15:
+            self.enemy_list.append(FinalBoss(400, 100))
 
-        # Add allies
-        for ally_position in ally_carrot_pos:
-            self.ally_list.append(NPC(ally_position[0], ally_position[1], 75, 110, type='carrot', speed=0))
-            self.map[ally_position[3]][ally_position[2]] = None
-            self.ally_list[-1].team = 'ally'
-            self.ally_list[-1].recruited = False
+        for pot_pos in flower_pot_pos:
+            self.pot_list.append(Tile((pot_pos[0], pot_pos[1]), (55, 59), 'flower_pot'))
+            self.map[pot_pos[3]][pot_pos[2]] = None
 
-        for ally_position in ally_potato_pos:
-            self.ally_list.append(NPC(ally_position[0], ally_position[1], 83, 94, type='potato', speed=0))
-            self.map[ally_position[3]][ally_position[2]] = None
-            self.ally_list[-1].team = 'ally'
-            self.ally_list[-1].recruited = False
-            
+        # Add spikes
+        for spike_pos in spike_positions:
+            self.spike_list.append(Tile((spike_pos[0], spike_pos[1]), (self.tile_size, self.tile_size), 'spike'))
+            self.map[spike_pos[3]][spike_pos[2]] = None
+
         self.collectible_sizes = {'water': (45, 53), 'sunlight': (40, 38), 'nutrient': (29, 46)}
         self.sprite_names = {'water': 'water_sprite.png', 'sunlight': 'sun_sprite.png', 'nutrient': 'nutrient_sprite.png'}
         self.collectible_images = {}
@@ -304,6 +345,7 @@ class CustomState:
             self.collectible_images[typ] = img # pygame.transform.smoothscale(img, size)
 
         self.collectibles = []
+
         for w in water_positions:
             size = self.collectible_sizes['water']
             rect = pygame.Rect(w[0], w[1], *size)
@@ -351,6 +393,109 @@ class CustomState:
 
     def _enemy_points(self, enemy):
         return self.ENEMY_KILL_POINTS.get(getattr(enemy, 'type', None), 100)
+
+    def _tile_from_position(self, x, y):
+        return int(x // self.tile_size), int(y // self.tile_size)
+
+    def _is_walkable_tile(self, tile_x, tile_y):
+        if tile_y < 0 or tile_y >= len(self.map):
+            return False
+        if tile_x < 0 or tile_x >= len(self.map[0]):
+            return False
+
+        tile = self.map[tile_y][tile_x]
+        return tile is None or not getattr(tile, 'collision', False)
+
+    def _find_path(self, start, goal):
+        if start == goal:
+            return [start]
+
+        open_set = []
+        heapq.heappush(open_set, (0, start))
+        came_from = {}
+        g_score = {start: 0}
+        closed = set()
+
+        def heuristic(a, b):
+            return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            if current in closed:
+                continue
+            if current == goal:
+                path = [current]
+                while current in came_from:
+                    current = came_from[current]
+                    path.append(current)
+                path.reverse()
+                return path
+
+            closed.add(current)
+            current_x, current_y = current
+            for neighbor in (
+                (current_x + 1, current_y),
+                (current_x - 1, current_y),
+                (current_x, current_y + 1),
+                (current_x, current_y - 1),
+            ):
+                if not self._is_walkable_tile(*neighbor) and neighbor != goal:
+                    continue
+
+                tentative = g_score[current] + 1
+                if tentative >= g_score.get(neighbor, float('inf')):
+                    continue
+
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative
+                priority = tentative + heuristic(neighbor, goal)
+                heapq.heappush(open_set, (priority, neighbor))
+
+        return None
+
+    def _select_ally_target(self, ally):
+        if self.enemy_list:
+            return min(
+                self.enemy_list,
+                key=lambda enemy: math.hypot(enemy.rect.centerx - ally.rect.centerx, enemy.rect.centery - ally.rect.centery),
+            )
+        return self.player
+
+    def _steer_ally_along_path(self, ally, path):
+        current_tile = self._tile_from_position(ally.rect.centerx, ally.rect.centery)
+        next_tile = path[1]
+
+        next_center_x = next_tile[0] * self.tile_size + self.tile_size / 2
+        next_center_y = next_tile[1] * self.tile_size + self.tile_size / 2
+
+        if next_center_x > ally.rect.centerx + 4:
+            ally.vx = ally.speed
+            ally.direction = 1
+        elif next_center_x < ally.rect.centerx - 4:
+            ally.vx = -ally.speed
+            ally.direction = 0
+        else:
+            ally.vx = 0
+
+        if next_center_y + (self.tile_size * 0.35) < ally.rect.centery and ally.on_ground:
+            ally.vy = -16.0
+
+        # If the path starts with a vertical move, keep the ally aggressive instead of stalling.
+        if current_tile[0] == next_tile[0] and abs(next_center_y - ally.rect.centery) > self.tile_size * 0.4:
+            ally.vx = 0
+
+    def _steer_ally_directly(self, ally, target):
+        if target.rect.centerx > ally.rect.centerx + 6:
+            ally.vx = ally.speed
+            ally.direction = 1
+        elif target.rect.centerx < ally.rect.centerx - 6:
+            ally.vx = -ally.speed
+            ally.direction = 0
+        else:
+            ally.vx = 0
+
+        if target.rect.centery + 10 < ally.rect.centery and ally.on_ground:
+            ally.vy = -16.0
 
     def _start_recruitment_dialogue(self, ally):
         if ally.recruited:
