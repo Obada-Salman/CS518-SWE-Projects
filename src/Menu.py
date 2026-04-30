@@ -231,6 +231,7 @@ class MainMenuState:
         
     def enter(self):
         self.__init__(self.name, self.state_machine)
+        self.play_music()
 
     def _normalize_username(self, username):
         normalized = (username or "").strip()
@@ -264,6 +265,8 @@ class MainMenuState:
         elif self.selected_slot > slot_count:
             self.selected_slot = 1
         self._refresh_slot_data()
+        self.setup_ui()
+        self.play_music()
 
     def _load_selected_save(self):
         if hasattr(self.state_machine, "load_save_slot"):
@@ -271,6 +274,8 @@ class MainMenuState:
             score_tracker = getattr(self.state_machine, "score_tracker", None)
             self.username_input = self._normalize_username(getattr(score_tracker, "username", "player1"))
         self._refresh_slot_data()
+        self.setup_ui()
+        self.play_music()
 
     def _new_game_selected_slot(self):
         if hasattr(self.state_machine, "create_new_game"):
@@ -278,6 +283,16 @@ class MainMenuState:
             score_tracker = getattr(self.state_machine, "score_tracker", None)
             self.username_input = self._normalize_username(getattr(score_tracker, "username", "player1"))
         self._refresh_slot_data()
+        self.setup_ui()
+        self.play_music()
+
+    def play_music(self):
+        if self.state_machine.max_unlocked_level > 10:
+            track = 'menu_theme2.ogg'
+        else:
+            track = 'menu_theme.ogg'
+        if track and hasattr(self.state_machine, 'sound_manager'):
+            self.state_machine.sound_manager.play_music_file(track)
 
     def _delete_selected_save(self):
         if hasattr(self.state_machine, "delete_save_slot"):
@@ -285,6 +300,9 @@ class MainMenuState:
             score_tracker = getattr(self.state_machine, "score_tracker", None)
             self.username_input = self._normalize_username(getattr(score_tracker, "username", "player1"))
         self._refresh_slot_data()
+
+        self.setup_ui()
+        self.play_music()
 
     def _confirm_delete_selected_save(self):
         self._delete_selected_save()

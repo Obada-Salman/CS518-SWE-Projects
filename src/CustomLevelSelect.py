@@ -114,6 +114,15 @@ class CustomLevelSelect:
     
     def enter(self):
         self.setup_ui()
+        self.play_music()
+        
+    def play_music(self):
+        if self.state_machine.max_unlocked_level > 10:
+            track = 'menu_theme2.ogg'
+        else:
+            track = 'menu_theme.ogg'
+        if track and hasattr(self.state_machine, 'sound_manager'):
+            self.state_machine.sound_manager.play_music_file(track)
         
         
         

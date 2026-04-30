@@ -99,6 +99,14 @@ class LevelSelectState:
         if hasattr(self.state_machine, 'set_story_level'):
             self.state_machine.set_story_level(level_number)
         self.state_machine.transition('story')
+        
+    def play_music(self):
+        if self.state_machine.max_unlocked_level > 10:
+            track = 'menu_theme2.ogg'
+        else:
+            track = 'menu_theme.ogg'
+        if track and hasattr(self.state_machine, 'sound_manager'):
+            self.state_machine.sound_manager.play_music_file(track)
     
     def draw(self, surface):
         surface.fill(WHITE)
@@ -121,7 +129,7 @@ class LevelSelectState:
     
     def enter(self):
         self.setup_ui()
-        
+        self.play_music()
         
         
         
