@@ -101,6 +101,11 @@ class NPC:
         self.vy = 0.0
         self.gravity = 0.8
         self.on_ground = False
+        self.on_wall = False  # Track if touching a wall
+        self.wall_direction = 0  # 0=left, 1=right
+        self.wall_jump_cooldown = 0  # Prevent rapid wall jumps
+        self.stuck_timer = 0  # Track how long ally has been barely moving
+        self.last_x = 0  # Track position to detect stuck state
         self.direction = 0 
         self.state = 0 
         self.moving = False
@@ -126,6 +131,7 @@ class NPC:
 
     def update(self, game_map, tile_size):
         # Move X
+        self.on_wall = False  # Reset wall flag each frame
         self.x += self.vx
         self.rect.x = int(round(self.x))
         self.check_map_collision(game_map, tile_size, 'x')
@@ -136,6 +142,31 @@ class NPC:
         self.rect.y = int(round(self.y))
         self.on_ground = False
         self.check_map_collision(game_map, tile_size, 'y')
+        
+        # Wall jump logic - automatically jump off walls to unstick
+        if self.wall_jump_cooldown > 0:
+            self.wall_jump_cooldown -= 1
+        
+        # If stuck on a wall, perform wall jump (aggressive corner escape)
+        # Trigger when on wall, even if on ground (corner case)
+        if self.on_wall and self.wall_jump_cooldown == 0:
+            self.perform_wall_jump()
+        
+        # Emergency jump if stuck in terrain (not moving despite trying)
+        # Track movement to detect stuck state
+        movement_distance = abs(self.x - self.last_x)
+        if self.vx != 0 and movement_distance < 0.5 and self.wall_jump_cooldown == 0:
+            # Not moving despite trying to move
+            self.stuck_timer += 1
+            if self.stuck_timer > 20:  # Stuck for 20 frames (~0.33 seconds)
+                if self.on_ground:
+                    self.vy = -14.0  # Emergency jump
+                    self.stuck_timer = 0
+                    self.wall_jump_cooldown = 15
+        else:
+            self.stuck_timer = 0  # Reset if moving
+        
+        self.last_x = self.x  # Store position for next frame
         
         # Set animation flags
         self.moving = abs(self.vx) > 0.1
@@ -176,6 +207,49 @@ class NPC:
             self.time_since_hit = pygame.time.get_ticks()
         elif self.team == 'enemy':
             self.health -= amount
+
+    def combat_with(self, opponent):
+        """
+        Health-based combat system: whoever has higher health wins.
+        The opponent takes damage, winner takes reduced damage or none.
+        """
+        if self.health <= 0 or opponent.health <= 0:
+            return
+        
+        # Determine winner based on health
+        health_diff = self.health - opponent.health
+        
+        if health_diff > 0:  # Self is healthier, wins the combat
+            # Opponent takes full damage, winner takes minimal damage
+            opponent.take_damage(self.damage)
+            if self.team == 'ally' and not self.invincible:
+                self.health -= max(1, self.damage // 2)  # Reduced damage for winner
+                self.invincible = True
+                self.time_since_hit = pygame.time.get_ticks()
+            elif self.team == 'enemy':
+                self.health -= max(1, self.damage // 2)  # Reduced damage for winner
+        elif health_diff < 0:  # Opponent is healthier, they win
+            # Self takes full damage, opponent takes minimal damage
+            self.take_damage(opponent.damage)
+            if opponent.team == 'ally' and not opponent.invincible:
+                opponent.health -= max(1, opponent.damage // 2)  # Reduced damage for winner
+                opponent.invincible = True
+                opponent.time_since_hit = pygame.time.get_ticks()
+            elif opponent.team == 'enemy':
+                opponent.health -= max(1, opponent.damage // 2)  # Reduced damage for winner
+        else:  # Equal health - both take full damage
+            self.take_damage(opponent.damage)
+            opponent.take_damage(self.damage)
+
+    def perform_wall_jump(self):
+        """Jump off the wall to unstick and continue following player."""
+        # Jump up and away from the wall
+        self.vy = -14.0  # Strong upward velocity
+        # Push away from wall
+        self.vx = self.speed if self.wall_direction == 0 else -self.speed
+        self.direction = 1 if self.vx > 0 else 0
+        self.wall_jump_cooldown = 15  # Faster wall jump cooldown for corner escape (0.25 seconds at 60 FPS)
+        self.on_wall = False
 
     def can_damage(self):
         if self.team == 'ally':
@@ -273,6 +347,15 @@ class NPC:
                                 self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)
                                 self.mask = pygame.mask.from_surface(self.mask_frame)
                                 
+                                # Detect wall collision for wall jump
+                                # wall_direction: 0=hit left wall, 1=hit right wall
+                                if offset_x > 0:  # Hit left wall (tile is to the right)
+                                    self.on_wall = True
+                                    self.wall_direction = 1
+                                else:  # Hit right wall (tile is to the left)
+                                    self.on_wall = True
+                                    self.wall_direction = 0
+                                
                                 # Optional: Push out of the wall slightly to prevent sticking
                                 if self.vx > 0: self.rect.left = tile_rect.right - self.left_offset
                                 else: self.rect.right = tile_rect.left + self.right_offset
@@ -291,6 +374,7 @@ class NPC:
                                 if self.vy > 0:  # Falling
                                     self.rect.bottom = tile_rect.top + self.bottom_offset
                                     self.on_ground = True
+                                    self.on_wall = False  # Reset wall flag when on ground
                                 elif self.vy < 0:  # Jumping Up
                                     self.rect.top = tile_rect.bottom - self.top_offset
                                 

@@ -117,8 +117,7 @@ class CustomState:
 
             for ally in self.ally_list:
                 if ally.recruited and ally.can_damage() and self.mask_collision(ally, enemy):
-                    enemy.take_damage(ally.damage)
-                    ally.take_damage(enemy.damage)
+                    ally.combat_with(enemy)
                     self.snd_damage.play()
                     
         keys = pygame.key.get_pressed()
@@ -137,8 +136,8 @@ class CustomState:
                     if dist < min_dist:
                         min_dist = dist
                         closest_enemy = enemy
-                if closest_enemy and min_dist < 400:
-                    # Go towards enemy
+                if closest_enemy and min_dist < 350:
+                    # Go towards enemy (allow leading ahead)
                     if ally.x < closest_enemy.x:
                         ally.vx = ally.speed
                         ally.direction = 1
@@ -147,18 +146,32 @@ class CustomState:
                         ally.direction = 0
                     else:
                         ally.vx = 0
+                    # Jump to reach enemy if needed
+                    if ally.on_ground and ally.y > closest_enemy.y + 20:
+                        ally.vy = -16.0
                 else:
-                    # Follow player with offset
+                    # Follow player as scout - allow significant leading ahead (50px)
+                    # This lets them scout ahead of player and engage enemies first
                     if ally.x < self.player.x - 50:
-                        ally.vx = ally.speed
+                        # Too far behind - catch up faster
+                        ally.vx = ally.speed * 1.2  # Speed boost to catch up
                         ally.direction = 1
                     elif ally.x > self.player.x + 50:
-                        ally.vx = -ally.speed
+                        # Too far ahead - slow down
+                        ally.vx = -ally.speed * 0.5
                         ally.direction = 0
                     else:
-                        ally.vx = 0
+                        # In formation - move at player speed
+                        if ally.x < self.player.x - 10:
+                            ally.vx = ally.speed
+                            ally.direction = 1
+                        elif ally.x > self.player.x + 10:
+                            ally.vx = -ally.speed
+                            ally.direction = 0
+                        else:
+                            ally.vx = 0
 
-                if ally.on_ground and ally.y > self.player.y and abs(ally.x - self.player.x) > 60:
+                if ally.on_ground and ally.y > self.player.y and abs(ally.x - self.player.x) > 30:
                     ally.vy = -16.0
             
             ally.update(self.map, self.tile_size)
