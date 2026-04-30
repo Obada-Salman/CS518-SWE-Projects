@@ -149,8 +149,7 @@ class StoryState:
 
             for ally in self.ally_list:
                 if ally.recruited and ally.can_damage() and self.mask_collision(ally, enemy):
-                    enemy.take_damage(ally.damage)
-                    ally.take_damage(enemy.damage)
+                    ally.combat_with(enemy)
                     self.snd_damage.play()
                     
         keys = pygame.key.get_pressed()
@@ -467,11 +466,17 @@ class StoryState:
         return None
 
     def _select_ally_target(self, ally):
+        # Prefer enemies over player, but give priority to nearby threats
+        # This allows allies to scout ahead and engage enemies proactively
         if self.enemy_list:
-            return min(
+            closest_enemy = min(
                 self.enemy_list,
                 key=lambda enemy: math.hypot(enemy.rect.centerx - ally.rect.centerx, enemy.rect.centery - ally.rect.centery),
             )
+            enemy_dist = math.hypot(closest_enemy.rect.centerx - ally.rect.centerx, closest_enemy.rect.centery - ally.rect.centery)
+            # Pursue enemies more aggressively - up to 180px away
+            if enemy_dist < 180:
+                return closest_enemy
         return self.player
 
     def _steer_ally_along_path(self, ally, path):
@@ -498,11 +503,15 @@ class StoryState:
             ally.vx = 0
 
     def _steer_ally_directly(self, ally, target):
+        # Use dynamic speed based on distance - slower when close, faster when far
+        distance = abs(target.rect.centerx - ally.rect.centerx)
+        speed_multiplier = min(1.2, 1.0 + (distance / 400))  # Up to 20% speed boost when far
+        
         if target.rect.centerx > ally.rect.centerx + 6:
-            ally.vx = ally.speed
+            ally.vx = ally.speed * speed_multiplier
             ally.direction = 1
         elif target.rect.centerx < ally.rect.centerx - 6:
-            ally.vx = -ally.speed
+            ally.vx = -ally.speed * speed_multiplier
             ally.direction = 0
         else:
             ally.vx = 0
@@ -527,7 +536,7 @@ class StoryState:
         if ally.recruited:
             return
         ally.recruited = True
-        ally.speed = 3
+        ally.speed = 5  # Match player speed so they can keep up and scout ahead
         self.snd_collect.play()
 
     def _start_level_cutscene_if_needed(self):
