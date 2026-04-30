@@ -195,7 +195,7 @@ class Player:
         
         elif axis == 'y':
             # Bottom Edge
-            if self.rect.y + mask_bounding_rect.bottom > map_height:
+            if self.rect.y + mask_bounding_rect.bottom -100 > map_height:
                 self.health = 0
 
         # Calculate exactly which tiles we are overlapping
