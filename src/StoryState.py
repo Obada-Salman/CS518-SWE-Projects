@@ -171,10 +171,10 @@ class StoryState:
                 if closest_enemy and min_dist < 350:
                     # Go towards enemy (allow leading ahead)
                     if ally.x < closest_enemy.x:
-                        ally.vx = ally.speed * dt * 60
+                        ally.vx = ally.speed
                         ally.direction = 1
                     elif ally.x > closest_enemy.x:
-                        ally.vx = -ally.speed * dt * 60
+                        ally.vx = -ally.speed
                         ally.direction = 0
                     else:
                         ally.vx = 0
@@ -186,19 +186,19 @@ class StoryState:
                     # This lets them scout ahead of player and engage enemies first
                     if ally.x < self.player.x - 50:
                         # Too far behind - catch up faster
-                        ally.vx = ally.speed * 1.2 * dt * 60  # Speed boost to catch up
+                        ally.vx = ally.speed * 1.2   # Speed boost to catch up
                         ally.direction = 1
                     elif ally.x > self.player.x + 50:
                         # Too far ahead - slow down
-                        ally.vx = -ally.speed * 0.5 * dt * 60
+                        ally.vx = -ally.speed * 0.5
                         ally.direction = 0
                     else:
                         # In formation - move at player speed
                         if ally.x < self.player.x - 10:
-                            ally.vx = ally.speed * dt * 60
+                            ally.vx = ally.speed
                             ally.direction = 1
                         elif ally.x > self.player.x + 10:
-                            ally.vx = -ally.speed * dt * 60
+                            ally.vx = -ally.speed
                             ally.direction = 0
                         else:
                             ally.vx = 0
