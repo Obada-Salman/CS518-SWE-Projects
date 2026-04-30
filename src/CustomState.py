@@ -59,7 +59,7 @@ class CustomState:
         self.offset_y = (self.screen_height - self.scaled_height) // 2
         # self.tile_size = self.true_height // ROWS
 
-    def update(self, events):
+    def update(self, events, dt):
         for event in events:
             if event.type == pygame.VIDEORESIZE:
                 self.setup_ui()
@@ -226,8 +226,8 @@ class CustomState:
                 self.snd_collect.play()
 
         if not self.player.is_alive():
-            self.__init__(self.state_machine)
             self.state_machine.transition('menu')
+            return
 
         # self.door_locked = self.enemy.is_alive()
         self.door_locked = len(self.enemy_list) > 0

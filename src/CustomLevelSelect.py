@@ -67,7 +67,7 @@ class CustomLevelSelect:
             
         self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
         
-    def update(self, events):
+    def update(self, events, dt):
         for event in events:
             for btn, level_num in self.level_buttons:
                 if btn.is_clicked(event):

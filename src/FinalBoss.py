@@ -4,27 +4,27 @@ from settings import BASE_HEIGHT, BASE_WIDTH
 
 class FinalBoss(NPC):
     def __init__(self, x, y):
-        super().__init__(x, y, 110, 180, type='finalboss', speed=2.0, team='enemy')
+        super().__init__(x, y, 110, 180, type='finalboss', speed=120, team='enemy')
 
         self.health = 200
         self.max_health = self.health
         self.damage = 4
-        self.speed = 2.0
-        self.attack_timer = 60
-        self.attack_cooldown = 60
+        self.speed = 120.0
+        self.attack_timer = 1.0
+        self.attack_cooldown = 1.0
         self.seeds = []
         self.scroll = 0
         self.previous_scroll = 0
 
-    def update(self, game_map, tile_size, scroll):
-        super().update(game_map, tile_size)
+    def update(self, game_map, tile_size, scroll, dt):
+        super().update(game_map, tile_size, dt)
         self.scroll = scroll
-        self.attack_timer -= 1
+        self.attack_timer -= dt
         if self.attack_timer <= 0:
             self.spawn_seed()
             self.attack_timer = self.attack_cooldown
         
-        self.update_seeds()
+        self.update_seeds(dt)
 
     def spawn_seed(self):
         seed_width = 16
@@ -34,17 +34,17 @@ class FinalBoss(NPC):
 
         self.seeds.append({
             'rect': pygame.Rect(seed_x, seed_y, seed_width, seed_height),
-            'vy': 4,
+            'vy': 240,  # px/s
             'damage': 1
         })
 
-    def update_seeds(self):
+    def update_seeds(self, dt):
         scroll_delta = self.scroll - self.previous_scroll
         self.previous_scroll = self.scroll
         
         for seed in self.seeds:
             seed['rect'].x -= scroll_delta
-            seed['rect'].y += seed['vy']
+            seed['rect'].y += seed['vy'] * dt
             if seed['rect'].y > BASE_HEIGHT:
                 self.seeds.remove(seed)
 

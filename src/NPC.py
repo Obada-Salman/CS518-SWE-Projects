@@ -6,56 +6,56 @@ import resource_path
 class NPC:
     NPC_TYPES = {
         'carrot': {
-            'speed': 3,
+            'speed': 180.0,
             'health': 5,
             'damage': 1,
             'scale': 1,
             'sprite': 'assets/images/Characters/Carrot_75x110.png'
         },
         'potato': {
-            'speed': 2,
+            'speed': 120.0,
             'health': 7,
             'damage': 1,
             'scale': 1,
             'sprite': 'assets/images/Characters/Potato_83x94.png'
         },
         'onion': {
-            'speed': 2,
+            'speed': 250.0,
             'health': 5,
             'damage': 1,
             'scale': 2,
             'sprite': 'assets/images/Characters/Onion_34x34.png'
         },
         'tomato': {
-            'speed': 7,
+            'speed': 420.0,
             'health': 3,
             'damage': 1,
             'scale': 0.6,
             'sprite': 'assets/images/Characters/Tomato_94x190.png'
         },
         'bokchoy': {
-            'speed': 5,
+            'speed': 300.0,
             'health': 5,
             'damage': 2,
             'scale': 0.6,
             'sprite': 'assets/images/Characters/BokChoy_94x184.png'
         },
         'pumpkin': {
-            'speed': 4.5,
+            'speed': 270.0,
             'health': 12,
             'damage': 3,
             'scale': 0.6,
             'sprite': 'assets/images/Characters/Pumpkin_94x177.png'
         },
         'broccoli': {
-            'speed': 9,
+            'speed': 540.0,
             'health': 6,
             'damage': 1,
             'scale': 0.6,
             'sprite': 'assets/images/Characters/Broccoli_101x178.png'
         },
         'finalboss': {
-            'speed': 2,
+            'speed': 120.0,
             'health': 200,
             'damage': 4,
             'scale': 2,
@@ -64,19 +64,19 @@ class NPC:
     }
 
     NPC_CONFIG = {
-        'carrot': (75, 110, 'carrot', 3, 'enemy'),
-        'potato': (83, 94, 'potato', 2, 'enemy'),
-        'tomato': (94, 190, 'tomato', 7, 'enemy'),
-        'bokchoy': (94, 184, 'bokchoy', 5, 'enemy'),
-        'pumpkin': (94, 177, 'pumpkin', 4.5, 'enemy'),
-        'broccoli': (101, 178, 'broccoli', 9, 'enemy'),
+        'carrot': (75, 110, 'carrot', 180.0, 'enemy'),
+        'potato': (83, 94, 'potato', 120.0, 'enemy'),
+        'tomato': (94, 190, 'tomato', 420.0, 'enemy'),
+        'bokchoy': (94, 184, 'bokchoy', 300.0, 'enemy'),
+        'pumpkin': (94, 177, 'pumpkin', 270.0, 'enemy'),
+        'broccoli': (101, 178, 'broccoli', 540.0, 'enemy'),
         'carrot_ally': (75, 110, 'carrot', 0, 'ally'),
         'potato_ally': (83, 94, 'potato', 0, 'ally'),
         'tomato_ally': (94, 190, 'tomato', 0, 'ally'),
         'bokchoy_ally': (94, 184, 'bokchoy', 0, 'ally'),
         'pumpkin_ally': (94, 177, 'pumpkin', 0, 'ally'),
         'broccoli_ally': (101, 178, 'broccoli', 0, 'ally'),
-        'finalboss': (110, 180, 'finalboss', 2, 'enemy')
+        'finalboss': (110, 180, 'finalboss', 120.0, 'enemy')
     }
 
     def __init__(self, x, y, width, height, type='carrot', speed=None, team='enemy'):
@@ -99,7 +99,7 @@ class NPC:
         
         self.vx = -self.speed
         self.vy = 0.0
-        self.gravity = 0.8
+        self.gravity = 2880.0  # px/s^2
         self.on_ground = False
         self.on_wall = False  # Track if touching a wall
         self.wall_direction = 0  # 0=left, 1=right
@@ -129,40 +129,40 @@ class NPC:
         self.visible = True
         self.invincibility_time = 2000
 
-    def update(self, game_map, tile_size):
+    def update(self, game_map, tile_size, dt):
         # Move X
         self.on_wall = False  # Reset wall flag each frame
-        self.x += self.vx
+        self.x += self.vx * dt
         self.rect.x = int(round(self.x))
         self.check_map_collision(game_map, tile_size, 'x')
 
         # Move Y
-        self.vy += self.gravity
-        self.y += self.vy
+        self.vy += self.gravity * dt
+        self.y += self.vy * dt
         self.rect.y = int(round(self.y))
         self.on_ground = False
         self.check_map_collision(game_map, tile_size, 'y')
         
         # Wall jump logic - automatically jump off walls to unstick
         if self.wall_jump_cooldown > 0:
-            self.wall_jump_cooldown -= 1
+            self.wall_jump_cooldown -= dt
         
         # If stuck on a wall, perform wall jump (aggressive corner escape)
         # Trigger when on wall, even if on ground (corner case)
-        if self.on_wall and self.wall_jump_cooldown == 0:
+        if self.on_wall and self.wall_jump_cooldown <= 0:
             self.perform_wall_jump()
         
         # Emergency jump if stuck in terrain (not moving despite trying)
         # Track movement to detect stuck state
         movement_distance = abs(self.x - self.last_x)
-        if self.vx != 0 and movement_distance < 0.5 and self.wall_jump_cooldown == 0:
+        if self.vx != 0 and movement_distance < 0.5 and self.wall_jump_cooldown <= 0:
             # Not moving despite trying to move
-            self.stuck_timer += 1
-            if self.stuck_timer > 20:  # Stuck for 20 frames (~0.33 seconds)
+            self.stuck_timer += dt
+            if self.stuck_timer > 0.33:  # Stuck for 0.33 seconds
                 if self.on_ground:
-                    self.vy = -14.0  # Emergency jump
+                    self.vy = -840.0  # Emergency jump
                     self.stuck_timer = 0
-                    self.wall_jump_cooldown = 15
+                    self.wall_jump_cooldown = 0.25  # 0.25 seconds
         else:
             self.stuck_timer = 0  # Reset if moving
         
@@ -191,7 +191,7 @@ class NPC:
         else: # idle
             self.state = 0
         
-        self.sprites.update(direction=self.direction, state=self.state)
+        self.sprites.update(dt, direction=self.direction, state=self.state)
 
         # current_frame = self.sprites.get_current_frame()
         # self.mask = pygame.mask.from_surface(current_frame)
@@ -244,11 +244,11 @@ class NPC:
     def perform_wall_jump(self):
         """Jump off the wall to unstick and continue following player."""
         # Jump up and away from the wall
-        self.vy = -14.0  # Strong upward velocity
+        self.vy = -840.0  # Strong upward velocity
         # Push away from wall
         self.vx = self.speed if self.wall_direction == 0 else -self.speed
         self.direction = 1 if self.vx > 0 else 0
-        self.wall_jump_cooldown = 15  # Faster wall jump cooldown for corner escape (0.25 seconds at 60 FPS)
+        self.wall_jump_cooldown = 0.25  # 0.25 seconds
         self.on_wall = False
 
     def can_damage(self):

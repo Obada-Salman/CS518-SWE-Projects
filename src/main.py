@@ -34,14 +34,15 @@ def main():
     
     while not state_manager.window_should_close:
         events = pygame.event.get()
+        dt_ms = clock.tick(FPS)
+        dt = dt_ms / 1000.0
         for event in events:
             if event.type == pygame.QUIT:
                 state_manager.quit()
-        state_manager.set_max_unlocked_level(15) # for debugging
-        state_manager.update(events)
+        # state_manager.set_max_unlocked_level(15) # for debugging
+        state_manager.update(events, dt)
         state_manager.draw(screen)
         pygame.display.flip()
-        clock.tick(FPS)
     pygame.quit()
     sys.exit()
     

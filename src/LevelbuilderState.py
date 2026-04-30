@@ -78,7 +78,7 @@ class LevelBuilderState:
         self.current_button = 0
         self.current_tile = self.button_list[self.current_button].type
 
-    def update(self, events):
+    def update(self, events, dt):
         self.player_placed = game_map.check_tile(self.tile_map, "player")
         self.goal_placed = game_map.check_tile(self.tile_map, "goal")
 

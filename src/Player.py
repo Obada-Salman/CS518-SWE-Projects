@@ -11,12 +11,12 @@ class Player:
         self.height = height
         self.rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
         
-        self.speed = 5
+        self.speed = 300.0  # px/s
         self.health = 5
         self.vx = 0.0
         self.vy = 0.0
-        self.gravity = 0.8  # Slightly increased for snappier feel
-        self.jump_strength = -16.0
+        self.gravity = 2880.0  # px/s^2
+        self.jump_strength = -960.0  # px/s
         self.on_ground = False
         self.moving = False
         self.jumping = False
@@ -71,35 +71,35 @@ class Player:
         tear_rect = self.tear.get_rect(center=self.rect.center)
         tear_mask = pygame.mask.from_surface(tear_surface)
 
-        self.tears.append({'rect': tear_rect, 'direction': self.direction, 'speed': 10, 'mask': tear_mask, 'start_x': tear_rect.x})
+        self.tears.append({'rect': tear_rect, 'direction': self.direction, 'speed': 600, 'mask': tear_mask, 'start_x': tear_rect.x})
         self.snd_tear_shoot.play()
 
 
-    def update(self, game_map, tile_size):
+    def update(self, game_map, tile_size, dt):
         self.handle_input()
         self.on_ground = False
 
         # Move X
-        self.x += self.vx
+        self.x += self.vx * dt
         self.rect.x = int(self.x)
         self.check_map_collision(game_map, tile_size, 'x')
 
         # Move Y
         if not self.on_ground:
-            self.vy += self.gravity
-            if self.vy > 14:
-                self.vy = 14
+            self.vy += self.gravity * dt
+            if self.vy > 840:
+                self.vy = 840
         else:
             self.vy = 0
         
         
-        self.y += self.vy
+        self.y += self.vy * dt
         self.rect.y = int(self.y)
         self.check_map_collision(game_map, tile_size, 'y')
 
         active_tears = []
         for tear in self.tears[:]:
-            tear['rect'].x += tear['speed'] if tear['direction'] == 1 else -tear['speed']
+            tear['rect'].x += tear['speed'] * dt if tear['direction'] == 1 else -tear['speed'] * dt
             distance_traveled = abs(tear['rect'].x - tear['start_x'])
             if distance_traveled > self.tear_range:
                 continue
@@ -144,7 +144,7 @@ class Player:
         else:
             self.state = 0
 
-        self.sprites.update(direction=self.direction, state=self.state)
+        self.sprites.update(dt, direction=self.direction, state=self.state)
         
         # current_frame = self.sprites.get_current_frame()
         # self.mask = pygame.mask.from_surface(current_frame)

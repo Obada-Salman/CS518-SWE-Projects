@@ -73,7 +73,7 @@ class LevelSelectState:
             
         self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
         
-    def update(self, events):
+    def update(self, events, dt):
         max_level = getattr(self.state_machine, 'max_unlocked_level', 1)
         for event in events:
             for btn, level_num in self.level_buttons:

@@ -73,7 +73,7 @@ class SpriteHandler:
         
         return frames[self.frame_idx]
 
-    def update(self, direction=None, state=None):
+    def update(self, dt, direction=None, state=None):
         if direction is not None:
             self.direction = direction
         if state is not None:
@@ -85,7 +85,7 @@ class SpriteHandler:
 
         frames = self.get_current_frames()
 
-        self.anim_counter += 1
+        self.anim_counter += 1 * dt * 60
         if self.anim_counter >= self.anim_speed:
             self.anim_counter = 0
             self.frame_idx = (self.frame_idx + 1) % len(frames)

@@ -185,9 +185,9 @@ class StateManager:
         if track:
             self.sound_manager.play_music_file(track)
 
-    def update(self, events):
+    def update(self, events, dt):
         if self.current_state:
-            self.current_state.update(events)
+            self.current_state.update(events, dt)
 
     def draw(self, surface):
         if self.current_state:

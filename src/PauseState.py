@@ -32,7 +32,7 @@ class PauseState:
         self.btn_menu = Button(button_x, button_y + 2 * (btn_height + btn_spacing), btn_width, btn_height, "Main Menu", btn_font, BLACK, WHITE)
         
 
-    def update(self, events):
+    def update(self, events, dt):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.state_machine.transition(self.previous_state)

@@ -44,7 +44,7 @@ class SettingsState:
             
         self.scaled_bg = pygame.transform.scale(self.background, (self.screen_width, self.screen_height))
 
-    def update(self, events):
+    def update(self, events, dt):
         for event in events:
             if self.btn_800.is_clicked(event):
                 self.change_resolution(800, 600)
