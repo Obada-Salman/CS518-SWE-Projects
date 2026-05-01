@@ -127,10 +127,15 @@ class StoryState:
             # Seed Collision (for FinalBoss)
             if enemy.type == 'finalboss' and hasattr(enemy, 'seeds'):
                 for seed in enemy.seeds[:]:
-                    if self.player.rect.colliderect(seed['rect']) and self.player.can_damage():
-                        self.player.take_damage(seed['damage'])
-                        self.snd_damage.play()
-                        enemy.seeds.remove(seed)
+                    if self.player.can_damage():
+                        # Use mask collision for seeds
+                        seed_mask = pygame.mask.Mask((seed['rect'].width, seed['rect'].height), fill=True)
+                        offset_x = seed['rect'].x - self.player.rect.x
+                        offset_y = seed['rect'].y - self.player.rect.y
+                        if self.player.mask.overlap(seed_mask, (offset_x, offset_y)):
+                            self.player.take_damage(seed['damage'])
+                            self.snd_damage.play()
+                            enemy.seeds.remove(seed)
 
             # Tear Collision
             for tear in self.player.tears[:]:
@@ -151,6 +156,13 @@ class StoryState:
                 if ally.recruited and ally.can_damage() and self.mask_collision(ally, enemy):
                     ally.combat_with(enemy)
                     self.snd_damage.play()
+                    
+        # Transfer spawned enemies from FinalBoss to the main enemy list
+        for enemy in self.enemy_list[:]:
+            if enemy.type == 'finalboss' and hasattr(enemy, 'enemies'):
+                for spawned_enemy in enemy.enemies[:]:
+                    self.enemy_list.append(spawned_enemy)
+                enemy.enemies.clear()
                     
         keys = pygame.key.get_pressed()
         for ally in self.ally_list:
@@ -367,7 +379,7 @@ class StoryState:
                 self.map[position[3]][position[2]] = None
         
         if self.current_level == 15:
-            self.enemy_list.append(FinalBoss(400, 100))
+            self.enemy_list.append(FinalBoss(550, 300))
 
         for pot_pos in flower_pot_pos:
             self.pot_list.append(Tile((pot_pos[0], pot_pos[1]), (55, 59), 'flower_pot'))

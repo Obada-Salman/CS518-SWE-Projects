@@ -347,6 +347,11 @@ class NPC:
                                 self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)
                                 self.mask = pygame.mask.from_surface(self.mask_frame)
                                 
+                                # Recalculate mask offsets after flipping
+                                mask_rects = self.mask.get_bounding_rects()
+                                self.left_offset = mask_rects[0].left
+                                self.right_offset = self.rect.width - mask_rects[0].right
+                                
                                 # Detect wall collision for wall jump
                                 # wall_direction: 0=hit left wall, 1=hit right wall
                                 if offset_x > 0:  # Hit left wall (tile is to the right)
@@ -357,15 +362,10 @@ class NPC:
                                     self.wall_direction = 0
                                 
                                 # Optional: Push out of the wall slightly to prevent sticking
+                                # Use the newly calculated offsets
                                 if self.vx > 0: self.rect.left = tile_rect.right - self.left_offset
                                 else: self.rect.right = tile_rect.left + self.right_offset
                                 self.x = float(self.rect.x)
-
-                                self.mask_frame = pygame.transform.flip(self.mask_frame, True, False)
-                                self.mask = pygame.mask.from_surface(self.mask_frame)
-                                mask_rects = self.mask.get_bounding_rects()
-                                self.left_offset = mask_rects[0].left
-                                self.right_offset = self.rect.width - mask_rects[0].right
                                 
                                 return
 
