@@ -157,7 +157,7 @@ class StoryState:
             if not ally.recruited:
                 dist = math.hypot(ally.x - self.player.x, ally.y - self.player.y)
                 if dist < 100 and keys[pygame.K_e]:
-                    self._start_recruitment_dialogue(ally, dt)
+                    self._start_recruitment_dialogue(ally)
                     return
             else:
                 # Find closest enemy
@@ -555,7 +555,7 @@ class StoryState:
         if target.rect.centery + 10 < ally.rect.centery and ally.on_ground:
             ally.vy = -16.0
 
-    def _start_recruitment_dialogue(self, ally, dt):
+    def _start_recruitment_dialogue(self, ally):
         if ally.recruited:
             return
 
@@ -565,14 +565,14 @@ class StoryState:
 
         self.sequence_player.start_dialogue(
             dialogue,
-            on_complete=lambda: self._complete_recruitment(ally, dt),
+            on_complete=lambda: self._complete_recruitment(ally),
         )
 
-    def _complete_recruitment(self, ally, dt):
+    def _complete_recruitment(self, ally):
         if ally.recruited:
             return
         ally.recruited = True
-        ally.speed = 250 * dt * 60
+        ally.speed = 250.0
         self.snd_collect.play()
 
     def _start_level_cutscene_if_needed(self):
