@@ -111,7 +111,8 @@ class HowToPlayState:
                 line_y = y_start + index * line_height - self.scroll_offset
                 if line_y + line_height < self.content_rect.y or line_y > self.content_rect.bottom:
                     continue
-                surface.blit(rendered, (x_text, line_y))
+                center_x = self.content_rect.x + (self.content_rect.width - rendered.get_width()) // 2
+                surface.blit(rendered, (center_x, line_y))
         surface.set_clip(previous_clip)
 
         self.btn_back.draw(surface)
