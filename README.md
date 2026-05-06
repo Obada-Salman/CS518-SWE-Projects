@@ -6,6 +6,15 @@
 Build Requires python 3.12  
 Python 3.12 download site https://www.python.org/downloads/release/python-3120/
 
+Potential dependencies for Linux (if you run into issues, run the following commands)
+
+```
+sudo apt update -y
+
+sudo apt install -y python-is-python3 python3-pip python3-venv pulseaudio libasound2-dev
+# sudo apt install -y libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0
+```
+
 ### Game
 
 #### Linux and Mac
