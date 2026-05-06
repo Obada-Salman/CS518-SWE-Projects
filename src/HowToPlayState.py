@@ -28,7 +28,7 @@ class HowToPlayState:
         self.title_font = pygame.font.Font(None, max(int(64 * self.scale), 24))
         self.text_font = pygame.font.SysFont(None, font_size)
         self.heading_font = pygame.font.SysFont(None, font_size, bold=True)
-        self.heading_titles = {"Story", "Controls", "Objective"}
+        self.heading_titles = {"Story", "Controls", "Objective", "Level Builder"}
 
         self.content_padding = int(20 * self.scale)
         content_top = int(150 * self.scale)
@@ -62,7 +62,12 @@ class HowToPlayState:
             "Allies are stationary and marked with a gray circle. When nearby, press E to recruit them and they",
             "will help you fight enemies. The circle will turn green and reflect the ally's health.",
             "When nearby flowerpots, press E to plant onion allies given you have enough resources. Each onion",
-            "costs 5 sunlight, 5 water, and 5 nutrients to plant."
+            "costs 5 sunlight, 5 water, and 5 nutrients to plant.",
+            "",
+            "Level Builder",
+            "Left click to place objects, right click to remove objects.",
+            "A and D to scroll left and right.",
+            "Left/right arrows to cycle through levels."
         ]
         self.scroll_offset = 0
         self.scroll_speed = max(int(40 * self.scale), 10)

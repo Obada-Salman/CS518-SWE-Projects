@@ -26,6 +26,11 @@ class StoryState:
     ENEMY_KILL_POINTS = {
         'carrot': 100,
         'potato': 120,
+        'tomato': 80,
+        'bokchoy': 150,
+        'pumpkin': 250,
+        'broccoli': 180,
+        'finalboss': 1000
     }
 
     def __init__(self, state_machine):
