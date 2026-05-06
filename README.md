@@ -3,12 +3,12 @@
 ## Build
 
 ### Setup
-Build Requires python 3.12
+Build Requires python 3.12  
 Python 3.12 download site https://www.python.org/downloads/release/python-3120/
 
 ### Game
 
-### Linux and Mac
+#### Linux and Mac
 ```
 git clone https://github.com/Obada-Salman/CS518-SWE-Projects.git
 cd CS518-SWE-Projects
@@ -21,7 +21,7 @@ pip install -r requirements.txt
 pyinstaller --name vegtable_wars --onefile --add-data "assets:assets" --add-data "levels/story:levels/story" src/main.py
 ```
 
-### Window
+#### Window
 ```
 git clone https://github.com/Obada-Salman/CS518-SWE-Projects.git
 cd CS518-SWE-Projects
@@ -35,20 +35,25 @@ pyinstaller --name vegtable_wars --onefile --add-data "assets:assets" --add-data
 
 ```
 ### Leaderboard
-`pyinstaller --onefile --name leaderboard_server --add-data "src/templates:templates" src/leaderboard_server.py`
+```
+pyinstaller --onefile --name leaderboard_server --add-data "src/templates:templates" src/leaderboard_server.py
+```
 
 ## Run
-### Linux and Max
+
+### Game
+
+#### Linux and Max
 ```./dist/vegtable_wars```
 
-### Window
+#### Window
 ```./dist/vegtable_wars.exe```
 
-### Run Leaderboard
-### Linux and Max
+### Leaderboard
+#### Linux and Max
 ```./dist/leaderboard_server```
 
-### Window
+#### Window
 ```./dist/leaderboard_server.exe```
 
 Executables can be moved to differnt locations and still run

@@ -5,4 +5,4 @@ data/*.db
 dist
 build
 vegtable_wars.spec
-leader_board.spec
+leaderboard_server.spec
