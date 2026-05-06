@@ -20,7 +20,7 @@ class FinalBoss(NPC):
         # Enemy spawning
         self.enemies = []
         self.enemy_spawn_timer = 0.0
-        self.enemy_spawn_cooldown = 15.0
+        self.enemy_spawn_cooldown = 10.0
         self.enemy_types = ['carrot', 'potato', 'tomato', 'bokchoy', 'pumpkin', 'broccoli']
 
         self.spawn_enemy_pair()

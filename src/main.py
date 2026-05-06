@@ -11,6 +11,7 @@ from PauseState import PauseState
 from CustomLevelSelect import CustomLevelSelect
 from CustomState import CustomState
 from GalleryState import GalleryState
+from HowToPlayState import HowToPlayState
 
 def main():
     pygame.init()
@@ -24,6 +25,7 @@ def main():
     state_manager.add_state('level_select',LevelSelectState('level_select', state_manager))
     state_manager.add_state('custom_select', CustomLevelSelect('custom_select',state_manager))
     state_manager.add_state('settings', SettingsState(state_manager))
+    state_manager.add_state('how_to_play', HowToPlayState(state_manager))
     state_manager.add_state('custom', CustomState(state_manager))
     state_manager.add_state('level_builder', LevelBuilderState(state_manager))
     state_manager.add_state('pause', PauseState('pause', state_manager))

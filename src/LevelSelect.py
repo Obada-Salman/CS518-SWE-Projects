@@ -113,7 +113,7 @@ class LevelSelectState:
         surface.blit(self.scaled_bg, (0, 0))
         title_scale = min(self.screen_width / self.BASE_WIDTH, self.screen_height / self.BASE_HEIGHT)
         title_font = pygame.font.Font(None, max(int(74 * title_scale), 20))
-        title = title_font.render(f"Stage {self.current_stage}", True, BLACK)
+        title = title_font.render(f"Stage {self.current_stage}", True, WHITE)
         
         surface.blit(title, (self.screen_width // 2 - title.get_width() // 2, int(50 * title_scale)))
         

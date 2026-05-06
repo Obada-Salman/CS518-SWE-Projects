@@ -53,7 +53,7 @@ class GalleryState:
             col = i % max_per_row
             x_pos = spacing_x + col * (btn_width + spacing_x)
             y_pos = start_y + row * (btn_height + spacing_y)
-            unlocked = max_level > level_key
+            unlocked = max_level >= level_key
             color = BLACK if unlocked else GRAY
 
             btn = Button(x_pos, y_pos,btn_width, btn_height,f"{level_key}",btn_font,color,WHITE)
@@ -94,7 +94,7 @@ class GalleryState:
                 
     def _start_cutscene(self, level_key):
         max_level = getattr(self.state_machine, 'max_unlocked_level', 1)
-        if level_key in STORY_CUTSCENE_FRAMES and level_key < max_level:
+        if level_key in STORY_CUTSCENE_FRAMES and level_key <= max_level:
             frames = STORY_CUTSCENE_FRAMES.get(level_key)
             if not frames:
                 return

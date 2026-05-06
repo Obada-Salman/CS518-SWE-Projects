@@ -35,10 +35,11 @@ class MainMenuState:
         button_y = (self.screen_height // 2) - int(100 * scale)
         self.story = Button(button_x, button_y, btn_width, btn_height, "Continue", btn_font, BLACK, WHITE)
         self.custom = Button(button_x, button_y + btn_spacing, btn_width, btn_height, "Custom Level", btn_font, BLACK, WHITE)
-        self.setting = Button(button_x, button_y + btn_spacing * 2, btn_width, btn_height, "Settings", btn_font, BLACK, WHITE)
-        self.level_bld = Button(button_x, button_y + btn_spacing * 3, btn_width, btn_height, "Level Builder", btn_font, BLACK, WHITE)
-        self.gallery = Button(button_x, button_y + btn_spacing * 4, btn_width, btn_height, "Gallery", btn_font, BLACK, WHITE)
-        self.quit = Button(button_x, button_y + btn_spacing * 5, btn_width, btn_height, "Quit", btn_font, RED, WHITE)
+        self.howto = Button(button_x, button_y + btn_spacing * 2, btn_width, btn_height, "How to Play", btn_font, BLACK, WHITE)
+        self.setting = Button(button_x, button_y + btn_spacing * 3, btn_width, btn_height, "Settings", btn_font, BLACK, WHITE)
+        self.level_bld = Button(button_x, button_y + btn_spacing * 4, btn_width, btn_height, "Level Builder", btn_font, BLACK, WHITE)
+        self.gallery = Button(button_x, button_y + btn_spacing * 5, btn_width, btn_height, "Gallery", btn_font, BLACK, WHITE)
+        self.quit = Button(button_x, button_y + btn_spacing * 6, btn_width, btn_height, "Quit", btn_font, RED, WHITE)
 
         save_btn_font = pygame.font.SysFont(None, max(int(26 * scale), 10))
         panel_w = int(300 * scale)
@@ -165,6 +166,8 @@ class MainMenuState:
                 self.pending_delete_confirmation = True
             elif self.custom.is_clicked(event):
                 self.state_machine.transition('custom_select')
+            elif self.howto.is_clicked(event):
+                self.state_machine.transition('how_to_play')
             elif self.setting.is_clicked(event):
                 self.state_machine.transition('settings')
             elif self.level_bld.is_clicked(event):
@@ -193,6 +196,7 @@ class MainMenuState:
 
         self.story.draw(surface)
         self.custom.draw(surface)
+        self.howto.draw(surface)
         self.setting.draw(surface)
         self.level_bld.draw(surface)
         self.gallery.draw(surface)
