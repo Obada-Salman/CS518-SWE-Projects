@@ -40,6 +40,10 @@ def get_community_level_path(app_name="vegtable_wars"):
 
 def get_leaderboard_database(app_name="vegtable_wars"):
     if hasattr(sys, '_MEIPASS'):
-        return os.path.join(get_user_data_path(app_name), "data", "leaderboard.db")
+        db_path =  os.path.join(get_user_data_path(app_name), "data", "leaderboard.db")
     else:
-        return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "leaderboard.db")
+        db_path =  os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "leaderboard.db")
+    
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
+    return db_path
