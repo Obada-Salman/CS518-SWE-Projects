@@ -1,6 +1,6 @@
 # CS518-SWE-Projects
 
-## Build
+## Build Game
 Requires python 3.12
 Python 3.12 download site https://www.python.org/downloads/release/python-3120/
 
@@ -28,7 +28,10 @@ python -m venv .env
 pip install -r requirements.txt
 
 pyinstaller --name vegtable_wars --onefile --add-data "assets:assets" --add-data "levels/story:levels/story" src/main.py
+
 ```
+### Build Leaderboard
+`pyinstaller --onefile --name leaderboard_server --add-data "src/templates:templates" src/leaderboard_server.py`
 
 ## Run
 ### Linux and Max
@@ -36,6 +39,15 @@ pyinstaller --name vegtable_wars --onefile --add-data "assets:assets" --add-data
 
 ### Window
 ```./dist/vegtable_wars.exe```
+
+### Run Leaderboard
+### Linux and Max
+```./dist/leaderboard_server```
+
+### Window
+```./dist/leaderboard_server.exe```
+
+Executables can be moved to differnt locations and still run
 
 ## Leaderboard scaffold (online + persistent)
 
