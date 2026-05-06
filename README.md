@@ -1,15 +1,19 @@
 # CS518-SWE-Projects
 
-## Build Game
-Requires python 3.12
+## Build
+
+### Setup
+Build Requires python 3.12
 Python 3.12 download site https://www.python.org/downloads/release/python-3120/
+
+### Game
 
 ### Linux and Mac
 ```
 git clone https://github.com/Obada-Salman/CS518-SWE-Projects.git
 cd CS518-SWE-Projects
 
-python -m venv .env
+python3.12 -m venv .env
 source .env/bin/activate
 
 pip install -r requirements.txt
@@ -22,7 +26,7 @@ pyinstaller --name vegtable_wars --onefile --add-data "assets:assets" --add-data
 git clone https://github.com/Obada-Salman/CS518-SWE-Projects.git
 cd CS518-SWE-Projects
 
-python -m venv .env
+py -3.12 -m venv .env
 .\.env\Scripts\activate
 
 pip install -r requirements.txt
@@ -30,7 +34,7 @@ pip install -r requirements.txt
 pyinstaller --name vegtable_wars --onefile --add-data "assets:assets" --add-data "levels/story:levels/story" src/main.py
 
 ```
-### Build Leaderboard
+### Leaderboard
 `pyinstaller --onefile --name leaderboard_server --add-data "src/templates:templates" src/leaderboard_server.py`
 
 ## Run
