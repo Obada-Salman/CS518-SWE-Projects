@@ -81,7 +81,7 @@ STORY_CUTSCENE_FRAMES = {
     15: [
         {
             'image': 'assets/images/Backgrounds/cutscene_ending_1.png',
-            'text': 'The last gate falls. For now, the garden breathes again.',
+            'text': '"This is it. Show me what you got, little crybaby onion."',
         },
     ],
 }
